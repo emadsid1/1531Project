@@ -4,8 +4,6 @@ def func1():
     kasjhfkjlasdh fhli
 
 
-    asgflkadshflhsdlkfh
-
 def func2():
     slkfnhgl
     aksjkajk
