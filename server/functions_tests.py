@@ -1,3 +1,4 @@
+from Error import AccessError
 import pytest
 
 def auth_login_test():
