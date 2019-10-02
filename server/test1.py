@@ -5,3 +5,6 @@ def func1():
 def func2():
     slkfnhgl
     aksjkajk
+    
+    
+    whatever
