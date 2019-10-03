@@ -64,10 +64,27 @@ def channels_create_test()
         assert channels_create('valid token', 'This is a string that is much longer than the max length', True)
 
 def user_profile_setname_test():
-    pass
+    #user_profile_setname(token, firstname, lastname), no return value
+    #SETUP TESTS BEGIN
+    #create token:
+    authRegDict = auth_register("ben.kah@student.unsw.edu.au", "password", "Ben", "Kah")
+    token = authRegDict["token"]
+    #SETUP TESTS END
+    user_profile_setname(token, "Jeffrey", "Oh")
+    with pytest.raises(ValueError, match=r"*"): #ValueError, match=r"*"
+        user_profile_setname(token, "This is a really long first name, more than 50 characters", "lmao")
+        user_profile_setname(token, "lmao", "This is a really long last name, more than 50 characters")
+        user_profile_setname(token, "This is a really long first name, more than 50 characters", "This is a really long last name, more than 50 characters")
 
 def user_profile_setemail_test():
-    pass
+    #user_profile_setemail(token, email), no return value
+    #SETUP TESTS BEGIN
+    #create token:
+    authRegDict = auth_register("ben.kah@student.unsw.edu.au", "password", "Ben", "Kah")
+    token = authRegDict["token"]
+    #SETUP TESTS END
+    user_profile_setemail(token, "goodemail@student.unsw.edu.au")
+    with pytest.raises(ValueError, match=r"*"")
 
 def user_profile_sethandle_test():
     pass
