@@ -41,34 +41,57 @@ def channel_messages_test():
     # TODO not sure what the messages data type is
 
 def channel_leave_test():
-        # Token 
-        auth_register_dict = auth_register("goodemail@gmail.com", "123456", "John", "Smith")
-        token = auth_register_dict('token')
+    # Token 
+    auth_register_dict = auth_register("goodemail@gmail.com", "123456", "John", "Smith")
+    token = auth_register_dict('token')
 
-        auth_register_dict2 = auth_register("emad@gmail.com", "123456", "Emad", "Siddiqui")
-        token2 = auth_register_dict2('token')
+    auth_register_dict2 = auth_register("emad@gmail.com", "123456", "Emad", "Siddiqui")
+    token2 = auth_register_dict2('token')
 
-        # Channel ID 
-        channels_create_dict = channels_create(token, "Channel 1", True)
-        channel_id = channels_create_dict('channel_id')
+    # Channel ID 
+    channels_create_dict = channels_create(token, "Channel 1", True)
+    channel_id = channels_create_dict('channel_id')
 
-        channels_create_dict2 = channels_create(token2, "Channel 2", False)
-        channel_id2 = channels_create_dict2('channel_id')
+    channels_create_dict2 = channels_create(token2, "Channel 2", False) #assumes token2 has access to the Private channel***
+    channel_id2 = channels_create_dict2('channel_id')
 
-        # leaving a public channel 1
-        channel_leave(token, channel_id)
-        # leaving a private channel 2
-        channel_leave(token2, channel_id2)
+    # leaving a public channel 1
+    channel_leave(token, channel_id)
+    # leaving a private channel 2
+    channel_leave(token2, channel_id2)
 
-        with pytest.raises(ValueError):
-            # channel does not exist (channel id doesn't correspond to a created channel)
-            channel_leave(token, channel_id + 100)
-            # trying to leave a channel you were not a part of in the first place 
-            # ex. John tries to leave Channel 2, when he is part of Channel 1
-            channel_leave(token, channel_id2)
+    with pytest.raises(ValueError):
+        # channel does not exist (channel id doesn't correspond to a created channel)
+        channel_leave(token, channel_id + 100)
+        # trying to leave a channel you were not a part of in the first place 
+        # ex. John tries to leave Channel 2, when he is part of Channel 1
+        channel_leave(token, channel_id2)
 
-def channel_join_test():
-    # TODO not sure what the messages data type is
+def channel_join_test():    
+    # Token 
+    auth_register_dict = auth_register("goodemail@gmail.com", "123456", "John", "Smith")
+    token = auth_register_dict('token')
+
+    auth_register_dict2 = auth_register("emad@gmail.com", "123456", "Emad", "Siddiqui")
+    token2 = auth_register_dict2('token')
+
+    # Channel ID 
+    channels_create_dict = channels_create(token, "Channel 1", True)
+    channel_id = channels_create_dict('channel_id')
+
+    channels_create_dict2 = channels_create(token2, "Channel 2", False)
+    channel_id2 = channels_create_dict2('channel_id')
+
+    # channel_join(token, channel_id)
+    channel_join(token, channel_id)
+
+    with pytest.raises(ValueError):
+        # channel does not exist (channel id doesn't correspond to a created channel)
+        channel_join(token, channel_id + 100)
+
+    with pytest.raises(AccessError):
+        # channel is private & user is not admin
+        channel_join(token, channel_id2)
 
 def channel_addowner_test():
     # TODO not sure what the messages data type is
