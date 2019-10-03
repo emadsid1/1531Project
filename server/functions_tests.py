@@ -63,26 +63,26 @@ def channels_create_test()
     with pytest.raises(Exception): # Following should raise exceptions
         assert channels_create('valid token', 'This is a string that is much longer than the max length', True)
 
-def user_profile_setname():
+def user_profile_setname_test():
     pass
 
-def user_profile_setemail():
+def user_profile_setemail_test():
     pass
 
-def user_profile_sethandle():
+def user_profile_sethandle_test():
     pass
 
-def user_profiles_uploadphoto():
+def user_profiles_uploadphoto_test():
     pass
 
-def standup_start():
+def standup_start_test():
     pass
 
-def standup_send():
+def standup_send_test():
     pass
 
-def search():
+def search_test():
     pass
 
-def admin_userpermission_change():
+def admin_userpermission_change_test():
     pass
