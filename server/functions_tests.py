@@ -85,7 +85,8 @@ def channel_join_test():
     # channel_join(token, channel_id)
     channel_join(token, channel_id)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(Value
+    # TODO not sure what the messaes data type isges data type isError):
         # channel does not exist (channel id doesn't correspond to a created channel)
         channel_join(token, channel_id + 100)
 
@@ -94,10 +95,57 @@ def channel_join_test():
         channel_join(token, channel_id2)
 
 def channel_addowner_test():
-    # TODO not sure what the messages data type is
+    # user 1
+    auth_register_dict = auth_register("emad@gmail.com", "123456", "Emad", "Siddiqui")
+    u_id = auth_register_dict['u_id']
+    token = auth_register_dict['token']
+    # user 2
+    auth_register_dict2 = auth_register("goodemail@gmail.com", "123456", "John", "Smith")
+    u_id2 = auth_register_dict2('u_id')
+    token2 = auth_register_dict2('token')
+
+    channels_create_dict = channels_create(token, "User 1's created Channel", False)
+    channel_id = channels_create_dict['channel_id']
+
+    with pytest.raises(AccessError):
+        channel_addowner(token, channel_id, u_id2)  # fail since u_id2 (token2) has no access to the channel
+        channel_addowner(token2, channel_id, u_id2) # as channel was created by u_id (token)
+                                                    
+
+    channel_addowner(token, channel_id, u_id2) # works as u_id2 isn't owner
+    with pytest.raises(ValueError):
+        channel_addowner(token, channel_id, u_id) # fail since u_id created channel & thus already is owner
+        channel_addowner(token, channel_id, u_id2) # fail since u_id2 has already been made owner previously
+        channel_addowner(token, channel_id + 1, u_id2) # fail since channel does not exist
 
 def channel_removeowner_test():
-    # TODO not sure what the messages data type is
+    # user 1
+    auth_register_dict = auth_register("emad@gmail.com", "123456", "Emad", "Siddiqui")
+    u_id = auth_register_dict['u_id']
+    token = auth_register_dict['token']
+    # user 2
+    auth_register_dict2 = auth_register("goodemail@gmail.com", "123456", "John", "Smith")
+    u_id2 = auth_register_dict2('u_id')
+    token2 = auth_register_dict2('token')
+
+    channels_create_dict = channels_create(token, "User 1's created Channel", False)
+    channel_id = channels_create_dict['channel_id']
+    
+    with pytest.raises(ValueError):
+        channel_removeowner(token, channel_id, u_id2) # fail since u_id2 is not an owner
+        channel_removeowner(token, channel_id + 1, u_id) # fail since channel ID is incorrect
+
+    with pytest.raises(AccessError):
+        channel_removeowner(token2, channel_id, u_id) # fail since u_id2 (token2) has no access to the channel
+        channel_removeowner(token, channel_id, u_id2) # as channel was created by u_id (token)
+
+        #what happens when you remove the owner from a channel which has only 1 owner?
+        channel_removeowner(token, channel_id, u_id) # fail since you cannot remove the sole owner of a channel ***assumption
+
+    # this should work as there will still be an owner of the channel
+    channel_addowner(token, channel_id, u_id2) # add u_id2 as owner
+    channel_removeowner(token, channel_id, u_id) # remove u_id from being owner
+
 
 def channels_list_test ():
     # TODO yo wtf are these fucking data types
