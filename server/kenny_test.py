@@ -116,10 +116,91 @@ def message_edit_test():
     # end of testing
 
 def message_react_test():
-    pass
+    # set up
+    # user1(admin)
+    registerDict1 = auth_register("kenny@gmail.com", "123456", "kenny", "han")
+    userID1 = registerDict1['u_id']
+    token1 = registerDict1['token']
+    # user2
+    registerDict2 = auth_register("ken@gmail.com", "654321", "ken", "han")
+    userID2 = registerDict2['u_id']
+    token2 = registerDict2['token']
+    # channel created by user1
+    channelDict1 = channels_create(token1, "kenny's channel", True)
+    channelID1 = channelDict1['channel_id']
+    # make sure user1 is the admin TODO not sure if we need to do this
+    admin_userpermission_change(token1, userID1, 2)
+    # user2 is just a member of channel1, user1 and user3 are the owners of channel1
+    channel_invite(token2, channelID1)
+    # message details
+    # create invalid message
+    long_sentance = "a" * 1001
+    message_send(token1, channelID1, "Hello")
+    message_send(token2, channelID1, long_sentance)
+    messageDetails = channel_messages(token1, channelID1, 0)    # TODO not sure if this one is right
+    messageList = messageDetails.messages                       # TODO not sure if this one is right
+    messageID1 = messageList[0]['message_id']                   # TODO not sure if this one is right
+    messageID2 = messageList[1]['message_id']                   # TODO not sure if this one is right
+    # end of set up
+
+    # testing
+    # raises ValueError when message_id is not a valid message within a channel that the authorised user has joined
+    with pytest.raises(ValueError):
+        message_react(token1, messageID2, 1)
+    with pytest.raises(ValueError):
+        message_react(token1, "@#$%^&*!", 1)
+    # raises ValueError when react_id is not a valid React ID
+    with pytest.raises(ValueError):
+        message_react(token1, messageID1, 5)                    # TODO assuming there are only 4 rections
+    # raises ValueError when message with ID message_id already contains an active React with ID react_id
+    message_react(token1, messageID1, 1)
+    with pytest.raises(ValueError):
+        message_react(token1, messageID1, 2)
+    # end of testing
 
 def message_unreact_test():
-    pass
+    # set up
+    # user1(admin)
+    registerDict1 = auth_register("kenny@gmail.com", "123456", "kenny", "han")
+    userID1 = registerDict1['u_id']
+    token1 = registerDict1['token']
+    # user2
+    registerDict2 = auth_register("ken@gmail.com", "654321", "ken", "han")
+    userID2 = registerDict2['u_id']
+    token2 = registerDict2['token']
+    # channel created by user1
+    channelDict1 = channels_create(token1, "kenny's channel", True)
+    channelID1 = channelDict1['channel_id']
+    # make sure user1 is the admin TODO not sure if we need to do this
+    admin_userpermission_change(token1, userID1, 2)
+    # user2 is just a member of channel1, user1 and user3 are the owners of channel1
+    channel_invite(token2, channelID1)
+    # message details
+    # create invalid message
+    long_sentance = "a" * 1001
+    message_send(token1, channelID1, "Hello")
+    message_send(token2, channelID1, long_sentance)
+    messageDetails = channel_messages(token1, channelID1, 0)    # TODO not sure if this one is right
+    messageList = messageDetails.messages                       # TODO not sure if this one is right
+    messageID1 = messageList[0]['message_id']                   # TODO not sure if this one is right
+    messageID2 = messageList[1]['message_id']                   # TODO not sure if this one is right
+    # end of set up
+
+    # testing
+    # raises ValueError when message_id is not a valid message within a channel that the authorised user has joined
+    with pytest.raises(ValueError):
+        message_unreact(token1, messageID2, 1)
+    with pytest.raises(ValueError):
+        message_unreact(token1, "@#$%^&*!", 1)
+    # raises ValueError when react_id is not a valid React ID
+    with pytest.raises(ValueError):
+        message_unreact(token1, messageID1, 5)                    # TODO assuming there are only 4 rections
+    # raises ValueError when message with ID message_id does not contain an active React with ID react_id
+    message_react(token1, messageID1, 1)
+    message_unreact(token1, messageID1, 1)
+    with pytest.raises(ValueError):
+        message_unreact(token1, messageID1, 1)
+    # end of testing
 
 def message_pin_test():
     # set up
