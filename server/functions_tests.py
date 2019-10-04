@@ -105,14 +105,15 @@ def channel_addowner_test():
     u_id2 = auth_register_dict2('u_id')
     token2 = auth_register_dict2('token')
 
-    channels_create_dict = channels_create(token, "User 1's created Channel", False)
+    channels_create_dict = channels_create(token, "User 1's created Channel", True)
     channel_id = channels_create_dict['channel_id']
 
     with pytest.raises(AccessError):
         channel_addowner(token, channel_id, u_id2)  # fail since u_id2 (token2) has no access to the channel
         channel_addowner(token2, channel_id, u_id2) # as channel was created by u_id (token)
                                                     
-
+    # u_id2 needs to be a member of the channel to be made an owner **assumption 
+    channel_join(token2, channel_id)
     channel_addowner(token, channel_id, u_id2) # works as u_id2 isn't owner
     with pytest.raises(ValueError):
         channel_addowner(token, channel_id, u_id) # fail since u_id created channel & thus already is owner
@@ -129,7 +130,7 @@ def channel_removeowner_test():
     u_id2 = auth_register_dict2('u_id')
     token2 = auth_register_dict2('token')
 
-    channels_create_dict = channels_create(token, "User 1's created Channel", False)
+    channels_create_dict = channels_create(token, "User 1's created Channel", True)
     channel_id = channels_create_dict['channel_id']
     
     with pytest.raises(ValueError):
@@ -147,17 +148,94 @@ def channel_removeowner_test():
     channel_addowner(token, channel_id, u_id2) # add u_id2 as owner
     channel_removeowner(token, channel_id, u_id) # remove u_id from being owner
 
+# to better justify the purpose of these two different listing functions, channels_list will ONLY list functions the auth user is part of
+# and channels_listall will list functions the auth user is part of in addition to ALL public channels available (regardless of membership).
+def channels_list_test():
+    # assume that this function displays ALL channels that the authorised user is part of**
 
-def channels_list_test ():
-    # TODO yo wtf are these fucking data types
+    # user 1
+    auth_register_dict = auth_register("emad@gmail.com", "123456", "Emad", "Siddiqui")
+    u_id = auth_register_dict['u_id']
+    token = auth_register_dict['token']
+    # user 2
+    auth_register_dict2 = auth_register("goodemail@gmail.com", "123456", "John", "Smith")
+    u_id2 = auth_register_dict2('u_id')
+    token2 = auth_register_dict2('token')
+
+    channels_create_dict = channels_create(token, "User 1's private channel", False)
+    channel_id = channels_create_dict['channel_id']
+
+    channels_create_dict2 = channels_create(token2, "User 2's public channel", True)
+    channel_id2 = channels_create_dict2['channel_id']
+    
+    # lists channels that only the authorised user is part of
+    assert channels_list(token) = ["User 1's private channel"]
+    assert channels_list(token2) = ["User 2's public channel"] # user 2 doesn't list user 1's private channel
+
+    # add user 1 to user 2's channel and list user 1's channels
+    channel_join(token, channel_id2) # user 1 can join as channel_id2 is public
+    assert channels_list(token) = ["User 1's private channel", "User 2's public channel"]
 
 def channels_listall_test():
-    # TODO yo wtf are these fucking data types
+    # assume channels_listall will list functions the auth user is part of in addition to ALL public channels available (regardless of membership).**
+    # user 1
+    auth_register_dict = auth_register("emad@gmail.com", "123456", "Emad", "Siddiqui")
+    u_id = auth_register_dict['u_id']
+    token = auth_register_dict['token']
+    # user 2
+    auth_register_dict2 = auth_register("goodemail@gmail.com", "123456", "John", "Smith")
+    u_id2 = auth_register_dict2('u_id')
+    token2 = auth_register_dict2('token')
+
+    channels_create_dict = channels_create(token, "User 1's private channel", False)
+    channel_id = channels_create_dict['channel_id']
+
+    channels_create_dict2 = channels_create(token2, "User 2's public channel", True)
+    channel_id2 = channels_create_dict2['channel_id']
+
+    channels_create_dict3 = channels_create(token2, "User 2's second public channel", True)
+    channel_id3 = channels_create_dict3['channel_id']
+    
+    # lists channels token is a part of AND all public channels available
+    # lists user 1's private channel and all public channels despite not being a part of them
+    assert channels_listall(token) = ["User 1's private channel", "User 2's public channel", "User 2's second public channel"]
+    # lists all user 2's channels but not user 1's  channel since it is private
+    assert channels_listall(token2) = ["User 2's public channel", "User 2's second public channel"] #assume channel order in list doesn't matter ***
+
 
 def channels_create_test()
     assert channels_create('valid token', 'Jeffrey', True) == 12345
     with pytest.raises(Exception): # Following should raise exceptions
         assert channels_create('valid token', 'This is a string that is much longer than the max length', True)
+
+def message_sendlater_test():
+    auth_register_dict = auth_register("emad@gmail.com", "123456", "Emad", "Siddiqui")
+    u_id = auth_register_dict['u_id']
+    token = auth_register_dict['token']
+
+    channels_create_dict = channels_create(token, "Channel 1", False)
+    channel_id = channels_create_dict['channel_id']
+
+    morethan1000characters = "a" * 1001
+    exactly1000characters = "a" * 1000
+    future_time = datetime.max
+    past_time = datetime.min
+
+    message_sendlater(token, channel_id, exactly1000characters, future_time) # should work since 1000 characters (testing >=)
+
+    with pytest.raises(ValueError):
+        message_sendlater(token, channel_id, morethan1000characters, future_time) # fail since message is more than 1000 characters
+        message_sendlater(token, channel_id, "", future_time) # fail since blank
+        message_sendlater(token, channel_id, exactly1000characters, past_time) # fail since time sent is in past
+        message_sendlater(token, channel_id + 1, exactly1000characters, past_time) # fail since channel ID is incorrect
+
+    #raise Access error if UNauthorised user tries to send message
+    # user 2
+    auth_register_dict2 = auth_register("goodemail@gmail.com", "123456", "John", "Smith")
+    u_id2 = auth_register_dict2('u_id')
+    token2 = auth_register_dict2('token')
+    with pytest.raises(AccessError):
+        message_sendlater(token2, channel_id, exactly1000characters, future_time) # fail since token2 is not authorised
 
 def user_profile_setname_test():
     #user_profile_setname(token, firstname, lastname), no return value
