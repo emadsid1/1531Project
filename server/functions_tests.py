@@ -1,5 +1,5 @@
 from Error import AccessError
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytest
 
 def auth_login_test():
@@ -253,7 +253,6 @@ def user_profile_setname_test():
         user_profile_setname(token, "This is a really long first name, more than 50 characters", "lmao")
         user_profile_setname(token, "lmao", "This is a really long last name, more than 50 characters")
         user_profile_setname(token, "This is a really long first name, more than 50 characters", "This is a really long last name, more than 50 characters")
-        #TODO: does there need to be a test with an incorrect token?
 
 def user_profile_setemail_test():
     #user_profile_setemail(token, email), no return value
@@ -317,17 +316,31 @@ def standup_send_test():
     token = authRegDict["token"]
     authRegDict2 = auth_register("jeffrey.oh@student.unsw.edu.au", "password", "Jeffrey", "Oh")
     token2 = authRegDict2["token"]
-    #create channel
+    #create channels:
     chanCreateDict = channels_create(token, "test channel", True)
     chanId = chanCreateDict["channel_id"]
+    chanCreateDict2 = channels_create(token, "test channel 2", True)
+    chanId2 = chanCreateDict2["channel_id"]
     #SETUP TESTS END
+    with pytest.raises(AccessError):
+        assert standup_send(toke, ChanId, "this is sent before standup_start is called")
+    #create time_finish
+    standupEnd = standup_start(token, chanId)
+    minBefStandupEnd = standupEnd - timedelta(minute = 1)
+    minAftStandupEnd = standupEnd + timedelta(minute = 1)
+    #this message should be sent, as it will be sent after the standup
+    message_sendlater(token, chanId, "this is sent after standup", minAftStandupEnd)
+    with pytest.raises(AccessError):
+        assert message_send(token, chanId, "this message can't be sent in a standup!")
+        assert message_sendlater(token, chanId, "wait until after standup", minBefStandupEnd)
     standup_send(token, chanId, "Standup message")
-    with pytest.raises(Exception):
-        assert standup_send(token, 55555555, "Standup message with wrong chanId")
-        assert standup_send(token, chanId, '''Standup message longer than 1000 chars''')
+    with pytest.raises(AccessError):
         assert standup_send(token2, chanId, "Standup message with user not a member of the channel")
-        assert standup_send() '''the standup time is finished'''
-    #TODO: figure out a message that is longer than 1000 chars, and how to represent standup time
+    strOver1000 = "yeah bo" + "i"*1000
+    with pytest.raises(ValueError, match=r"*"):
+        assert standup_send(token, chanId, strOver1000)
+        assert standup_send(token, chanId2, "Standup message with wrong chanId")
+    #TODO: how to represent standup time
 
 def search_test():
     #search(token, query_str), returns messages
