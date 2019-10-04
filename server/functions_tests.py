@@ -352,6 +352,7 @@ def message_edit_test():
 
 def message_react_test():
     # set up
+    rections = {'thumb_up': 1, 'thumb_down': 2, 'happy': 3, 'angry': 4}
     # user1(admin)
     registerDict1 = auth_register("kenny@gmail.com", "123456", "kenny", "han")
     userID1 = registerDict1['u_id']
@@ -381,20 +382,22 @@ def message_react_test():
     # testing
     # raises ValueError when message_id is not a valid message within a channel that the authorised user has joined
     with pytest.raises(ValueError):
-        message_react(token1, messageID2, 1)
+        message_react(token1, messageID2, rections['happy'])
     with pytest.raises(ValueError):
-        message_react(token1, "@#$%^&*!", 1)
+        message_react(token1, "@#$%^&*!", rections['happy'])
     # raises ValueError when react_id is not a valid React ID
     with pytest.raises(ValueError):
-        message_react(token1, messageID1, 5)                    # TODO assuming there are only 4 rections
+        message_react(token1, messageID1, rections['not_happy'])                    # TODO assuming there are only 4 rections
     # raises ValueError when message with ID message_id already contains an active React with ID react_id
-    message_react(token1, messageID1, 1)
+    message_react(token1, messageID1, rections['happy'])
     with pytest.raises(ValueError):
-        message_react(token1, messageID1, 2)
+        message_react(token1, messageID1, rections['angry'])
     # end of testing
 
 def message_unreact_test():
     # set up
+    # assume there are only 4 reactions
+    rections = {'thumb_up': 1, 'thumb_down': 2, 'happy': 3, 'angry': 4}
     # user1(admin)
     registerDict1 = auth_register("kenny@gmail.com", "123456", "kenny", "han")
     userID1 = registerDict1['u_id']
@@ -424,17 +427,17 @@ def message_unreact_test():
     # testing
     # raises ValueError when message_id is not a valid message within a channel that the authorised user has joined
     with pytest.raises(ValueError):
-        message_unreact(token1, messageID2, 1)
+        message_unreact(token1, messageID2, rections['happy'])
     with pytest.raises(ValueError):
-        message_unreact(token1, "@#$%^&*!", 1)
+        message_unreact(token1, "@#$%^&*!", rections['happy'])
     # raises ValueError when react_id is not a valid React ID
     with pytest.raises(ValueError):
-        message_unreact(token1, messageID1, 5)                    # TODO assuming there are only 4 rections
+        message_unreact(token1, messageID1, rections['not_happy'])                    # TODO assuming there are only 4 rections
     # raises ValueError when message with ID message_id does not contain an active React with ID react_id
-    message_react(token1, messageID1, 1)
-    message_unreact(token1, messageID1, 1)
+    message_react(token1, messageID1, rections['happy'])
+    message_unreact(token1, messageID1, rections['happy'])
     with pytest.raises(ValueError):
-        message_unreact(token1, messageID1, 1)
+        message_unreact(token1, messageID1, rections['happy'])
     # end of testing
 
 def message_pin_test():
