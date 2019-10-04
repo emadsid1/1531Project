@@ -379,7 +379,7 @@ def admin_userpermission_change_test():
 
     admin_userpermission_change(token, userId2, 1) #add regular user as an owner again to set up next test
     #create second channel:
-    chanCreateDict2 = channels_create(token, "test channel", True)
+    chanCreateDict2 = channels_create(token, "test channel 2", True)
     chanId2 = chanCreateDict2["channel_id"]
     #add regular user to second channel:
     channel_invite(token, chanId, userId2) #owner of channel 1 should not be owner of this channel
