@@ -42,14 +42,14 @@ def channel_messages_test():
     # TODO not sure what the messages data type is
 
 def channel_leave_test():
-    # Token 
+    # Token
     auth_register_dict = auth_register("goodemail@gmail.com", "123456", "John", "Smith")
     token = auth_register_dict('token')
 
     auth_register_dict2 = auth_register("emad@gmail.com", "123456", "Emad", "Siddiqui")
     token2 = auth_register_dict2('token')
 
-    # Channel ID 
+    # Channel ID
     channels_create_dict = channels_create(token, "Channel 1", True)
     channel_id = channels_create_dict('channel_id')
 
@@ -64,19 +64,19 @@ def channel_leave_test():
     with pytest.raises(ValueError):
         # channel does not exist (channel id doesn't correspond to a created channel)
         channel_leave(token, channel_id + 100)
-        # trying to leave a channel you were not a part of in the first place 
+        # trying to leave a channel you were not a part of in the first place
         # ex. John tries to leave Channel 2, when he is part of Channel 1
         channel_leave(token, channel_id2)
 
-def channel_join_test():    
-    # Token 
+def channel_join_test():
+    # Token
     auth_register_dict = auth_register("goodemail@gmail.com", "123456", "John", "Smith")
     token = auth_register_dict('token')
 
     auth_register_dict2 = auth_register("emad@gmail.com", "123456", "Emad", "Siddiqui")
     token2 = auth_register_dict2('token')
 
-    # Channel ID 
+    # Channel ID
     channels_create_dict = channels_create(token, "Channel 1", True)
     channel_id = channels_create_dict('channel_id')
 
@@ -111,7 +111,7 @@ def channel_addowner_test():
     with pytest.raises(AccessError):
         channel_addowner(token, channel_id, u_id2)  # fail since u_id2 (token2) has no access to the channel
         channel_addowner(token2, channel_id, u_id2) # as channel was created by u_id (token)
-                                                    
+
 
     channel_addowner(token, channel_id, u_id2) # works as u_id2 isn't owner
     with pytest.raises(ValueError):
@@ -131,7 +131,7 @@ def channel_removeowner_test():
 
     channels_create_dict = channels_create(token, "User 1's created Channel", False)
     channel_id = channels_create_dict['channel_id']
-    
+
     with pytest.raises(ValueError):
         channel_removeowner(token, channel_id, u_id2) # fail since u_id2 is not an owner
         channel_removeowner(token, channel_id + 1, u_id) # fail since channel ID is incorrect
@@ -164,10 +164,14 @@ def user_profile_setname_test():
     #SETUP TESTS BEGIN
     #create token:
     authRegDict = auth_register("benjamin.kah@student.unsw.edu.au", "password", "Ben", "Kah")
+    userId = authRegDict["u_id"]
     token = authRegDict["token"]
     #SETUP TESTS END
-    user_profile_setname(token, "Jeffrey", "Oh")
-    with pytest.raises(Exception): #ValueError, match=r"*"
+    user_profile_setname(token, "Jeffrey", "Oh") #this function should pass
+    userDict = user_profile(token, userId)
+    assert userDict["name_first"] == "Jeffrey" #test that name has been changed
+    assert userDict["name_last"] == "Oh"
+    with pytest.raises(ValueError, match=r"*"): #following should raise exceptions
         user_profile_setname(token, "This is a really long first name, more than 50 characters", "lmao")
         user_profile_setname(token, "lmao", "This is a really long last name, more than 50 characters")
         user_profile_setname(token, "This is a really long first name, more than 50 characters", "This is a really long last name, more than 50 characters")
@@ -178,37 +182,36 @@ def user_profile_setemail_test():
     #SETUP TESTS BEGIN
     #create token:
     authRegDict = auth_register("benjamin.kah@student.unsw.edu.au", "password", "Ben", "Kah")
+    userId = authRegDict["u_id"]
     token = authRegDict["token"]
     #create second person's email:
     authRegDict2 = auth_register("jeffrey.oh@student.unsw.edu.au", "password", "Jeffrey", "Oh")
-    userDict2 = user_profile(authRegDict2["u_id"], authRegDict2["token"])
+    userDict2 = user_profile(authRegDict2["token"], authRegDict2["u_id"])
     email2 = userDict2["email"]
     #SETUP TESTS END
-    user_profile_setemail(token, "goodemail@student.unsw.edu.au")
-    with pytest.raises(Exception): #ValueError, match=r"*""
+    user_profile_setemail(token, "goodemail@student.unsw.edu.au") #this function should pass
+    userDict = user_profile(token, userId)
+    assert userDict["email"] == "goodemail@student.unsw.edu.au" #test that email has been changed
+    with pytest.raises(ValueError, match=r"*"): #following should raise exceptions
         user_profile_setemail(token, "bad email")
-        user_profile_setemail(token, email2)
+        user_profile_setemail(token, email2) #using another user's email
 
 def user_profile_sethandle_test():
     #user_profile_sethandle(token, handle_str), no return value
     #SETUP TESTS BEGIN
     #create token:
     authRegDict = auth_register("benjamin.kah@student.unsw.edu.au", "password", "Ben", "Kah")
+    userId = authRegDict["u_id"]
     token = authRegDict["token"]
     #SETUP TESTS END
     user_profile_sethandle(token, "good handle")
-    with pytest.raises(Exception):
+    userDict = user_profile(token, userId)
+    assert userDict["handle_str"] == "good handle"
+    with pytest.raises(ValueError, match=r"*"):
         user_profile_sethandle(token, "This handle is way too long")
 
 def user_profiles_uploadphoto_test():
-    #user_profile_sethandle(token, img_url, x_start, y_start, x_end, y_end), no return value
-    #SETUP TESTS BEGIN
-    #create token:
-    authRegDict = auth_register("benjamin.kah@student.unsw.edu.au", "password", "Ben", "Kah")
-    token = authRegDict["token"]
-    #SETUP TESTS END
-    user_profiles_uploadphoto(token, "exampleimage.jpg", 100, 100, 200, 200)
-    #TODO: wtf are image urls and their sizes, and how do you get a http status
+    pass
 
 def standup_start_test():
     #standup_start(token, channel_id), returns time_finish
@@ -257,10 +260,17 @@ def search_test():
     #create channel
     chanCreateDict = channels_create(token, "test channel", True)
     chanId = chanCreateDict["channel_id"]
-    #create message
+    #create messages
     message_send(token, chanId, "New message sent")
+    message_send(token, chanId, "Another message")
+    message_send(token, chanId, "A completely different string")
     #SETUP TESTS END
-    search(token, "message")
+    searchResultsList = search(token, "message") #first search query
+    searchResultsList2 = search(token, "nothing to find") #second search query
+    assert searchResultsList[0]["message"] == "New message sent" #search results should contain these strings
+    assert searchResultsList[1]["message"] == "Another message"
+    assert len(searchResultsList) == 2
+    assert searchResultsList2 == False #list should be empty
 
 def admin_userpermission_change_test():
     #admin_userpermission_change(token, u_id, permission_id), no return value
@@ -276,16 +286,29 @@ def admin_userpermission_change_test():
     #create channel from admin:
     chanCreateDict = channels_create(token, "test channel", True)
     chanId = chanCreateDict["channel_id"]
-    #add regular user to channel:
+    #add regular user to first channel:
     channel_invite(token, chanId, userId2)
     #SETUP TESTS END
-    #regular user is promoted
-    admin_userpermission_change(token, userId2, 1)
-    admin_userpermission_change(token, userId2, 2)
-    #regular user is demoted
-    admin_userpermission_change(token, userId2, 3)
-    with pytest.raises(Exception):
-        assert admin_userpermission_change(token2, userId, 3)
-        assert admin_userpermission_change(token, userId, 0)
+    admin_userpermission_change(token, userId2, 3) #confirm regular user is a member
+    with pytest.raises(AccessError):
+        assert channel_removeowner(token2, chanId, userId) #regular user should not have permission to do this
+
+    admin_userpermission_change(token, userId2, 1) #make regular user an owner
+    channel_removeowner(token2, chanId, userId) #revoke original admin's permissions - should pass
+
+    admin_userpermission_change(token2, userId, 2) #make original admin an admin again
+    channel_removeowner(token, chanId, userId2) #original admin removes new owner's privileges - should pass
+
+    admin_userpermission_change(token, userId2, 1) #add regular user as an owner again to set up next test
+    #create second channel:
+    chanCreateDict2 = channels_create(token, "test channel", True)
+    chanId2 = chanCreateDict2["channel_id"]
+    #add regular user to second channel:
+    channel_invite(token, chanId, userId2) #owner of channel 1 should not be owner of this channel
+    with pytest.raises(AccessError):
+        assert channel_removeowner(token2, chanId2, userId) #regular user should not have permission to do this
+
+    with pytest.raises(ValueError, match=r"*"):
+        assert admin_userpermission_change(token, userId, 0) #invalid permission_id
         assert admin_userpermission_change(token, userId, 4)
-        assert admin_userpermission_change(token, 55555, 3)
+        assert admin_userpermission_change(token, 55555, 3) #invalid user ID
