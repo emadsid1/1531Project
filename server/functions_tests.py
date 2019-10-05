@@ -1,5 +1,5 @@
 from Error import AccessError
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytest
 
 def auth_login_test():
@@ -60,14 +60,14 @@ def channel_messages_test():
         
 
 def channel_leave_test():
-    # Token 
+    # Token
     auth_register_dict = auth_register("goodemail@gmail.com", "123456", "John", "Smith")
     token = auth_register_dict('token')
 
     auth_register_dict2 = auth_register("emad@gmail.com", "123456", "Emad", "Siddiqui")
     token2 = auth_register_dict2('token')
 
-    # Channel ID 
+    # Channel ID
     channels_create_dict = channels_create(token, "Channel 1", True)
     channel_id = channels_create_dict('channel_id')
 
@@ -82,19 +82,19 @@ def channel_leave_test():
     with pytest.raises(ValueError):
         # channel does not exist (channel id doesn't correspond to a created channel)
         channel_leave(token, channel_id + 100)
-        # trying to leave a channel you were not a part of in the first place 
+        # trying to leave a channel you were not a part of in the first place
         # ex. John tries to leave Channel 2, when he is part of Channel 1
         channel_leave(token, channel_id2)
 
-def channel_join_test():    
-    # Token 
+def channel_join_test():
+    # Token
     auth_register_dict = auth_register("goodemail@gmail.com", "123456", "John", "Smith")
     token = auth_register_dict('token')
 
     auth_register_dict2 = auth_register("emad@gmail.com", "123456", "Emad", "Siddiqui")
     token2 = auth_register_dict2('token')
 
-    # Channel ID 
+    # Channel ID
     channels_create_dict = channels_create(token, "Channel 1", True)
     channel_id = channels_create_dict('channel_id')
 
@@ -123,14 +123,15 @@ def channel_addowner_test():
     u_id2 = auth_register_dict2('u_id')
     token2 = auth_register_dict2('token')
 
-    channels_create_dict = channels_create(token, "User 1's created Channel", False)
+    channels_create_dict = channels_create(token, "User 1's created Channel", True)
     channel_id = channels_create_dict['channel_id']
 
     with pytest.raises(AccessError):
         channel_addowner(token, channel_id, u_id2)  # fail since u_id2 (token2) has no access to the channel
         channel_addowner(token2, channel_id, u_id2) # as channel was created by u_id (token)
-                                                    
 
+    # u_id2 needs to be a member of the channel to be made an owner **assumption
+    channel_join(token2, channel_id)
     channel_addowner(token, channel_id, u_id2) # works as u_id2 isn't owner
     with pytest.raises(ValueError):
         channel_addowner(token, channel_id, u_id) # fail since u_id created channel & thus already is owner
@@ -147,9 +148,9 @@ def channel_removeowner_test():
     u_id2 = auth_register_dict2('u_id')
     token2 = auth_register_dict2('token')
 
-    channels_create_dict = channels_create(token, "User 1's created Channel", False)
+    channels_create_dict = channels_create(token, "User 1's created Channel", True)
     channel_id = channels_create_dict['channel_id']
-    
+
     with pytest.raises(ValueError):
         channel_removeowner(token, channel_id, u_id2) # fail since u_id2 is not an owner
         channel_removeowner(token, channel_id + 1, u_id) # fail since channel ID is incorrect
@@ -165,61 +166,487 @@ def channel_removeowner_test():
     channel_addowner(token, channel_id, u_id2) # add u_id2 as owner
     channel_removeowner(token, channel_id, u_id) # remove u_id from being owner
 
+<<<<<<< HEAD
+=======
+# to better justify the purpose of these two different listing functions, channels_list will ONLY list functions the auth user is part of
+# and channels_listall will list functions the auth user is part of in addition to ALL public channels available (regardless of membership).
+def channels_list_test():
+    # assume that this function displays ALL channels that the authorised user is part of**
+
+    # user 1
+    auth_register_dict = auth_register("emad@gmail.com", "123456", "Emad", "Siddiqui")
+    u_id = auth_register_dict['u_id']
+    token = auth_register_dict['token']
+    # user 2
+    auth_register_dict2 = auth_register("goodemail@gmail.com", "123456", "John", "Smith")
+    u_id2 = auth_register_dict2('u_id')
+    token2 = auth_register_dict2('token')
+
+    channels_create_dict = channels_create(token, "User 1's private channel", False)
+    channel_id = channels_create_dict['channel_id']
+
+    channels_create_dict2 = channels_create(token2, "User 2's public channel", True)
+    channel_id2 = channels_create_dict2['channel_id']
+
+    # lists channels that only the authorised user is part of
+    assert channels_list(token) = ["User 1's private channel"]
+    assert channels_list(token2) = ["User 2's public channel"] # user 2 doesn't list user 1's private channel
+
+    # add user 1 to user 2's channel and list user 1's channels
+    channel_join(token, channel_id2) # user 1 can join as channel_id2 is public
+    assert channels_list(token) = ["User 1's private channel", "User 2's public channel"]
+
+def channels_listall_test():
+    # assume channels_listall will list functions the auth user is part of in addition to ALL public channels available (regardless of membership).**
+    # user 1
+    auth_register_dict = auth_register("emad@gmail.com", "123456", "Emad", "Siddiqui")
+    u_id = auth_register_dict['u_id']
+    token = auth_register_dict['token']
+    # user 2
+    auth_register_dict2 = auth_register("goodemail@gmail.com", "123456", "John", "Smith")
+    u_id2 = auth_register_dict2('u_id')
+    token2 = auth_register_dict2('token')
+
+    channels_create_dict = channels_create(token, "User 1's private channel", False)
+    channel_id = channels_create_dict['channel_id']
+
+    channels_create_dict2 = channels_create(token2, "User 2's public channel", True)
+    channel_id2 = channels_create_dict2['channel_id']
+
+    channels_create_dict3 = channels_create(token2, "User 2's second public channel", True)
+    channel_id3 = channels_create_dict3['channel_id']
+
+    # lists channels token is a part of AND all public channels available
+    # lists user 1's private channel and all public channels despite not being a part of them
+    assert channels_listall(token) = ["User 1's private channel", "User 2's public channel", "User 2's second public channel"]
+    # lists all user 2's channels but not user 1's  channel since it is private
+    assert channels_listall(token2) = ["User 2's public channel", "User 2's second public channel"] #assume channel order in list doesn't matter ***
+
+
+>>>>>>> dbcd3424fdb1fa147bcf05ad9cb490647be38aff
 def channels_create_test()
     assert channels_create('valid token', 'Jeffrey', True) == 12345
     with pytest.raises(Exception): # Following should raise exceptions
         assert channels_create('valid token', 'This is a string that is much longer than the max length', True)
+
+def message_sendlater_test():
+    auth_register_dict = auth_register("emad@gmail.com", "123456", "Emad", "Siddiqui")
+    u_id = auth_register_dict['u_id']
+    token = auth_register_dict['token']
+
+    channels_create_dict = channels_create(token, "Channel 1", False)
+    channel_id = channels_create_dict['channel_id']
+
+    morethan1000characters = "a" * 1001
+    exactly1000characters = "a" * 1000
+    future_time = datetime.max
+    past_time = datetime.min
+
+    message_sendlater(token, channel_id, exactly1000characters, future_time) # should work since 1000 characters (testing >=)
+
+    with pytest.raises(ValueError):
+        message_sendlater(token, channel_id, morethan1000characters, future_time) # fail since message is more than 1000 characters
+        message_sendlater(token, channel_id, "", future_time) # fail since blank
+        message_sendlater(token, channel_id, exactly1000characters, past_time) # fail since time sent is in past
+        message_sendlater(token, channel_id + 1, exactly1000characters, past_time) # fail since channel ID is incorrect
+
+    #raise Access error if UNauthorised user tries to send message
+    # user 2
+    auth_register_dict2 = auth_register("goodemail@gmail.com", "123456", "John", "Smith")
+    u_id2 = auth_register_dict2('u_id')
+    token2 = auth_register_dict2('token')
+    with pytest.raises(AccessError):
+        message_sendlater(token2, channel_id, exactly1000characters, future_time) # fail since token2 is not authorised
+
+def message_send_test():
+    # set up
+    # user1(admin)
+    registerDict1 = auth_register("kenny@gmail.com", "123456", "kenny", "han")
+    userID1 = registerDict1['u_id']
+    token1 = registerDict1['token']
+    # user2
+    registerDict2 = auth_register("ken@gmail.com", "123456", "ken", "han")
+    userID2 = registerDict2['u_id']
+    token2 = registerDict2['token']
+    # channel created by user1
+    channelDict = channels_create(token1, "kenny's channel", True)
+    channelID = channelDict['channel_id']
+    # two long sentances with more than 1000 characters
+    long_sentance1 = "a" * 1000
+    long_sentance2 = "21" * 1000
+    # end of set up
+
+    # testing
+    # raises AccessError if unauthorised user tries to send message
+    with pytest.raises(AccessError, match=r"*"):
+        message_send(token2, channelID, "This is from Ken")
+    # raises ValueError if the message is more than 1000 characters but exact 1000 characters is fine
+    message_send(token1, channelID, long_sentance1)     # TODO how to test if the function is working fine
+    with pytest.raises(ValueError):
+        message_send(token1, channelID, long_sentance2)
+    # tesing end
+
+def message_remove_test():
+    # set up
+    # user1(admin)
+    registerDict1 = auth_register("kenny@gmail.com", "123456", "kenny", "han")
+    userID1 = registerDict1['u_id']
+    token1 = registerDict1['token']
+    # user2
+    registerDict2 = auth_register("ken@gmail.com", "654321", "ken", "han")
+    userID2 = registerDict2['u_id']
+    token2 = registerDict2['token']
+    # user3
+    registerDict3 = auth_register("k@gmail.com", "666666", "k", "h")
+    userID3 = registerDict3['u_id']
+    token3 = registerDict3['token']
+    # channel created by user1
+    channelDict1 = channels_create(token1, "kenny's channel", True)
+    channelID1 = channelDict1['channel_id']
+    # make sure user1 the admin TODO not sure if we need to do this 
+    admin_userpermission_change(token1, userID1, 2)
+    # user2 is just a member of channel1, user1 and user3 are the owners of channel1
+    channel_join(token2, channelID1)
+    channel_invite(token3, channelID1)
+    # message details
+    message_send(token1, channelID1, "Hello")
+    message_send(token2, channelID1, "Hey")
+    messageDetails = channel_messages(token1, channelID1, 0)
+    messageList = messageDetails.messages                       # TODO not sure if this one is right
+    messageID1 = messageList[0]['message_id']
+    messageUserID1 = messageList[0]['u_id']
+    # end of set up
+
+    # testing
+    # raises AccessError when message with message_id was not sent by the authorised user making this request
+    with pytest.raises(AccessError):
+        message_remove(token3, messageID1)
+    # raises AccessError when message with message_id was not sent by an owner of this channel or admin of slackr
+    with pytest.raises(AccessError):
+        message_remove(token2, messageID1)
+    # raises ValueError when message(based on ID) no longer exists
+    message_remove(token1, messageID1)
+    with pytest.raises(ValueError):
+        message_remove(token1, messageID1) 
+    # end of testing
+
+def message_edit_test():
+    # set up
+    # user1(admin)
+    registerDict1 = auth_register("kenny@gmail.com", "123456", "kenny", "han")
+    userID1 = registerDict1['u_id']
+    token1 = registerDict1['token']
+    # user2
+    registerDict2 = auth_register("ken@gmail.com", "654321", "ken", "han")
+    userID2 = registerDict2['u_id']
+    token2 = registerDict2['token']
+    # user3
+    registerDict3 = auth_register("k@gmail.com", "666666", "k", "h")
+    userID3 = registerDict3['u_id']
+    token3 = registerDict3['token']
+    # channel created by user1
+    channelDict1 = channels_create(token1, "kenny's channel", True)
+    channelID1 = channelDict1['channel_id']
+    # make sure user1 is the admin TODO not sure if we need to do this
+    admin_userpermission_change(token1, userID1, 2)
+    # user2 is just a member of channel1, user1 and user3 are the owners of channel1
+    channel_join(token2, channelID1)
+    channel_invite(token3, channelID1)
+    # message details
+    message_send(token1, channelID1, "Hello")
+    message_send(token2, channelID1, "Hey")
+    message_send(token3, channelID1, "Yo")
+    messageDetails = channel_messages(token1, channelID1, 0)    # TODO not sure if this one is right
+    messageList = messageDetails.messages                       # TODO not sure if this one is right
+    messageID1 = messageList[0]['message_id']                   # TODO not sure if this one is right
+    messageID2 = messageList[1]['message_id']                   # TODO not sure if this one is right
+    # end of set up
+
+    # testing TODO I think all these should be AccessError
+    # raises ValueError when message with message_id was not sent by the authorised user making this request
+    with pytest.raises(ValueError):                             
+        message_edit(token3, messageID1) 
+    # raises ValueError when message with message_id was not sent by an owner of this channel or admin of slackr
+    with pytest.raises(ValueError):
+        message_edit(token2, messageID2)
+    # end of testing
+
+def message_react_test():
+    # set up
+    rections = {'thumb_up': 1, 'thumb_down': 2, 'happy': 3, 'angry': 4}
+    # user1(admin)
+    registerDict1 = auth_register("kenny@gmail.com", "123456", "kenny", "han")
+    userID1 = registerDict1['u_id']
+    token1 = registerDict1['token']
+    # user2
+    registerDict2 = auth_register("ken@gmail.com", "654321", "ken", "han")
+    userID2 = registerDict2['u_id']
+    token2 = registerDict2['token']
+    # channel created by user1
+    channelDict1 = channels_create(token1, "kenny's channel", True)
+    channelID1 = channelDict1['channel_id']
+    # make sure user1 is the admin TODO not sure if we need to do this
+    admin_userpermission_change(token1, userID1, 2)
+    # user2 is just a member of channel1, user1 and user3 are the owners of channel1
+    channel_invite(token2, channelID1)
+    # message details
+    # create invalid message
+    long_sentance = "a" * 1001
+    message_send(token1, channelID1, "Hello")
+    message_send(token2, channelID1, long_sentance)
+    messageDetails = channel_messages(token1, channelID1, 0)    # TODO not sure if this one is right
+    messageList = messageDetails.messages                       # TODO not sure if this one is right
+    messageID1 = messageList[0]['message_id']                   # TODO not sure if this one is right
+    messageID2 = messageList[1]['message_id']                   # TODO not sure if this one is right
+    # end of set up
+
+    # testing
+    # raises ValueError when message_id is not a valid message within a channel that the authorised user has joined
+    with pytest.raises(ValueError):
+        message_react(token1, messageID2, rections['happy'])
+    with pytest.raises(ValueError):
+        message_react(token1, "@#$%^&*!", rections['happy'])
+    # raises ValueError when react_id is not a valid React ID
+    with pytest.raises(ValueError):
+        message_react(token1, messageID1, rections['not_happy'])                    # TODO assuming there are only 4 rections
+    # raises ValueError when message with ID message_id already contains an active React with ID react_id
+    message_react(token1, messageID1, rections['happy'])
+    with pytest.raises(ValueError):
+        message_react(token1, messageID1, rections['angry'])
+    # end of testing
+
+def message_unreact_test():
+    # set up
+    # assume there are only 4 reactions
+    rections = {'thumb_up': 1, 'thumb_down': 2, 'happy': 3, 'angry': 4}
+    # user1(admin)
+    registerDict1 = auth_register("kenny@gmail.com", "123456", "kenny", "han")
+    userID1 = registerDict1['u_id']
+    token1 = registerDict1['token']
+    # user2
+    registerDict2 = auth_register("ken@gmail.com", "654321", "ken", "han")
+    userID2 = registerDict2['u_id']
+    token2 = registerDict2['token']
+    # channel created by user1
+    channelDict1 = channels_create(token1, "kenny's channel", True)
+    channelID1 = channelDict1['channel_id']
+    # make sure user1 is the admin TODO not sure if we need to do this
+    admin_userpermission_change(token1, userID1, 2)
+    # user2 is just a member of channel1, user1 and user3 are the owners of channel1
+    channel_invite(token2, channelID1)
+    # message details
+    # create invalid message
+    long_sentance = "a" * 1001
+    message_send(token1, channelID1, "Hello")
+    message_send(token2, channelID1, long_sentance)
+    messageDetails = channel_messages(token1, channelID1, 0)    # TODO not sure if this one is right
+    messageList = messageDetails.messages                       # TODO not sure if this one is right
+    messageID1 = messageList[0]['message_id']                   # TODO not sure if this one is right
+    messageID2 = messageList[1]['message_id']                   # TODO not sure if this one is right
+    # end of set up
+
+    # testing
+    # raises ValueError when message_id is not a valid message within a channel that the authorised user has joined
+    with pytest.raises(ValueError):
+        message_unreact(token1, messageID2, rections['happy'])
+    with pytest.raises(ValueError):
+        message_unreact(token1, "@#$%^&*!", rections['happy'])
+    # raises ValueError when react_id is not a valid React ID
+    with pytest.raises(ValueError):
+        message_unreact(token1, messageID1, rections['not_happy'])                    # TODO assuming there are only 4 rections
+    # raises ValueError when message with ID message_id does not contain an active React with ID react_id
+    message_react(token1, messageID1, rections['happy'])
+    message_unreact(token1, messageID1, rections['happy'])
+    with pytest.raises(ValueError):
+        message_unreact(token1, messageID1, rections['happy'])
+    # end of testing
+
+def message_pin_test():
+    # set up
+    # user1(admin)
+    registerDict1 = auth_register("kenny@gmail.com", "123456", "kenny", "han")
+    userID1 = registerDict1['u_id']
+    token1 = registerDict1['token']
+    # user2
+    registerDict2 = auth_register("ken@gmail.com", "654321", "ken", "han")
+    token2 = registerDict2['token']
+    # user3
+    registerDict3 = auth_register("k@gmail.com", "666666", "k", "h")
+    token3 = registerDict3['token']
+    # user4
+    registerDict4 = auth_register("user4@gmail.com", "212121", "user4", "ha")
+    userID4 = registerDict4['u_id']
+    token4 = registerDict4['token']
+    # channel created by user1
+    channelDict1 = channels_create(token1, "kenny's channel", True)
+    channelID1 = channelDict1['channel_id']
+    # make sure user1 the admin TODO not sure if we need to do this
+    admin_userpermission_change(token1, userID1, 2)
+    # user2 is just a member of channel1, user1 and user3 are the owners of channel1
+    channel_join(token2, channelID1)
+    channel_invite(token3, channelID1)
+    # message details
+    # create invalid message
+    long_sentance = "a" * 1001
+    message_send(token1, channelID1, "Hello")
+    message_send(token2, channelID1, "Hey")
+    message_send(token3, channelID1, long_sentance)
+    messageDetails = channel_messages(token1, channelID1, 0)
+    messageList = messageDetails.messages                       # TODO not sure if this one is right
+    messageID1 = messageList[0]['message_id']
+    messageUserID1 = messageList[0]['u_id']
+    messageID3 = messageList[2]['message_id']
+    messageUserID3 = messageList[2]['u_id']
+    # end of set up
+
+    # testing
+    # raises ValueError when message_id is not a valid message
+    with pytest.raises(ValueError):
+        message_pin(token3, messageID3)
+    with pytest.raises(ValueError):
+        message_pin(token1, "@#$%^&*!")
+    # raises Value Error when the authorised user is not an admin
+    with pytest.raises(ValueError):
+        message_pin(token2, messageUserID1)
+    # raises AccessError when the authorised user is not a member of the channel that the message is within
+    with pytest.raises(AccessError):
+        message_pin(token4, messageID1)
+    # raises ValueError when message with ID message_id is already pinned
+    message_pin(token1, messageID1)
+    with pytest.raises(ValueError):
+        message_pin(token1, messageID1)
+    # end of testing
+
+def message_unpin_test():
+    # set up
+    # user1(admin)
+    registerDict1 = auth_register("kenny@gmail.com", "123456", "kenny", "han")
+    userID1 = registerDict1['u_id']
+    token1 = registerDict1['token']
+    # user2
+    registerDict2 = auth_register("ken@gmail.com", "654321", "ken", "han")
+    token2 = registerDict2['token']
+    # user3
+    registerDict3 = auth_register("k@gmail.com", "666666", "k", "h")
+    token3 = registerDict3['token']
+    # user4
+    registerDict4 = auth_register("user4@gmail.com", "212121", "user4", "ha")
+    userID4 = registerDict4['u_id']
+    token4 = registerDict4['token']
+    # channel created by user1
+    channelDict1 = channels_create(token1, "kenny's channel", True)
+    channelID1 = channelDict1['channel_id']
+    # make sure user1 the admin TODO not sure if we need to do this
+    admin_userpermission_change(token1, userID1, 2)
+    # user2 is just a member of channel1, user1 and user3 are the owners of channel1
+    channel_join(token2, channelID1)
+    channel_invite(token3, channelID1)
+    # message details
+    # create invalid message
+    long_sentance = "a" * 1001
+    message_send(token1, channelID1, "Hello")
+    message_send(token2, channelID1, "Hey")
+    message_send(token3, channelID1, long_sentance)
+    messageDetails = channel_messages(token1, channelID1, 0)
+    messageList = messageDetails.messages                       # TODO not sure if this one is right
+    messageID1 = messageList[0]['message_id']
+    messageUserID1 = messageList[0]['u_id']
+    messageID3 = messageList[2]['message_id']
+    messageUserID3 = messageList[2]['u_id']
+    # end of set up
+
+    # testing
+    # raises ValueError when message_id is not a valid message
+    with pytest.raises(ValueError):
+        message_unpin(token3, messageID3)
+    with pytest.raises(ValueError):
+        message_unpin(token1, "@#$%^&*!")
+    # raises Value Error when the authorised user is not an admin
+    with pytest.raises(ValueError):
+        message_unpin(token2, messageUserID1)
+    # raises AccessError when the authorised user is not a member of the channel that the message is within
+    with pytest.raises(AccessError):
+        message_unpin(token4, messageID1)
+    # raises ValueError when message with ID message_id is already unpinned
+    message_pin(token1, messageID1)
+    message_unpin(token1, messageID1)
+    with pytest.raises(ValueError):
+        message_unpin(token1, messageID1)
+    # end of testing
+
+def user_profile_test():
+    # set up
+    # user1(admin)
+    registerDict1 = auth_register("kenny@gmail.com", "123456", "kenny", "han")
+    userID1 = registerDict1['u_id']
+    token1 = registerDict1['token']
+    # user2
+    registerDict2 = auth_register("ken@gmail.com", "654321", "ken", "han")
+    userID2 = registerDict2['u_id']
+    token2 = registerDict2['token']
+    # end of set up
+
+    # testing
+    # raises ValueError when user with u_id is not a valid user
+    with pytest.raises(ValueError):
+        userProfile = user_profile(token1, userID2)
+    with pytest.raises(ValueError):
+        userProfile = user_profile(token2, userID1)
+    with pytest,raises(ValueError):
+        userProfile = user_profile(token1, "@#$%^&*!")
 
 def user_profile_setname_test():
     #user_profile_setname(token, firstname, lastname), no return value
     #SETUP TESTS BEGIN
     #create token:
     authRegDict = auth_register("benjamin.kah@student.unsw.edu.au", "password", "Ben", "Kah")
+    userId = authRegDict["u_id"]
     token = authRegDict["token"]
     #SETUP TESTS END
-    user_profile_setname(token, "Jeffrey", "Oh")
-    with pytest.raises(Exception): #ValueError, match=r"*"
+    user_profile_setname(token, "Jeffrey", "Oh") #this function should pass
+    userDict = user_profile(token, userId)
+    assert userDict["name_first"] == "Jeffrey" #test that name has been changed
+    assert userDict["name_last"] == "Oh"
+    with pytest.raises(ValueError, match=r"*"): #following should raise exceptions
         user_profile_setname(token, "This is a really long first name, more than 50 characters", "lmao")
         user_profile_setname(token, "lmao", "This is a really long last name, more than 50 characters")
         user_profile_setname(token, "This is a really long first name, more than 50 characters", "This is a really long last name, more than 50 characters")
-        #TODO: does there need to be a test with an incorrect token?
 
 def user_profile_setemail_test():
     #user_profile_setemail(token, email), no return value
     #SETUP TESTS BEGIN
     #create token:
     authRegDict = auth_register("benjamin.kah@student.unsw.edu.au", "password", "Ben", "Kah")
+    userId = authRegDict["u_id"]
     token = authRegDict["token"]
     #create second person's email:
     authRegDict2 = auth_register("jeffrey.oh@student.unsw.edu.au", "password", "Jeffrey", "Oh")
-    userDict2 = user_profile(authRegDict2["u_id"], authRegDict2["token"])
+    userDict2 = user_profile(authRegDict2["token"], authRegDict2["u_id"])
     email2 = userDict2["email"]
     #SETUP TESTS END
-    user_profile_setemail(token, "goodemail@student.unsw.edu.au")
-    with pytest.raises(Exception): #ValueError, match=r"*""
+    user_profile_setemail(token, "goodemail@student.unsw.edu.au") #this function should pass
+    userDict = user_profile(token, userId)
+    assert userDict["email"] == "goodemail@student.unsw.edu.au" #test that email has been changed
+    with pytest.raises(ValueError, match=r"*"): #following should raise exceptions
         user_profile_setemail(token, "bad email")
-        user_profile_setemail(token, email2)
+        user_profile_setemail(token, email2) #using another user's email
 
 def user_profile_sethandle_test():
     #user_profile_sethandle(token, handle_str), no return value
     #SETUP TESTS BEGIN
     #create token:
     authRegDict = auth_register("benjamin.kah@student.unsw.edu.au", "password", "Ben", "Kah")
+    userId = authRegDict["u_id"]
     token = authRegDict["token"]
     #SETUP TESTS END
     user_profile_sethandle(token, "good handle")
-    with pytest.raises(Exception):
+    userDict = user_profile(token, userId)
+    assert userDict["handle_str"] == "good handle"
+    with pytest.raises(ValueError, match=r"*"):
         user_profile_sethandle(token, "This handle is way too long")
 
 def user_profiles_uploadphoto_test():
-    #user_profile_sethandle(token, img_url, x_start, y_start, x_end, y_end), no return value
-    #SETUP TESTS BEGIN
-    #create token:
-    authRegDict = auth_register("benjamin.kah@student.unsw.edu.au", "password", "Ben", "Kah")
-    token = authRegDict["token"]
-    #SETUP TESTS END
-    user_profiles_uploadphoto(token, "exampleimage.jpg", 100, 100, 200, 200)
-    #TODO: wtf are image urls and their sizes, and how do you get a http status
+    pass
 
 def standup_start_test():
     #standup_start(token, channel_id), returns time_finish
@@ -247,17 +674,31 @@ def standup_send_test():
     token = authRegDict["token"]
     authRegDict2 = auth_register("jeffrey.oh@student.unsw.edu.au", "password", "Jeffrey", "Oh")
     token2 = authRegDict2["token"]
-    #create channel
+    #create channels:
     chanCreateDict = channels_create(token, "test channel", True)
     chanId = chanCreateDict["channel_id"]
+    chanCreateDict2 = channels_create(token, "test channel 2", True)
+    chanId2 = chanCreateDict2["channel_id"]
     #SETUP TESTS END
+    with pytest.raises(AccessError):
+        assert standup_send(toke, ChanId, "this is sent before standup_start is called")
+    #create time_finish
+    standupEnd = standup_start(token, chanId)
+    minBefStandupEnd = standupEnd - timedelta(minute = 1)
+    minAftStandupEnd = standupEnd + timedelta(minute = 1)
+    #this message should be sent, as it will be sent after the standup
+    message_sendlater(token, chanId, "this is sent after standup", minAftStandupEnd)
+    with pytest.raises(AccessError):
+        assert message_send(token, chanId, "this message can't be sent in a standup!")
+        assert message_sendlater(token, chanId, "wait until after standup", minBefStandupEnd)
     standup_send(token, chanId, "Standup message")
-    with pytest.raises(Exception):
-        assert standup_send(token, 55555555, "Standup message with wrong chanId")
-        assert standup_send(token, chanId, '''Standup message longer than 1000 chars''')
+    with pytest.raises(AccessError):
         assert standup_send(token2, chanId, "Standup message with user not a member of the channel")
-        assert standup_send() '''the standup time is finished'''
-    #TODO: figure out a message that is longer than 1000 chars, and how to represent standup time
+    strOver1000 = "yeah bo" + "i"*1000
+    with pytest.raises(ValueError, match=r"*"):
+        assert standup_send(token, chanId, strOver1000)
+        assert standup_send(token, chanId2, "Standup message with wrong chanId")
+    #TODO: how to represent standup time
 
 def search_test():
     #search(token, query_str), returns messages
@@ -268,10 +709,17 @@ def search_test():
     #create channel
     chanCreateDict = channels_create(token, "test channel", True)
     chanId = chanCreateDict["channel_id"]
-    #create message
+    #create messages
     message_send(token, chanId, "New message sent")
+    message_send(token, chanId, "Another message")
+    message_send(token, chanId, "A completely different string")
     #SETUP TESTS END
-    search(token, "message")
+    searchResultsList = search(token, "message") #first search query
+    searchResultsList2 = search(token, "nothing to find") #second search query
+    assert searchResultsList[0]["message"] == "New message sent" #search results should contain these strings
+    assert searchResultsList[1]["message"] == "Another message"
+    assert len(searchResultsList) == 2
+    assert searchResultsList2 == False #list should be empty
 
 def admin_userpermission_change_test():
     #admin_userpermission_change(token, u_id, permission_id), no return value
@@ -287,16 +735,29 @@ def admin_userpermission_change_test():
     #create channel from admin:
     chanCreateDict = channels_create(token, "test channel", True)
     chanId = chanCreateDict["channel_id"]
-    #add regular user to channel:
+    #add regular user to first channel:
     channel_invite(token, chanId, userId2)
     #SETUP TESTS END
-    #regular user is promoted
-    admin_userpermission_change(token, userId2, 1)
-    admin_userpermission_change(token, userId2, 2)
-    #regular user is demoted
-    admin_userpermission_change(token, userId2, 3)
-    with pytest.raises(Exception):
-        assert admin_userpermission_change(token2, userId, 3)
-        assert admin_userpermission_change(token, userId, 0)
+    admin_userpermission_change(token, userId2, 3) #confirm regular user is a member
+    with pytest.raises(AccessError):
+        assert channel_removeowner(token2, chanId, userId) #regular user should not have permission to do this
+
+    admin_userpermission_change(token, userId2, 1) #make regular user an owner
+    channel_removeowner(token2, chanId, userId) #revoke original admin's permissions - should pass
+
+    admin_userpermission_change(token2, userId, 2) #make original admin an admin again
+    channel_removeowner(token, chanId, userId2) #original admin removes new owner's privileges - should pass
+
+    admin_userpermission_change(token, userId2, 1) #add regular user as an owner again to set up next test
+    #create second channel:
+    chanCreateDict2 = channels_create(token, "test channel 2", True)
+    chanId2 = chanCreateDict2["channel_id"]
+    #add regular user to second channel:
+    channel_invite(token, chanId, userId2) #owner of channel 1 should not be owner of this channel
+    with pytest.raises(AccessError):
+        assert channel_removeowner(token2, chanId2, userId) #regular user should not have permission to do this
+
+    with pytest.raises(ValueError, match=r"*"):
+        assert admin_userpermission_change(token, userId, 0) #invalid permission_id
         assert admin_userpermission_change(token, userId, 4)
-        assert admin_userpermission_change(token, 55555, 3)
+        assert admin_userpermission_change(token, 55555, 3) #invalid user ID
