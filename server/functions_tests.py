@@ -4,7 +4,7 @@ import pytest
 
 def auth_login_test():
     assert auth_login('z5555555@student.unsw.edu.au', 'right password') == (12345, 'correct token')
-    with pytest.raises(Exception): # Following should raise exceptions
+    with pytest.raises(ValueError): # Following should raise exceptions
         assert auth_login('bad email', 'right password')
         assert auth_login('z5555555@asdfghjkl', 'right password')
         assert auth_login('z55555@.com', 'right password')
@@ -14,30 +14,50 @@ def auth_login_test():
         assert auth_login('z5555555@asdfghjkl', 'wrong password')
 
 def auth_logout_test():
-    # TODO if no output how to test?
+    auth_logout('Active token') # Should log out user
+    auth_logout('Inactive token')   # Should do nothing
 
 def auth_register_test():
     assert auth_register('jeffrey.oh@student.unsw.edu.au', 'right password', 'Jeffrey', 'Oh') == ('12345', 'correct token')
-    with pytest.raises(Exception): # Following should raise exceptions
+    with pytest.raises(ValueError): # Following should raise exceptions
         assert auth_register('jeffrey.oh@student.unsw.edu.au', 'good     password', 'Jeffrey', 'This is a string that is much longer than the max length')
         assert auth_register('jeffrey.oh@student.unsw.edu.au', 'good password', 'This is a string that is much longer than the max length', 'Oh')
         assert auth_register('jeffrey.oh@student.unsw.edu.au', 'password that does not meet requirements', 'Jeffrey', 'Oh')
         assert auth_register('bad email', 'good password', 'Jeffrey', 'Oh')
 
 def auth_passwordreset_request_test():
-    # TODO if no output how to test?
+    auth_passwordreset_request('Registered email')  # Should send reset requesy
+    auth_passwordreset_request('Unregistered email')    # Should do nothing
 
 def auth_passwordreset_reset_test():
-    # TODO if no output how to test?
+    auth_passwordreset_reset('Valid reset code', 'Valid password')    # No exception raised
+    with pytest.raises(ValueError):   # Following should raise exceptions
+        auth_passwordreset_reset('Invalid reset code', 'Valid password')
+        auth_passwordreset_reset('Valid reset code', 'Invalid password')
+        auth_passwordreset_reset('Invalid reset code', 'Invalid password')
 
 def channel_invite_test():
-    # TODO if no output how to test?
+    channel_invite('Token', 1, 1)   # Valid u_id, valid channel_id
+    with pytest.raises(ValueError):
+        channel_invite('Token', 12345, 12345)   # Invalid u_id, invalid channel_id
 
 def channel_details_test():
-    assert channel_details('valid token', 12345) == ('Jeffrey', ????????) # TODO not sure what the members data type is
+    assert channel_details('Valid token', 123) == ('Owner name', list_of_owner_members, list_of_all_members)
+    with pytest.raises(ValueError):  # Following should raise exceptions
+        channel_details('Valid token', 123) # If channel 123 does not exist
+    with pytest.raises(AccessError):  # Following should raise exceptions
+        channel_details('Invalid token', 123)   # User is not in the channel    
+
+
 
 def channel_messages_test():
-    # TODO not sure what the messages data type is
+    assert channel_messages('Valid token', 1, 1) == (valid_messages, 1, 5) # Assuming all inputs are valid, outputs desired messages with correct start and end
+    with pytest.raises(ValueError):  # Following should raise exceptions
+        channel_messages('Valid token', 123, 123)   # Channel id does not exist
+        channel_messages('Valid token', 123, 123)   # Start exceeeds number of messages
+    with pytest.raises(AccessError):  # Following should raise exceptions
+        channel_messages('Invalid token', 1, 1) # User token is not in channel
+        
 
 def channel_leave_test():
     # Token 
