@@ -3,8 +3,6 @@ from datetime import datetime
 import pytest
 
 def auth_login_test():
-    # TODO (Fucking apparently we just assume whether the password and email are right or not, and the returned tokens are whatever we want) PLEASE double check tho
-    # TODO check if right BUT u_id is some sort of integer and token is a string
     assert auth_login('z5555555@student.unsw.edu.au', 'right password') == (12345, 'correct token')
     with pytest.raises(Exception): # Following should raise exceptions
         assert auth_login('bad email', 'right password')
@@ -146,13 +144,6 @@ def channel_removeowner_test():
     # this should work as there will still be an owner of the channel
     channel_addowner(token, channel_id, u_id2) # add u_id2 as owner
     channel_removeowner(token, channel_id, u_id) # remove u_id from being owner
-
-
-def channels_list_test ():
-    # TODO yo wtf are these fucking data types
-
-def channels_listall_test():
-    # TODO yo wtf are these fucking data types
 
 def channels_create_test()
     assert channels_create('valid token', 'Jeffrey', True) == 12345
