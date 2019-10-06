@@ -276,7 +276,7 @@ def message_send_test():
 
     # testing
     # raises AccessError if unauthorised user tries to send message
-    with pytest.raises(AccessError, match=r"*"):
+    with pytest.raises(AccessError, ):
         message_send(token2, channelID, "This is from Ken")
     # raises ValueError if the message is more than 1000 characters but exact 1000 characters is fine
     message_send(token1, channelID, long_sentance1)     # TODO how to test if the function is working fine
@@ -605,7 +605,7 @@ def user_profile_setname_test():
     userDict = user_profile(token, userId)
     assert userDict["name_first"] == "Jeffrey" #test that name has been changed
     assert userDict["name_last"] == "Oh"
-    with pytest.raises(ValueError, match=r"*"): #following should raise exceptions
+    with pytest.raises(ValueError): #following should raise exceptions
         user_profile_setname(token, "This is a really long first name, more than 50 characters", "lmao")
         user_profile_setname(token, "lmao", "This is a really long last name, more than 50 characters")
         user_profile_setname(token, "This is a really long first name, more than 50 characters", "This is a really long last name, more than 50 characters")
@@ -625,7 +625,7 @@ def user_profile_setemail_test():
     user_profile_setemail(token, "goodemail@student.unsw.edu.au") #this function should pass
     userDict = user_profile(token, userId)
     assert userDict["email"] == "goodemail@student.unsw.edu.au" #test that email has been changed
-    with pytest.raises(ValueError, match=r"*"): #following should raise exceptions
+    with pytest.raises(ValueError): #following should raise exceptions
         user_profile_setemail(token, "bad email")
         user_profile_setemail(token, email2) #using another user's email
 
@@ -640,7 +640,7 @@ def user_profile_sethandle_test():
     user_profile_sethandle(token, "good handle")
     userDict = user_profile(token, userId)
     assert userDict["handle_str"] == "good handle"
-    with pytest.raises(ValueError, match=r"*"):
+    with pytest.raises(ValueError):
         user_profile_sethandle(token, "This handle is way too long")
 
 def user_profiles_uploadphoto_test():
@@ -651,7 +651,7 @@ def user_profiles_uploadphoto_test():
     token = authRegDict["token"]
     #SETUP TESTS END
     assert user_profiles_uploadphoto(token, "http://test_url.com/example.html", 0, 0, 1024, 1024)
-    with pytest.raises(ValueError, match=r"*"):
+    with pytest.raises(ValueError:
         assert user_profiles_uploadphoto(token, "http://test_url.com/negativeexample.html", -1, 0, 1024, 1024)
         assert user_profiles_uploadphoto(token, "http://test_url.com/negativeexample2.html", 0, -1, 1024, 1024)
         assert user_profiles_uploadphoto(token, "http://test_url.com/startgreaterthanendx.html", 1000, 0, 900, 1024)
@@ -704,7 +704,7 @@ def standup_send_test():
     with pytest.raises(AccessError):
         assert standup_send(token2, chanId, "Standup message with user not a member of the channel")
     strOver1000 = "yeah bo" + "i"*1000
-    with pytest.raises(ValueError, match=r"*"):
+    with pytest.raises(ValueError):
         assert standup_send(token, chanId, strOver1000)
         assert standup_send(token, chanId2, "Standup message with wrong chanId")
     #TODO: how to represent standup time
@@ -766,7 +766,7 @@ def admin_userpermission_change_test():
     with pytest.raises(AccessError):
         assert channel_removeowner(token2, chanId2, userId) #regular user should not have permission to do this
 
-    with pytest.raises(ValueError, match=r"*"):
+    with pytest.raises(ValueError):
         assert admin_userpermission_change(token, userId, 0) #invalid permission_id
         assert admin_userpermission_change(token, userId, 4)
         assert admin_userpermission_change(token, 55555, 3) #invalid user ID
