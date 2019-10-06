@@ -270,8 +270,7 @@ def message_send_test():
     channelDict = channels_create(token1, "kenny's channel", True)
     channelID = channelDict['channel_id']
     # two long sentances with more than 1000 characters
-    long_sentance1 = "a" * 1000
-    long_sentance2 = "21" * 1000
+    long_sentance = "a" * 1001
     # end of set up
 
     # testing
@@ -279,9 +278,8 @@ def message_send_test():
     with pytest.raises(AccessError, ):
         message_send(token2, channelID, "This is from Ken")
     # raises ValueError if the message is more than 1000 characters but exact 1000 characters is fine
-    message_send(token1, channelID, long_sentance1)     # TODO how to test if the function is working fine
     with pytest.raises(ValueError):
-        message_send(token1, channelID, long_sentance2)
+        message_send(token1, channelID, long_sentance)
     # tesing end
 
 def message_remove_test():
@@ -301,7 +299,7 @@ def message_remove_test():
     # channel created by user1
     channelDict1 = channels_create(token1, "kenny's channel", True)
     channelID1 = channelDict1['channel_id']
-    # make sure user1 the admin TODO not sure if we need to do this
+    # make sure user1 the admin
     admin_userpermission_change(token1, userID1, 2)
     # user2 is just a member of channel1, user1 and user3 are the owners of channel1
     channel_join(token2, channelID1)
@@ -310,7 +308,7 @@ def message_remove_test():
     message_send(token1, channelID1, "Hello")
     message_send(token2, channelID1, "Hey")
     messageDetails = channel_messages(token1, channelID1, 0)
-    messageList = messageDetails.messages                       # TODO not sure if this one is right
+    messageList = messageDetails.messages
     messageID1 = messageList[0]['message_id']
     messageUserID1 = messageList[0]['u_id']
     # end of set up
@@ -345,7 +343,7 @@ def message_edit_test():
     # channel created by user1
     channelDict1 = channels_create(token1, "kenny's channel", True)
     channelID1 = channelDict1['channel_id']
-    # make sure user1 is the admin TODO not sure if we need to do this
+    # make sure user1 is the admin
     admin_userpermission_change(token1, userID1, 2)
     # user2 is just a member of channel1, user1 and user3 are the owners of channel1
     channel_join(token2, channelID1)
@@ -354,13 +352,13 @@ def message_edit_test():
     message_send(token1, channelID1, "Hello")
     message_send(token2, channelID1, "Hey")
     message_send(token3, channelID1, "Yo")
-    messageDetails = channel_messages(token1, channelID1, 0)    # TODO not sure if this one is right
-    messageList = messageDetails.messages                       # TODO not sure if this one is right
-    messageID1 = messageList[0]['message_id']                   # TODO not sure if this one is right
-    messageID2 = messageList[1]['message_id']                   # TODO not sure if this one is right
+    messageDetails = channel_messages(token1, channelID1, 0)
+    messageList = messageDetails.messages
+    messageID1 = messageList[0]['message_id']
+    messageID2 = messageList[1]['message_id']
     # end of set up
 
-    # testing TODO I think all these should be AccessError
+    # testing, AccessError here is better?
     # raises ValueError when message with message_id was not sent by the authorised user making this request
     with pytest.raises(ValueError):
         message_edit(token3, messageID1)
@@ -383,7 +381,7 @@ def message_react_test():
     # channel created by user1
     channelDict1 = channels_create(token1, "kenny's channel", True)
     channelID1 = channelDict1['channel_id']
-    # make sure user1 is the admin TODO not sure if we need to do this
+    # make sure user1 is the admin
     admin_userpermission_change(token1, userID1, 2)
     # user2 is just a member of channel1, user1 and user3 are the owners of channel1
     channel_invite(token2, channelID1)
@@ -392,10 +390,10 @@ def message_react_test():
     long_sentance = "a" * 1001
     message_send(token1, channelID1, "Hello")
     message_send(token2, channelID1, long_sentance)
-    messageDetails = channel_messages(token1, channelID1, 0)    # TODO not sure if this one is right
-    messageList = messageDetails.messages                       # TODO not sure if this one is right
-    messageID1 = messageList[0]['message_id']                   # TODO not sure if this one is right
-    messageID2 = messageList[1]['message_id']                   # TODO not sure if this one is right
+    messageDetails = channel_messages(token1, channelID1, 0)
+    messageList = messageDetails.messages
+    messageID1 = messageList[0]['message_id']
+    messageID2 = messageList[1]['message_id']
     # end of set up
 
     # testing
@@ -404,9 +402,9 @@ def message_react_test():
         message_react(token1, messageID2, rections['happy'])
     with pytest.raises(ValueError):
         message_react(token1, "@#$%^&*!", rections['happy'])
-    # raises ValueError when react_id is not a valid React ID
+    # raises ValueError when react_id is not a valid React ID, assuming there are only 4 reactions
     with pytest.raises(ValueError):
-        message_react(token1, messageID1, rections['not_happy'])                    # TODO assuming there are only 4 rections
+        message_react(token1, messageID1, rections['not_happy'])
     # raises ValueError when message with ID message_id already contains an active React with ID react_id
     message_react(token1, messageID1, rections['happy'])
     with pytest.raises(ValueError):
@@ -428,7 +426,7 @@ def message_unreact_test():
     # channel created by user1
     channelDict1 = channels_create(token1, "kenny's channel", True)
     channelID1 = channelDict1['channel_id']
-    # make sure user1 is the admin TODO not sure if we need to do this
+    # make sure user1 is the admin
     admin_userpermission_change(token1, userID1, 2)
     # user2 is just a member of channel1, user1 and user3 are the owners of channel1
     channel_invite(token2, channelID1)
@@ -437,10 +435,10 @@ def message_unreact_test():
     long_sentance = "a" * 1001
     message_send(token1, channelID1, "Hello")
     message_send(token2, channelID1, long_sentance)
-    messageDetails = channel_messages(token1, channelID1, 0)    # TODO not sure if this one is right
-    messageList = messageDetails.messages                       # TODO not sure if this one is right
-    messageID1 = messageList[0]['message_id']                   # TODO not sure if this one is right
-    messageID2 = messageList[1]['message_id']                   # TODO not sure if this one is right
+    messageDetails = channel_messages(token1, channelID1, 0)
+    messageList = messageDetails.messages
+    messageID1 = messageList[0]['message_id']
+    messageID2 = messageList[1]['message_id']
     # end of set up
 
     # testing
@@ -449,9 +447,9 @@ def message_unreact_test():
         message_unreact(token1, messageID2, rections['happy'])
     with pytest.raises(ValueError):
         message_unreact(token1, "@#$%^&*!", rections['happy'])
-    # raises ValueError when react_id is not a valid React ID
+    # raises ValueError when react_id is not a valid React ID, assuming there are only 4 reactions
     with pytest.raises(ValueError):
-        message_unreact(token1, messageID1, rections['not_happy'])                    # TODO assuming there are only 4 rections
+        message_unreact(token1, messageID1, rections['not_happy'])
     # raises ValueError when message with ID message_id does not contain an active React with ID react_id
     message_react(token1, messageID1, rections['happy'])
     message_unreact(token1, messageID1, rections['happy'])
@@ -478,7 +476,7 @@ def message_pin_test():
     # channel created by user1
     channelDict1 = channels_create(token1, "kenny's channel", True)
     channelID1 = channelDict1['channel_id']
-    # make sure user1 the admin TODO not sure if we need to do this
+    # make sure user1 the admin
     admin_userpermission_change(token1, userID1, 2)
     # user2 is just a member of channel1, user1 and user3 are the owners of channel1
     channel_join(token2, channelID1)
@@ -490,7 +488,7 @@ def message_pin_test():
     message_send(token2, channelID1, "Hey")
     message_send(token3, channelID1, long_sentance)
     messageDetails = channel_messages(token1, channelID1, 0)
-    messageList = messageDetails.messages                       # TODO not sure if this one is right
+    messageList = messageDetails.messages
     messageID1 = messageList[0]['message_id']
     messageUserID1 = messageList[0]['u_id']
     messageID3 = messageList[2]['message_id']
@@ -534,7 +532,7 @@ def message_unpin_test():
     # channel created by user1
     channelDict1 = channels_create(token1, "kenny's channel", True)
     channelID1 = channelDict1['channel_id']
-    # make sure user1 the admin TODO not sure if we need to do this
+    # make sure user1 the admin
     admin_userpermission_change(token1, userID1, 2)
     # user2 is just a member of channel1, user1 and user3 are the owners of channel1
     channel_join(token2, channelID1)
@@ -546,7 +544,7 @@ def message_unpin_test():
     message_send(token2, channelID1, "Hey")
     message_send(token3, channelID1, long_sentance)
     messageDetails = channel_messages(token1, channelID1, 0)
-    messageList = messageDetails.messages                       # TODO not sure if this one is right
+    messageList = messageDetails.messages
     messageID1 = messageList[0]['message_id']
     messageUserID1 = messageList[0]['u_id']
     messageID3 = messageList[2]['message_id']
