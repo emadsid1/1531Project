@@ -1,6 +1,8 @@
+import pytest
+import functions
 from Error import AccessError
 from datetime import datetime, timedelta
-import pytest
+
 
 def auth_login_test():
     assert auth_login('z5555555@student.unsw.edu.au', 'right password') == (12345, 'correct token')
@@ -166,8 +168,6 @@ def channel_removeowner_test():
     channel_addowner(token, channel_id, u_id2) # add u_id2 as owner
     channel_removeowner(token, channel_id, u_id) # remove u_id from being owner
 
-<<<<<<< HEAD
-=======
 # to better justify the purpose of these two different listing functions, channels_list will ONLY list functions the auth user is part of
 # and channels_listall will list functions the auth user is part of in addition to ALL public channels available (regardless of membership).
 def channels_list_test():
@@ -222,8 +222,6 @@ def channels_listall_test():
     # lists all user 2's channels but not user 1's  channel since it is private
     assert channels_listall(token2) = ["User 2's public channel", "User 2's second public channel"] #assume channel order in list doesn't matter ***
 
-
->>>>>>> dbcd3424fdb1fa147bcf05ad9cb490647be38aff
 def channels_create_test()
     assert channels_create('valid token', 'Jeffrey', True) == 12345
     with pytest.raises(Exception): # Following should raise exceptions
