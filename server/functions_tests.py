@@ -1,6 +1,8 @@
+import pytest
+import functions
 from Error import AccessError
 from datetime import datetime, timedelta
-import pytest
+
 
 def auth_login_test():
     assert auth_login('z5555555@student.unsw.edu.au', 'right password') == (12345, 'correct token')
