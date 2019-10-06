@@ -23,6 +23,8 @@ want.
 group of people in that specific channel anymore.
 7. As an owner of a channel in Slackr, I would like to be able to modify a member's privilege, so that I can manage and organize my channel more 
 efficiently. 
+8. As an admin of Slackr, I would like to be able to make another person an admin as well, so that I can ask other people to help me manage 
+and organize Slackr application better.
 
 Epic 3: As a member of a channel in Slackr, I should be able to send, edit, remove, pin and react to messages. I should also be able to search for 
 messages. I should be able to begin a “stand up” as well.
@@ -52,5 +54,3 @@ would be able to update as soon as possible on Slackr as well.
 3. As a valid member of Slackr, I should be able to check out other people's profiles as well, so that I can make sure if a person is actually the 
 person I know by checking his or her profiles.
 
-One more: As an admin of Slackr, I would like to be able to make another person an admin as well, so that I can ask other people to help me manage 
-and organize Slackr application better.
