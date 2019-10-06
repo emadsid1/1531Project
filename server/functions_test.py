@@ -343,7 +343,7 @@ def message_edit_test():
     # channel created by user1
     channelDict1 = channels_create(token1, "kenny's channel", True)
     channelID1 = channelDict1['channel_id']
-    # make sure user1 is the admin TODO not sure if we need to do this
+    # make sure user1 is the admin
     admin_userpermission_change(token1, userID1, 2)
     # user2 is just a member of channel1, user1 and user3 are the owners of channel1
     channel_join(token2, channelID1)
