@@ -48,7 +48,7 @@ def channel_details_test():
     with pytest.raises(ValueError):  # Following should raise exceptions
         channel_details('Valid token', 123) # If channel 123 does not exist
     with pytest.raises(AccessError):  # Following should raise exceptions
-        channel_details('Invalid token', 123)   # User is not in the channel    
+        channel_details('Invalid token', 123)   # User is not in the channel
 
 
 
@@ -59,7 +59,7 @@ def channel_messages_test():
         channel_messages('Valid token', 123, 123)   # Start exceeeds number of messages
     with pytest.raises(AccessError):  # Following should raise exceptions
         channel_messages('Invalid token', 1, 1) # User token is not in channel
-        
+
 
 def channel_leave_test():
     # Token
@@ -301,7 +301,7 @@ def message_remove_test():
     # channel created by user1
     channelDict1 = channels_create(token1, "kenny's channel", True)
     channelID1 = channelDict1['channel_id']
-    # make sure user1 the admin TODO not sure if we need to do this 
+    # make sure user1 the admin TODO not sure if we need to do this
     admin_userpermission_change(token1, userID1, 2)
     # user2 is just a member of channel1, user1 and user3 are the owners of channel1
     channel_join(token2, channelID1)
@@ -325,7 +325,7 @@ def message_remove_test():
     # raises ValueError when message(based on ID) no longer exists
     message_remove(token1, messageID1)
     with pytest.raises(ValueError):
-        message_remove(token1, messageID1) 
+        message_remove(token1, messageID1)
     # end of testing
 
 def message_edit_test():
@@ -362,8 +362,8 @@ def message_edit_test():
 
     # testing TODO I think all these should be AccessError
     # raises ValueError when message with message_id was not sent by the authorised user making this request
-    with pytest.raises(ValueError):                             
-        message_edit(token3, messageID1) 
+    with pytest.raises(ValueError):
+        message_edit(token3, messageID1)
     # raises ValueError when message with message_id was not sent by an owner of this channel or admin of slackr
     with pytest.raises(ValueError):
         message_edit(token2, messageID2)
@@ -644,7 +644,18 @@ def user_profile_sethandle_test():
         user_profile_sethandle(token, "This handle is way too long")
 
 def user_profiles_uploadphoto_test():
-    pass
+    #user_profiles_uploadphoto(token, img_url, x_start, y_start, x_end, y_end), no return value
+    #SETUP TESTS BEGIN
+    #create token:
+    authRegDict = auth_register("benjamin.kah@student.unsw.edu.au", "password", "Ben", "Kah")
+    token = authRegDict["token"]
+    #SETUP TESTS END
+    assert user_profiles_uploadphoto(token, "http://test_url.com/example.html", 0, 0, 1024, 1024)
+    with pytest.raises(ValueError, match=r"*"):
+        assert user_profiles_uploadphoto(token, "http://test_url.com/negativeexample.html", -1, 0, 1024, 1024)
+        assert user_profiles_uploadphoto(token, "http://test_url.com/negativeexample2.html", 0, -1, 1024, 1024)
+        assert user_profiles_uploadphoto(token, "http://test_url.com/startgreaterthanendx.html", 1000, 0, 900, 1024)
+        assert user_profiles_uploadphoto(token, "http://test_url.com/startgreaterthanendy.html", 0, 1000, 1024, 900)
 
 def standup_start_test():
     #standup_start(token, channel_id), returns time_finish

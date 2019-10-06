@@ -25,7 +25,11 @@ admin_userpermission_change, channel_addowner
 * The difference in permissions between someone made owner through the admin_userpermission_change method and being made admin is that an admin is automatically given special permissions over any new channel that is created, however, a user with owner permissions has to be added as an owner any time a new channel is created.
 
 user_profiles_uploadphoto
-* The function user_profiles_uploadphoto cannot be tested in this current iteration. We have no way of testing what HTTP status img_url returns or being able to determine the current size of the image.
+* In this current iteration, the HTTP value returned is not tested. This is because there is no function currently available to do so.
+* Likewise, testing whether the crop bounds are outside the maximum image dimensions is also not tested, for similar reasons.
+* The current ValueErrors for crop bounds are assumed to be a mistake in the specifications. Currently, they make no sense - x_start, y_start, x_end, and y_end are all within the dimensions of the image is not at all a cause for an error. Instead, tests for alternative ValueErrors have been implemented:
+* If any of the bounds are negative, this should produce a ValueError.
+* If x_start > x_end or y_start > y_end, this should also produce a ValueError.
 
 standup_start, standup_send, message_send, message_sendlater
 * Assume that standup_send can only be called after standup_start.
