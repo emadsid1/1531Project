@@ -18,5 +18,101 @@ def echo2():
         'echo' : request.form.get('echo'),
     })
 
+@app.route('/auth/login', methods=['POST'])
+
+
+@app.route('/auth/logout', methods=['POST'])
+
+
+@app.route('/auth/register', methods=['POST'])
+
+
+@app.route('/auth/passwordreset/request', methods=['POST'])
+
+
+@app.route('/auth/passwordreset/reset', methods=['POST'])
+
+
+@app.route('/channel/invite', methods=['POST'])
+
+
+@app.route('/channel/details', methods=['GET'])
+
+
+@app.route('/channel/messages', methods=['GET'])
+
+
+@app.route('/channel/leave', methods=['POST'])
+
+
+@app.route('/channel/join', methods=['POST'])
+
+
+@app.route('/channel/addowner', methods=['POST'])
+
+
+@app.route('/channel/removeowner', methods=['POST'])
+
+
+@app.route('/channels/list', methods=['GET'])
+
+
+@app.route('/channels/listall', methods=['GET'])
+
+
+@app.route('/channels/create', methods=['POST'])
+
+
+@app.route('/message/sendlater', methods=['POST'])
+
+
+@app.route('/message/send', methods=['POST'])
+
+
+@app.route('/message/remove', methods=['DELET'])
+
+
+@app.route('/message/edit', methods=['PUT'])
+
+
+@app.route('/message/react', methods=['POST'])
+
+
+@app.route('/message/unreact', methods=['POST'])
+
+
+@app.route('/message/pin', methods=['POST'])
+
+
+@app.route('/message/unpin', methods=['POST'])
+
+
+@app.route('/user/profile', methods=['GET'])
+
+
+@app.route('/user/profile/setname', methods=['PUT'])
+
+
+@app.route('/user/profile/setemail', methods=['PUT'])
+
+
+@app.route('/user/profile/sethandle', methods=['PUT'])
+
+
+@app.route('/user/profiles/uploadphoto', methods=['POST'])
+
+
+@app.route('/standup/start', methods=['POST'])
+
+
+@app.route('/standup/send', methods=['POST'])
+
+
+@app.route('/search', methods=['GET'])
+
+
+@app.route('/admin/userpermission/change', methods=['POST'])
+
+
 if __name__ == '__main__':
     app.run(debug=True)
