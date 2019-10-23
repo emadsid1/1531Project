@@ -1,6 +1,6 @@
 data = {
-    'users': [],
-    'channels': [],
+    'accounts': [],
+    'channels': []
 }
 
 class user():

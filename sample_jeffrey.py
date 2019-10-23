@@ -18,12 +18,12 @@ def echo_get():
 
 @app.route('/auth/register', methods = ['POST'])
 def auth_register():
-    global accounts
+    global data
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
     email = request.form.get('email')
     if(not (re.search(regex,email))):
         raise Exception('ValueError')
-    for acc in accounts:
+    for acc in data['accounts']:
         if acc.email == email:
             raise Exception('ValueError')
     password = request.form.get('password')
