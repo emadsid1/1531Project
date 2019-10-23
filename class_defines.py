@@ -1,4 +1,4 @@
-accounts = [] # list of classes
+accounts = [] # list of ALL users
 
 class user():
     def __init__(self, email, password, first, last):
@@ -7,7 +7,7 @@ class user():
         self.name_first = first
         self.name_last = last
 
-channels = []
+channels = [] # list of channels
 
 class channel():
     def __init__(self, owners, admins, members):
