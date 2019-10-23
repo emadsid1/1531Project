@@ -1,12 +1,20 @@
-from flask import Flask, request
+from flask import Flask, request, flash
 from json import dumps
 
 app = Flask(__name__)
 
 # global varaiables
-messages = {
-    'channal_1' = [],
-}
+
+# created a class called Mesg which stores all the information of every message
+class Mesg:
+    def __init__(self, user, create_time, message):
+        self.message = message
+        self.user = user
+        self.create_time = create_time
+
+# a list of messages
+Messages = []
+
 # end of global variable
 
 @app.route('/echo/post', methods = ['POST'])
@@ -41,6 +49,8 @@ def echo_get():
 
 
 @app.route('/message/unpin', methods=['POST'])
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
