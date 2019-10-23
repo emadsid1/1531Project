@@ -1,8 +1,8 @@
 from flask import Flask, request
 from json import dumps
+from class_defines import data, user, channel, mesg, reacts
 import re 
 import jwt
-import class_defines.py
 
 app = Flask(__name__)
 
@@ -18,7 +18,7 @@ def echo_get():
 
 @app.route('/auth/register', methods = ['POST'])
 def auth_register():
-    global users
+    global accounts
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
     email = request.form.get('email')
     if(not (re.search(regex,email))):
