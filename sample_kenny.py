@@ -1,4 +1,5 @@
 from flask import Flask, request, flash
+from datetime import datetime
 from json import dumps
 
 app = Flask(__name__)
@@ -7,10 +8,21 @@ app = Flask(__name__)
 
 # created a class called Mesg which stores all the information of every message
 class Mesg:
-    def __init__(self, user, create_time, message):
+    def __init__(self, sender, create_time, message):
         self.message = message
-        self.user = user
+        self.sender = sender
         self.create_time = create_time
+        self.reaction = None
+        self.pin = False
+
+    def get_mesg():
+        return self.message
+
+    def get_sender():
+        return self.sender
+
+    def get_mesg_time():
+        return self.create_time
 
 # a list of messages
 Messages = []
@@ -31,6 +43,14 @@ def echo_get():
 
 
 @app.route('/message/send', methods=['POST'])
+def send():
+    global Messages
+    # check TOKEN???
+    mesg = request.form.get('message')
+    # get user???
+    sending_time = datetime.now()
+    Messages.append(Mesg(sender, sending_time, mesg))
+    return dumps('message sent')
 
 
 @app.route('/message/remove', methods=['DELET'])
