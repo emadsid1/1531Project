@@ -41,26 +41,30 @@ def mesg_send():
                 # sender exists in the account list, get the token and channels the sender holds
                 valid_account = True
                 token = acc.token
-                user_channel = acc.in_channel
+                user_channels = acc.in_channel
                 if token == '':
                     # if the sender is not authorised
                     raise Exception('AccessError') 
                 else:
-                    for cha in user_channel:
+                    for cha in user_channels:
                         if current_channel == cha:
                             # sender verified and add the new message to the current channel
                             valid_send = True
-                            cha.messages.append(mesg(sender, sending_time, msg, False))
                     if valid_send == False:
                         # the authorised user has not joined the channel they are trying to post to
                         raise Exception('AccessError')
         if valid_account == False:
             # if the account doesn't exist in the account list
             raise Exception('AccessError')
-
-
-    
-    
+    if valid_send == True and valid_account == True:
+        for cha in user_channels:
+            if cha == current_channel:
+                cha.messages.append(mesg(sender, sending_time, msg, False))
+                cha.messages.message_id = len(cha.messages)     # TODO not sure if this is right
+                break
+    return dumps({
+        'message_id': cha.messages.message_id,    # TODO not sure if this is right
+    })
 
 @app.route('/message/remove', methods=['DELET'])
 def mesg_remove():
