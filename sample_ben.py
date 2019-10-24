@@ -2,6 +2,8 @@
 from json import dumps
 from flask import Flask, request
 from class_defines import data, user, channel, mesg, reacts
+from datetime import datetime, timedelta
+import AccessError
 
 app = Flask(__name__)
 
@@ -109,9 +111,55 @@ def user_profile_uploadphoto():
     return dumps({})
 
 @app.route('/standup/start', methods=['POST'])
+def standup_start():
+    token = request.form.get("token") #assume token is valid
+    channel = request.form.get("channel_id")
+    valid = False
+    in_channel = False
+    ch_counter = 0
+    for ch in data["channels"]:
+        if channel == ch.channel_id:
+            valid = True
+        elif valid == False:
+            ch_counter += 1
+    if valid == False:
+        raise Exception("ValueError") # channel does not exist
 
+    for acc in data["channels"][ch_counter].owners: # search owners list
+        if token == acc.token:
+            in_channel = True
+    if in_channel == False:
+        for acc in data["channels"][ch_counter].admins: # search admins list
+            if token == acc.token:
+                in_channel = True
+    if in_channel == False:
+        for acc in data["channels"][ch_counter].members: # search members list
+            if token == acc.token:
+                in_channel = True
+    if in_channel == False: # if the user is not in the channel, raise an error
+        raise Exception("AccessError") # need to write this function
+
+    data["channels"][ch_counter].is_standup = True
+    data["channels"][ch_counter].standup_time = datetime.now()
+    standup_finish = data["channels"][ch_counter].standup_time + timedelta(minutes=15)
+
+    return dumps({standup_finish})
 
 @app.route('/standup/send', methods=['POST'])
+def standup_send():
+    token = request.form.get("token") # assume token is valid
+    channel = request.form.get("channel_id")
+    message = request.form.get("message")
+    valid = False
+    ch_counter = 0
+    for ch in data["channels"]:
+        if channel == ch.channel_id:
+            valid = True
+        elif valid == False:
+            ch_counter += 1
+    if valid == False:
+        raise Exception("ValueError") # channel does not exist
+    
 
 
 @app.route('/search', methods=['GET'])
