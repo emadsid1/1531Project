@@ -104,13 +104,6 @@ def reset_reset():
 def check_email(email):
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
     if(not(re.search(regex,email))):    # if not valid email
-<<<<<<< HEAD
-        raise Exception('ValueError')
-
-# Run flask
-if __name__ == '__main__':
-    app.run(debug=True)
-=======
         raise Exception('ValueError')
 
 # Run flask
