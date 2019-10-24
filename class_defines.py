@@ -16,13 +16,14 @@ class user():
         self.in_channel = []    # list of channels the user is in
 
 class channel():
-    def __init__(self, owners, admins, members, name, is_public): 
+    def __init__(self, name, is_public, channel_id, owners): 
         self.owners = []    # list of users
         self.admins = []    # list of users admins cant change owner permissions
         self.members = []   # list of users
         self.name = ''  # name of channel
         self.messages = []  # list of messages
         self.is_public = is_public # public status
+        self.channel_id = channel_id
 
 class mesg:
     def __init__(self, sender, create_time, message, is_later):
