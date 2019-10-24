@@ -1,8 +1,15 @@
-"""Flask server from M13A-SNAKE"""
+"""Flask server"""
+import sys
+from flask_cors import CORS
 from json import dumps
 from flask import Flask, request
 
 app = Flask(__name__)
+CORS(app)
+
+@app.route('/auth/register', methods=['POST'])
+def echo4():
+    pass
 
 @app.route('/echo/get', methods=['GET'])
 def echo1():
@@ -115,4 +122,8 @@ def echo2():
 
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     app.run(debug=True)
+=======
+    APP.run(port=(sys.argv[1] if len(sys.argv) > 1 else 5000))
+>>>>>>> COMP1531/19T3-cs1531-project-master

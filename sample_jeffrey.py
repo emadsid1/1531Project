@@ -1,7 +1,7 @@
 from flask import Flask, request
 from json import dumps
 from class_defines import data, user, channel, mesg, reacts
-import re 
+import re
 import jwt
 
 app = Flask(__name__)
@@ -56,7 +56,11 @@ def auth_register():
     password = request.form.get('password')
     if (len(password) < 6): # if password is too short
         raise Exception('ValueError')
-    
+<<<<<<< HEAD
+
+=======
+
+>>>>>>> COMP1531/19T3-cs1531-project-master
     first = request.form.get('name_first')
     if (not(1 <= len(first) and len(first) <= 50)): # if name is not between 1 and 50 characters long
         raise Exception('ValueError')
@@ -100,8 +104,16 @@ def reset_reset():
 def check_email(email):
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
     if(not(re.search(regex,email))):    # if not valid email
-        raise Exception('ValueError')  
+<<<<<<< HEAD
+        raise Exception('ValueError')
 
 # Run flask
 if __name__ == '__main__':
     app.run(debug=True)
+=======
+        raise Exception('ValueError')
+
+# Run flask
+if __name__ == '__main__':
+    app.run(debug=True)
+>>>>>>> COMP1531/19T3-cs1531-project-master

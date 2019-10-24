@@ -44,7 +44,7 @@ def mesg_send():
                 user_channels = acc.in_channel
                 if token == '':
                     # if the sender is not authorised
-                    raise Exception('AccessError') 
+                    raise Exception('AccessError')
                 else:
                     for cha in user_channels:
                         if current_channel == cha:

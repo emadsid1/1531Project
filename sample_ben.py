@@ -161,7 +161,6 @@ def standup_send():
         raise Exception("ValueError") # channel does not exist
     
 
-
 @app.route('/search', methods=['GET'])
 
 
