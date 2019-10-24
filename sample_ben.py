@@ -4,6 +4,7 @@ from flask import Flask, request
 from class_defines import data, user, channel, mesg, reacts
 from datetime import datetime, timedelta
 from Error import AccessError
+import re
 
 app = Flask(__name__)
 
@@ -72,7 +73,7 @@ def user_profile_email():
     global data
     token = request.form.get("token") # assume token is valid
     email = request.form.get("email")
-    # TODO: if email is invalid, raise ValueError
+    check_email(email)
     number = None
     for acc in data["accounts"]:
         if token == acc.token:
@@ -90,7 +91,6 @@ def user_profile_sethandle():
     handle = request.form.get("handle_str")
     if len(handle) < 3 or len(handle) > 20:
         raise Exception("ValueError")
-    # TODO: if email is invalid, raise ValueError
     number = None
     for acc in data["accounts"]:
         if token == acc.token:
@@ -224,6 +224,12 @@ def admin_userpermission_change():
     if valid == False:
         raise Exception("ValueError") # user does not exist
     return dumps({})
+
+# Helper functions
+def check_email(email):
+    regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+    if(not(re.search(regex,email))):    # if not valid email
+        raise Exception('ValueError')
 
 if __name__ == '__main__':
     app.run(debug=True)
