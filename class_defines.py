@@ -28,6 +28,7 @@ class channel():
 class mesg:
     def __init__(self, sender, create_time, message, is_later):
         self.message = message  # string
+        self.message_id = ''    # string of a unique id
         self.sender = sender    # type user
         self.create_time = create_time  # date_time (depends on is_later)
         self.reaction = []    # facebooks reacts similar list of

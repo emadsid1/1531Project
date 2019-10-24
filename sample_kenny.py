@@ -1,43 +1,9 @@
+from class_defines import data, user, channel, mesg, reacts
 from flask import Flask, request, flash
 from datetime import datetime
 from json import dumps
 
 app = Flask(__name__)
-
-# global varaiables
-# created a class called Mesg which stores all the information of every message
-class Mesg:
-    def __init__(self, sender, create_time, message):
-        self.message = message
-        self.sender = sender
-        self.create_time = create_time
-        self.reaction = None
-        self.pin = False
-
-    def get_mesg():
-        return self.message
-
-    def get_sender():
-        return self.sender
-
-    def get_mesg_time():
-        return self.create_time
-
-    def set_reaction(self, reaction):
-        self.reaction = reaction
-
-    def remove_reaction(self):
-        self.reaction = None
-
-    def pin_self(self):
-        self.pin = True
-
-    def unpin_self(self):
-        self.pin = False
-
-# a list of messages
-Messages = []
-# end of global variable
 
 @app.route('/echo/post', methods = ['POST'])
 def echo_post():
@@ -51,61 +17,86 @@ def echo_get():
 
 @app.route('/message/sendlater', methods=['POST'])
 def send_later():
-    global Messages
-    # check TOKEN???
-    # get user???
-    latency = request.form.get('send later')
-    mesg = request.form.get('message')
+    global data
+    sender = request.form.get('user')
+    time_to_send = request.form.get('time to send')
+    msg = request.form.get('message')
 
 
 @app.route('/message/send', methods=['POST'])
 def mesg_send():
-    global Messages
-    # check TOKEN???
-    # get user???
-    mesg = request.form.get('message')
+    global data
+    # counter = 0
+    valid_send = False  # check if the user can actually send the message
+    valid_account = False   # check if the sender is in the account list
     sending_time = datetime.now()
-    if len(mesg) < 1000 or len(mesg) == 1000:
-        Messages.append(Mesg(sender, sending_time, mesg))
-        return dumps('message sent')
+    sender = request.form.get('user')
+    msg = request.form.get('message')
+    current_channel = request.form.get('channel')
+    if len(msg) > 1000:
+        raise Exception('ValueError')
     else:
-        return dumps('message not send due to some error')
+        for counter, acc in enumerate(data['accounts']):
+            if acc == sender:
+                # sender exists in the account list, get the token and channels the sender holds
+                valid_account = True
+                token = acc.token
+                user_channel = acc.in_channel
+                if token == '':
+                    # if the sender is not authorised
+                    raise Exception('AccessError') 
+                else:
+                    for cha in user_channel:
+                        if current_channel == cha:
+                            # sender verified and add the new message to the current channel
+                            valid_send = True
+                            cha.messages.append(mesg(sender, sending_time, msg, False))
+                    if valid_send == False:
+                        # the authorised user has not joined the channel they are trying to post to
+                        raise Exception('AccessError')
+        if valid_account == False:
+            # if the account doesn't exist in the account list
+            raise Exception('AccessError')
+
+
+    
+    
 
 @app.route('/message/remove', methods=['DELET'])
 def mesg_remove():
-    global Messages
+    global data
     # how to find the correct original message?
 
 @app.route('/message/edit', methods=['PUT'])
 def mesg_edit():
-    global Messages
+    global data
     new_message = request.form.get('new message')
     # how to find the correct original message?
     return dumps('successfully edited the message')
 
 @app.route('/message/react', methods=['POST'])
 def mesg_react():
-    global Messages
+    global data
     new_reaction = request.form.get('reaction')
     # how to find the correct original message?
 
 
 @app.route('/message/unreact', methods=['POST'])
 def mesg_unreact():
-    global Messages
+    global data
     # how to find the correct original message?
 
 
 
 @app.route('/message/pin', methods=['POST'])
 def mesg_pin():
-    global Messages
+    global messages
     # how to find the correct original message?
 
 
 @app.route('/message/unpin', methods=['POST'])
 def mesg_unpin():
-    global Messages
+    global messages
     # how to find the correct original message?
 
 
