@@ -4,7 +4,7 @@ data = {
 }
 
 class user():
-    def __init__(self, email, password, first, last, handle, token):
+    def __init__(self, email, password, first, last, handle, token, perm_id):
         self.email = email
         self.password = password
         self.name_first = first
@@ -14,6 +14,7 @@ class user():
         self.token = '' # login token
         self.prof_pic = ''  # URL to pic
         self.in_channel = []    # list of channels the user is in
+        self.permission_id = perm_id # user's permission id
 
 class channel():
     def __init__(self, name, is_public, channel_id, standup_time):
@@ -26,6 +27,7 @@ class channel():
         self.channel_id = channel_id
         self.is_standup = False # standup flag
         self.standup_time = standup_time # standup_time start - any variable can be passed in as long as is_standup is False
+        self.standup_messages = [] # list of standup messages - cleared after every standup
 
     def get_standup_time():
         return self.standup_time
