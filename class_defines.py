@@ -27,8 +27,8 @@ class channel():
         self.is_standup = False # standup flag
         self.standup_time = standup_time # standup_time start - any variable can be passed in as long as is_standup is False
 
-    def get_standup_time(self, time):
-        return self.standup_time = standup_time
+    def get_standup_time():
+        return self.standup_time
 
 class mesg:
     def __init__(self, sender, create_time, message, is_later):
