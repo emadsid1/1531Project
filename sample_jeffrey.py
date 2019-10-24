@@ -109,4 +109,3 @@ def check_email(email):
 # Run flask
 if __name__ == '__main__':
     app.run(debug=True)
->>>>>>> COMP1531/19T3-cs1531-project-master
