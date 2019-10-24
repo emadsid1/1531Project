@@ -8,7 +8,7 @@ class user():
         self.email = email
         self.password = password
         self.name_first = first
-        self.name_last = last   
+        self.name_last = last
         self.handle = handle
         self.user_id = ''
         self.token = '' # login token
@@ -16,7 +16,7 @@ class user():
         self.in_channel = []    # list of channels the user is in
 
 class channel():
-    def __init__(self, name, is_public, channel_id): 
+    def __init__(self, name, is_public, channel_id, standup_time):
         self.owners = []    # list of users
         self.admins = []    # list of users admins cant change owner permissions
         self.members = []   # list of users
@@ -24,6 +24,11 @@ class channel():
         self.messages = []  # list of messages
         self.is_public = is_public # public status
         self.channel_id = channel_id
+        self.is_standup = False # standup flag
+        self.standup_time = standup_time # standup_time start - any variable can be passed in as long as is_standup is False
+
+    def get_standup_time(self, time):
+        return self.standup_time = standup_time
 
 class mesg:
     def __init__(self, sender, create_time, message, is_later):
@@ -60,6 +65,3 @@ class reacts():
     def __init__(self, reacter, react_type):
         self.reacter = reacter    # type user
         self.react = react_type # type of reaction (string)
-
-
-
