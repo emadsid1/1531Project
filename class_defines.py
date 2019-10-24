@@ -16,7 +16,7 @@ class user():
         self.in_channel = []    # list of channels the user is in
 
 class channel():
-    def __init__(self, name, is_public, channel_id, owners): 
+    def __init__(self, name, is_public, channel_id): 
         self.owners = []    # list of users
         self.admins = []    # list of users admins cant change owner permissions
         self.members = []   # list of users
