@@ -116,7 +116,6 @@ def standup_start():
     token = request.form.get("token") #assume token is valid
     channel = request.form.get("channel_id")
     valid = False
-    in_channel = False
     ch_counter = 0
     for ch in data["channels"]:
         if channel == ch.channel_id:
@@ -126,19 +125,7 @@ def standup_start():
     if valid == False:
         raise Exception("ValueError") # channel does not exist
 
-    for acc in data["channels"][ch_counter].owners: # search owners list
-        if token == acc.token:
-            in_channel = True
-    if in_channel == False:
-        for acc in data["channels"][ch_counter].admins: # search admins list
-            if token == acc.token:
-                in_channel = True
-    if in_channel == False:
-        for acc in data["channels"][ch_counter].members: # search members list
-            if token == acc.token:
-                in_channel = True
-    if in_channel == False: # if the user is not in the channel, raise an error
-        raise Exception("AccessError") # need to write this function
+    check_in_channel(token, ch_counter)
 
     data["channels"][ch_counter].is_standup = True
     data["channels"][ch_counter].standup_time = datetime.now()
@@ -151,7 +138,6 @@ def standup_send():
     token = request.form.get("token") # assume token is valid
     channel = request.form.get("channel_id")
     valid = False
-    in_channel = False
     ch_counter = 0
     for ch in data["channels"]:
         if channel == ch.channel_id:
@@ -167,19 +153,7 @@ def standup_send():
     if len(message) > 1000:
         raise Exception("ValueError") # message too long
 
-    for acc in data["channels"][ch_counter].owners: # search owners list
-        if token == acc.token:
-            in_channel = True
-    if in_channel == False:
-        for acc in data["channels"][ch_counter].admins: # search admins list
-            if token == acc.token:
-                in_channel = True
-    if in_channel == False:
-        for acc in data["channels"][ch_counter].members: # search members list
-            if token == acc.token:
-                in_channel = True
-    if in_channel == False: # if the user is not in the channel, raise an error
-        raise Exception("AccessError") # need to write this function
+    check_in_channel(token, ch_counter)
 
     # TODO: how to check if standup has finished?
     data["channels"][ch_counter].standup_messages.append(message)
@@ -230,6 +204,22 @@ def check_email(email):
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
     if(not(re.search(regex,email))):    # if not valid email
         raise Exception('ValueError')
+
+def check_in_channel(token, channel_index):
+    in_channel = False
+    for acc in data["channels"][channel_index].owners: # search owners list
+        if token == acc.token:
+            in_channel = True
+    if in_channel == False:
+        for acc in data["channels"][channel_index].admins: # search admins list
+            if token == acc.token:
+                in_channel = True
+    if in_channel == False:
+        for acc in data["channels"][channel_index].members: # search members list
+            if token == acc.token:
+                in_channel = True
+    if in_channel == False: # if the user is not in the channel, raise an error
+        raise Exception("AccessError") # TODO: need to write this function
 
 if __name__ == '__main__':
     app.run(debug=True)
