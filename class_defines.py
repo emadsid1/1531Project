@@ -11,10 +11,10 @@ class user():
         self.name_last = last
         self.handle = handle
         self.user_id = ''
-        self.token = '' # login token
+        self.token = token # login token
         self.prof_pic = ''  # URL to pic
         self.in_channel = []    # list of channels the user is in
-        self.permission_id = perm_id # user's permission id
+        self.permission_id = perm_id # user's permission id TODO NEED TO CHANGE
 
 class channel():
     def __init__(self, name, is_public, channel_id, standup_time):
