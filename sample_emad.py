@@ -146,6 +146,8 @@ def channel_add_owner():
     return dumps({
     })
 
+    
+
 @app.route('/channel/removeowner', methods = ['POST'])
 def channel_remove_owner():
     global data
