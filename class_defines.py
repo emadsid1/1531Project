@@ -39,6 +39,7 @@ class mesg:
         self.sender = sender    # type user
         self.create_time = create_time  # date_time (depends on is_later)
         self.reaction = []    # facebooks reacts similar list of
+        self.reacted_user = []  # list of users that has reacted to this message
         self.is_pinned = False    # pin flag
         self.is_later = is_later    # when to send message
         self.is_unread = True      # read or not
@@ -68,3 +69,4 @@ class reacts():
     def __init__(self, reacter, react_type):
         self.reacter = reacter    # type user
         self.react = react_type # type of reaction (string)
+        self.react_id = ''
