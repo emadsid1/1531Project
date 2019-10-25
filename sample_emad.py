@@ -1,12 +1,29 @@
 from flask import Flask, request, flash
 from datetime import datetime
 from json import dumps
-from class_defines import data, channel
+from class_defines import data, channel, user
 from Error import AccessError
 from sample_ben import check_in_channel
 
 app = Flask(__name__)
 #channel invite vs join, invite needed to join a private channel. passive v active.
+
+# given a token, returns acc with that token
+def user_from_token(token):
+    global data
+    for acc in data['accounts']:
+        #print(acc)
+        if acc.token == token:
+            return acc
+    raise AccessError('token does not exist for any user')
+
+# given u_id, returns acc with that u_id
+def user_from_uid(u_id):
+    global data
+    for acc in enumerate(data['accounts']):
+        if int(acc.user_id) == int(u_id):
+            return acc
+    raise AccessError('u_id does not exist for any user')
 
 def max_20_characters(name):
     if len(name) <= 20:
@@ -38,7 +55,7 @@ def channel_create():
         index = channel_index(channel_id)
         data['channels'][index].owners = [token]
         data['channels'][index].members = [token]
-        print(type(channel_id))
+
         # add channel to user's list of channels 
     
     return dumps({
@@ -75,12 +92,23 @@ def channel_join():
     index = channel_index(channel_id)
 
     # raise AccessError if channel is Private & authorised user is not an admin
-    if data['channels'][index].is_public == True:
+    if data['channels'][index].is_public == False:
         # check if authorised user is an admin
+        valid = 0
+        for admin_acc in data['channels'][index].admins: 
+            if admin_acc.token == token:
+                valid = 1
+        if valid == 0:
+            raise AccessError('authorised user is not an admin of private channel')
 
-    #TODO: find way to get u_id from token, write a function that when given a token, it returns u_id
-    u_id = token
-    data['channels'][index].members.append(u_id)
+    # testing set up
+    #data['accounts'].append(user('email', 'pass', 'first', 'last', 'handle', token, 'perm id'))
+    # testing set up
+
+    acct = user_from_token(token)
+    data['channels'][index].members.append(acct)
+
+    #print(data['channels'][index].members[1].token) #returns token of 2nd member (1st member is one who created channel)
 
     return dumps({
     })
@@ -88,6 +116,20 @@ def channel_join():
 @app.route('/channel/leave', methods = ['POST'])
 def channel_leave():
     global data
+    token = request.form.get('token')
+    channel_id = int(request.form.get('channel_id'))
+
+    # raise ValueError if channel_id doesn't exist (channel_index)
+    index = channel_index(channel_id)
+
+    acct = user_from_token(token)
+    data['channels'][index].members.pop(acct)
+
+    if acct in data['channels'][index].owners:
+        data['channels'][index].owners.pop(acct)
+    if acct in data['channels'][index].admins:
+        data['channels'][index].admins.pop(acct)
+
     return dumps({
     })
 
