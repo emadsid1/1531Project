@@ -41,7 +41,7 @@ class mesg:
         self.reaction = []    # facebooks reacts similar list of
         self.is_pinned = False    # pin flag
         self.is_later = is_later    # when to send message
-        self.is_unread = False      # read or not
+        self.is_unread = True      # read or not
 
     def get_mesg():
         return self.message
