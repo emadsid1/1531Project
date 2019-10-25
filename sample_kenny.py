@@ -18,6 +18,8 @@ def echo_get():
 @app.route('/message/sendlater', methods=['POST'])
 def send_later():
     global data
+    valid_send = False  # check if the user can actually send the message
+    valid_account = False   # check if the sender is in the account list
     sender = request.form.get('user')
     time_to_send = request.form.get('time to send')
     msg = request.form.get('message')
@@ -26,7 +28,6 @@ def send_later():
 @app.route('/message/send', methods=['POST'])
 def mesg_send():
     global data
-    # counter = 0
     valid_send = False  # check if the user can actually send the message
     valid_account = False   # check if the sender is in the account list
     sending_time = datetime.now()
