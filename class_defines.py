@@ -39,8 +39,9 @@ class mesg:
         self.sender = sender    # type user
         self.create_time = create_time  # date_time (depends on is_later)
         self.reaction = []    # facebooks reacts similar list of
-        self.pin = False    # pin flag
+        self.is_pinned = False    # pin flag
         self.is_later = is_later    # when to send message
+        self.is_unread = False      # read or not
 
     def get_mesg():
         return self.message
