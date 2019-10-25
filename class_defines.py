@@ -3,8 +3,10 @@ data = {
     'channels': []
 }
 
+account_count = 0
+
 class user():
-    def __init__(self, email, password, first, last, handle, token, perm_id):
+    def __init__(self, email, password, first, last, handle, token):
         self.email = email
         self.password = password
         self.name_first = first
@@ -14,7 +16,7 @@ class user():
         self.token = token # login token
         self.prof_pic = ''  # URL to pic
         self.in_channel = []    # list of channels the user is in
-        self.permission_id = perm_id # user's permission id TODO NEED TO CHANGE
+        self.reset_code = ''
 
 class channel():
     def __init__(self, name, is_public, channel_id, standup_time):
