@@ -23,7 +23,7 @@ class channel():
         self.owners = []    # list of users
         self.admins = []    # list of users admins cant change owner permissions
         self.members = []   # list of users
-        self.name = ''  # name of channel
+        self.name = name  # name of channel
         self.messages = []  # list of messages
         self.is_public = is_public # public status
         self.channel_id = channel_id
