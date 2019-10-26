@@ -54,7 +54,7 @@ def channel_create():
     if max_20_characters(name) == False:
         raise ValueError('name is more than 20 characters')
     else: 
-        channel_id = hash(name)  #assume channel_id is hash of name
+        channel_id = int(uuid.uuid4())
         data['channels'].append(channel(name, is_public, channel_id, False))
         index = channel_index(channel_id)
         data['channels'][index].owners.append(user_from_token(token))
