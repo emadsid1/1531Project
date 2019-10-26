@@ -53,9 +53,9 @@ def channel_create():
         channel_id = hash(name)  #assume channel_id is hash of name
         data['channels'].append(channel(name, is_public, channel_id, False))
         index = channel_index(channel_id)
-        data['channels'][index].owners = [token]
-        data['channels'][index].members = [token]
-
+        data['channels'][index].owners.append(user_from_token(token))
+        data['channels'][index].members.append(user_from_token(token))
+        
         # add channel to user's list of channels 
     
     return dumps({
@@ -68,7 +68,7 @@ def channel_invite():
     global data
     token = request.form.get('token')
     channel_id = int(request.form.get('channel_id'))
-    u_id = request.form.get('u_id')
+    u_id = int(request.form.get('u_id'))
 
     # raise AccessError if authorised user not in channel (check_in_channel)
     # raise ValueError if channel_id doesn't exist (channel_index)
@@ -100,10 +100,6 @@ def channel_join():
                 valid = 1
         if valid == 0:
             raise AccessError('authorised user is not an admin of private channel')
-
-    # testing set up
-    #data['accounts'].append(user('email', 'pass', 'first', 'last', 'handle', token, 'perm id'))
-    # testing set up
 
     acct = user_from_token(token)
     data['channels'][index].members.append(acct)
@@ -137,24 +133,46 @@ def channel_leave():
 def channel_add_owner():
     global data
     token = request.form.get('token')
-    channel_id = request.form.get('channel_id')
-    u_id = request.form.get('u_id')
+    channel_id = int(request.form.get('channel_id'))
+    u_id = int(request.form.get('u_id'))
 
+    # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
-    data['channels'][index].owners.append(u_id)
+
+    # check if user with u_id is already owner 
+    if user_from_uid(u_id) in data['channels'][index].owners:
+        raise ValueError('User with u_id is already an owner')
+
+    # check if authorised user is an owner of this channel
+    if user_from_token(token) not in data['channels'][index].owners:
+        raise AccessError('Authorised user not an owner of this channel')
+    
+    acct = user_from_uid(u_id)
+    data['channels'][index].owners.append(acct)
 
     return dumps({
     })
-
-    
 
 @app.route('/channel/removeowner', methods = ['POST'])
 def channel_remove_owner():
     global data
     token = request.form.get('token')
-    channel_id = request.form.get('channel_id')
-    u_id = request.form.get('u_id')
+    channel_id = int(request.form.get('channel_id'))
+    u_id = int(request.form.get('u_id'))
 
+    # raise ValueError if channel_id doesn't exist (channel_index)
+    index = channel_index(channel_id)
+
+    # raise ValueError if u_id is not an owner
+    if user_from_uid(u_id) not in data['channels'][index].owners:
+        raise ValueError('u_id is not an owner of the channel')
+
+    # raise AccessError if token is not an owner of this channel
+    if user_from_token(token) not in data['channels'][index].owners:
+        raise AccessError('authorised user is not an owner of this channel')
+    
+    acct = user_from_uid(u_id)
+    data['channels'][index].owners.pop(acct)
 
     return dumps({
     })
@@ -162,6 +180,50 @@ def channel_remove_owner():
 @app.route('/channel/details', methods = ['GET'])
 def channel_details():
     global data
+    token = request.args.get('token')
+    channel_id = int(request.args.get('channel_id'))
+
+    # raise ValueError if channel_id doesn't exist (channel_index)
+    index = channel_index(channel_id)
+
+    # raise AccessError if authorised user isn't in channel
+    if user_from_token(token) not in data['channels'][index].members or user_from_token(token) not in data['channels'][index].owners or user_from_token(token) not in data['channels'][index].admins:
+        raise AccessError('authorised user is not in channel')
+
+    name = data['channels'][index].name
+    owner_members = data['channels'][index].owners
+    all_members = data['channels'][index].members
+
+    return dumps({
+        'name': channel_name,
+        'owners': owner_members,
+        'members': all_members
+    })
+
+@app.route('/channel/list', methods = ['GET'])
+def channel_list():
+    global data
+    token = request.args.get('token')
+
+    # testing set up
+    #data['channels'][0].members.append(user_from_token(token))
+    # testing set up
+
+    channel_list = []
+    for channel in data['channels']:
+        for acct in channel.members:
+            if acct.token == token:
+                channel_list.append(channel.name)
+
+    return dumps({
+        'channels': channel_list
+    })
+
+@app.route('/channel/listall', methods = ['GET'])
+def channel_listall():
+    global data
+
+
     return dumps({
     })
 
@@ -170,19 +232,6 @@ def channel_messages():
     global data
     return dumps({
     })
-
-@app.route('/channel/list', methods = ['GET'])
-def channel_list():
-    global data
-    return dumps({
-    })
-
-@app.route('/channel/listall', methods = ['GET'])
-def channel_listall():
-    global data
-    return dumps({
-    })
-
 
 if __name__ == '__main__':
     app.run(port = 5022, debug=True)
