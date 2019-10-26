@@ -40,20 +40,12 @@ class mesg:
         self.message_id = message_id    # string of a unique id
         self.sender = sender    # type user
         self.create_time = create_time  # date_time (depends on is_later)
+        self.in_channel = ''    # channel id of which the message is blong to
         self.reaction = []    # facebooks reacts similar list of
-        self.reacted_user = []  # list of users that has reacted to this message
+        self.reacted_user = []  # list of user ids that has reacted to this message
         self.is_pinned = False    # pin flag
         self.is_later = is_later    # when to send message
         self.is_unread = True      # read or not
-
-    def get_mesg():
-        return self.message
-
-    def get_sender():
-        return self.sender
-
-    def get_mesg_time():
-        return self.create_time
 
     def set_reaction(self, reaction):
         self.reaction = reaction
