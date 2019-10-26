@@ -246,10 +246,38 @@ def channel_messages():
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
 
-    no_messages = 0
+    # raise AccessError if authorised user isn't in channel
+    if user_from_token(token) not in data['channels'][index].members or user_from_token(token) not in data['channels'][index].owners or user_from_token(token) not in data['channels'][index].admins:
+        raise AccessError('authorised user is not in channel')
+
+    # raise ValueError if start is greater than no. of total messages
+    no_total_messages = len(data['channels'][index].messages)
+    if start > no_total_messages:
+        raise ValueError('start is greater than no. of total messages')
     
+    messages = []
+    i = start
+    for i in data['channels'][index].messages[i]:
+        message = {}
+        message['message_id'] = data['channels'][index].messages[i].message_id
+        message['u_id'] = data['channels'][index].messages[i].sender
+        message['message'] = data['channels'][index].messages[i].message
+        message['time_created'] = data['channels'][index].messages[i].create_time
+        message['reacts'] = data['channels'][index].messages[i].reaction
+        message['is_pinned'] = data['channels'][index].messages[i].is_pinned
+
+        messages.append(message)
+        if i == (start + 50):
+            end = i
+            break
+        if i == no_total_messages:
+            end = -1
+            break
     
     return dumps({
+        'messages': messages,
+        'start': start,
+        'end': end
     })
 
 if __name__ == '__main__':
