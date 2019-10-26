@@ -47,6 +47,10 @@ def channel_create():
     name = request.form.get('name')
     is_public = request.form.get('is_public') 
 
+    #TESTING
+    #data['accounts'].append(user('email', 'password', 'first', 'last', 'handle', token))
+    #TESTING
+
     if max_20_characters(name) == False:
         raise ValueError('name is more than 20 characters')
     else: 
@@ -55,7 +59,7 @@ def channel_create():
         index = channel_index(channel_id)
         data['channels'][index].owners.append(user_from_token(token))
         data['channels'][index].members.append(user_from_token(token))
-        
+
         # add channel to user's list of channels 
     
     return dumps({
@@ -222,14 +226,29 @@ def channel_list():
 @app.route('/channel/listall', methods = ['GET'])
 def channel_listall():
     global data
+    token = request.args.get('token')
 
+    channel_list = []
+    for channel in data['channels']:
+        channel_list.append('Name: '+channel.name +' Public? '+ channel.is_public)
 
     return dumps({
+        'channels': channel_list
     })
 
 @app.route('/channel/messages', methods = ['GET'])
 def channel_messages():
     global data
+    token = request.args.get('token')
+    channel_id = int(request.args.get('channel_id'))
+    start = int(request.args.get('start'))
+
+    # raise ValueError if channel_id doesn't exist (channel_index)
+    index = channel_index(channel_id)
+
+    no_messages = 0
+    
+    
     return dumps({
     })
 
