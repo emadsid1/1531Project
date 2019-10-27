@@ -68,7 +68,6 @@ def echo_get():
 @app.route('/message/sendlater', methods=['POST'])
 def send_later():
     global data
-
     # TESTING
     # user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
     # channel1 = channel('kenny channel', True, 123456, 15)
@@ -79,7 +78,6 @@ def send_later():
     # data['channels'][0].members.append(user1.u_id)
     # data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
     # TESTING
-
     token = request.form.get('token')
     msg = request.form.get('message')
     chan_id = int(request.form.get('channel_id'))

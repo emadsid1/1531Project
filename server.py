@@ -503,7 +503,7 @@ def send_later():
             raise AccessError('You have not joined this channel yet, join first!')
         # generate a globally unique id
         msg_id = int(uuid4())
-        while 1:                                    # TODO not sure if this is right
+        while 1:
             if datetime.now() == dt_sent:
                 break
         # time sent reached and no exceptions raised, send the message
