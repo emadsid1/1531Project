@@ -48,7 +48,6 @@ class mesg:
         self.is_unread = True           # read or not
 
 class reacts():
-    def __init__(self, reacter, react_type, react_id):
+    def __init__(self, reacter, react_id):
         self.reacter = reacter          # type user
-        self.react_type = react_type    # reaction types
         self.react_id = react_id        # react id of the reaction (for iteration 2 this is 1)
