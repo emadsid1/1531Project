@@ -28,9 +28,17 @@ efficiently.
 and organize Slackr application better.
 
 ## Epic 3 Assurances
+This was tested by creating a channel and two different users. The first user sent a message, and the second user pinned, reacted, edited, search for, and finally removed the message. This was tested in the Postman API.
 * As a member of a channel in Slackr, I would like to be able to send messages, so that people in the channel can communicate with each other by sending messages.
 * As a member of a channel in Slackr, I would like to be able to pin and unpin a message, so that I can mark the messages that I’m interested or I think it’s important, and also that I can unpin it when I don’t need the message anymore.
 * As a member of a channel of Slackr, I would like to be able to react and unreact to messages, so that I can express my emotion and opinion on a certain message faster and more straight forward, and if I don’t want my emotions and opinions to be seen, I can unreact the message I reacted to.
+* As a member of a channel of Slack, I would like to be able to edit a message, so that when I said something wrong I can still change the message even after it’s been sent already.
+*  As a member of a channel of Slack, I would like to be able to remove a message, so that when I don’t want the message I sent to be seen anymore, I can delete it at any time I want.
+* As a member of a channel of Slack, I would like to be able to search for messages based on key words, so that I can access old content
+efficiently.
+
+The standup was tested in that created channel by first calling it, and then by sending a message. Likewise, this was tested in the Postman API.
+* As a member of a channel of Slack, I would like to be able to begin a “stand up”, so that I can perform Agile stand-up method better in a group meeting, which means everyone in the group can get together talk for 15 minutes and make sure everyone knows what’s been done since the last meeting and what’s everyone’s plan before the next meeting.
 
 ## Epic 4 Assurances
 
