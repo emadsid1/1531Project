@@ -13,8 +13,8 @@ class user():
         self.name_last = last
         self.handle = handle
         self.u_id = user_id
-        self.token = token # login token
-        self.prof_pic = ''  # URL to pic
+        self.token = token      # login token
+        self.prof_pic = ''      # URL to pic
         self.in_channel = []    # list of channels the user is in
         self.reset_code = ''
 
@@ -48,7 +48,6 @@ class mesg:
         self.is_unread = True           # read or not
 
 class reacts():
-    def __init__(self, reacter, react_type, react_id):
+    def __init__(self, reacter, react_id):
         self.reacter = reacter          # type user
-        self.react_type = react_type    # reaction types
         self.react_id = react_id        # react id of the reaction (for iteration 2 this is 1)
