@@ -20,35 +20,35 @@ class user():
 
 class channel():
     def __init__(self, name, is_public, channel_id, standup_time):
-        self.owners = []    # list of users
-        self.admins = []    # list of users admins cant change owner permissions
-        self.members = []   # list of users
-        self.name = name  # name of channel
-        self.messages = []  # list of messages
-        self.is_public = is_public # public status
+        self.owners = []                    # list of users
+        self.admins = []                    # list of users admins cant change owner permissions
+        self.members = []                   # list of users
+        self.name = name                    # name of channel
+        self.messages = []                  # list of messages
+        self.is_public = is_public          # public status
         self.channel_id = channel_id
-        self.is_standup = False # standup flag
-        self.standup_time = standup_time # standup_time start - any variable can be passed in as long as is_standup is False
-        self.standup_messages = [] # list of standup messages - cleared after every standup
+        self.is_standup = False             # standup flag
+        self.standup_time = standup_time    # standup_time start - any variable can be passed in as long as is_standup is False
+        self.standup_messages = []          # list of standup messages - cleared after every standup
 
     def get_standup_time():
         return self.standup_time
 
 class mesg:
     def __init__(self, sender, create_time, message, message_id, channel_id, is_later):
-        self.message = message  # string
+        self.message = message          # string
         self.message_id = message_id    # string of a unique id
-        self.sender = sender    # type user
+        self.sender = sender            # type user
         self.create_time = create_time  # date_time (depends on is_later)
         self.in_channel = channel_id    # channel id of which the message is blong to
-        self.reaction = []    # facebooks reacts similar list of
-        self.reacted_user = []  # list of user ids that has reacted to this message
-        self.is_pinned = False    # pin flag
-        self.is_later = is_later    # when to send message
-        self.is_unread = True      # read or not
+        self.reaction = None            # active reaction
+        self.reacted_user = []          # list of user ids that has reacted to this message
+        self.is_pinned = False          # pin flag
+        self.is_later = is_later        # when to send message
+        self.is_unread = True           # read or not
 
 class reacts():
-    def __init__(self, reacter, react_type):
-        self.reacter = reacter    # type user
-        self.react = react_type # type of reaction (string)
-        self.react_id = ''
+    def __init__(self, reacter, react_type, react_id):
+        self.reacter = reacter          # type user
+        self.react_type = react_type    # reaction types
+        self.react_id = react_id        # react id of the reaction (for iteration 2 this is 1)
