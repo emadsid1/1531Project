@@ -47,18 +47,6 @@ class mesg:
         self.is_later = is_later    # when to send message
         self.is_unread = True      # read or not
 
-    def set_reaction(self, reaction):
-        self.reaction = reaction
-
-    def remove_reaction(self):
-        self.reaction = None
-
-    def pin_self(self):
-        self.pin = True
-
-    def unpin_self(self):
-        self.pin = False
-
 class reacts():
     def __init__(self, reacter, react_type):
         self.reacter = reacter    # type user
