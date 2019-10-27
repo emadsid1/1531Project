@@ -13,8 +13,8 @@ class user():
         self.name_last = last
         self.handle = handle
         self.u_id = user_id
-        self.token = token # login token
-        self.prof_pic = ''  # URL to pic
+        self.token = token      # login token
+        self.prof_pic = ''      # URL to pic
         self.in_channel = []    # list of channels the user is in
         self.reset_code = ''
 
