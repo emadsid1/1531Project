@@ -1,10 +1,16 @@
-"""Flask server from M13A-SNAKE"""
 from json import dumps
 from flask import Flask, request
-from class_defines import data, user, channel, mesg, reacts
+from class_defines import user, channel, mesg, reacts #data
 from datetime import datetime, timedelta
 from Error import AccessError
 import re
+
+nom = user("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
+ben = user("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
+
+data = {
+    "accounts": [nom, ben]
+}
 
 app = Flask(__name__)
 
@@ -31,39 +37,44 @@ def user_profile():
     user = {}
     for acc in data["accounts"]:
         if token == acc.token: # note: assumes token is valid
-            if request.args.get("u_id") == acc.user_id:
-                valid = True
+            valid = True
+            if int(request.args.get("u_id")) == acc.u_id:
+                user["email"] = acc.email
+                user["name_first"] = acc.name_first
+                user["name_last"] = acc.name_last
+                user["handle_str"] = acc.handle
             else:
-                raise Exception("ValueError")
-    if valid == True:
-        user["email"] = acc.email
-        user["name_first"] == acc.name_first
-        user["name_last"] == acc.name_last
-        user["handle_str"] == acc.handle
+                raise Exception("ValueError") # wrong u_id
+    if valid == False:
+        raise Exception("ValueError") # invalid token
     return dumps({
     "email": user["email"],
     "name_first": user["name_first"],
     "name_last": user["name_last"],
     "handle_str": user["handle_str"]
+    # "dataToken": data["accounts"][0].token,
+    # "token": token
     })
 
 @app.route('/user/profile/setname', methods=['PUT'])
 def user_profile_setname():
     global data
-    token = request.form.get("token") #assume token is valid
+    token = str(request.form.get("token")) #assume token is valid
 
-    name_first = request.form.get("name_first")
+    name_first = str(request.form.get("name_first"))
     if not(len(name_first) >= 1 and len(name_first) <= 50):
         raise Exception("ValueError")
 
-    name_last = request.form.get("name_last")
+    name_last = str(request.form.get("name_last"))
     if not(len(name_last) >= 1 and len(name_last) <= 50):
         raise Exception("ValueError")
 
     for acc in data["accounts"]:
         if token == acc.token:
-            acc.name_first == name_first
-            acc.name_last == name_last
+            acc.name_first = name_first
+            acc.name_last = name_last
+        else:
+            raise Exception("ValueError") # invalid token
 
     return dumps({})
 
@@ -74,31 +85,41 @@ def user_profile_email():
     token = request.form.get("token") # assume token is valid
     email = request.form.get("email")
     check_email(email)
-    number = None
+    counter = 0
+    found = False
     for acc in data["accounts"]:
         if token == acc.token:
-            number = acc
+            found = True
         if email == acc.email:
-            raise Exception("ValueError")
-    if number is not None:
-        data["accounts"][number].email = email
+            raise Exception("ValueError") # email already being used
+        if found is False:
+            counter += 1
+    if found is not False:
+        data["accounts"][counter].email = email
+    else:
+        raise Exception("ValueError") # token is invalid
     return dumps({})
 
 @app.route('/user/profile/sethandle', methods=['PUT'])
 def user_profile_sethandle():
     global data
     token = request.form.get("token") # assume token is valid
-    handle = request.form.get("handle_str")
+    handle = str(request.form.get("handle_str"))
     if len(handle) < 3 or len(handle) > 20:
-        raise Exception("ValueError")
-    number = None
+        raise Exception("ValueError") # handle has incorrect number of chars
+    counter = 0
+    found = False
     for acc in data["accounts"]:
         if token == acc.token:
-            number = acc
+            found = True
         if handle == acc.handle:
-            raise Exception("ValueError")
-    if number is not None:
-        data["accounts"][number].handle = handle
+            raise Exception("ValueError") # handle already being used
+        if found is False:
+            counter += 1
+    if found is not False:
+        data["accounts"][counter].handle = handle
+    else:
+        raise Exception("ValueError") #token is invalid
     return dumps({})
 
 @app.route('/user/profiles/uploadphoto', methods=['POST'])
