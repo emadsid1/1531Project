@@ -1,15 +1,17 @@
 from json import dumps
 from flask import Flask, request
 from class_defines import user, channel, mesg, reacts #data
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from Error import AccessError
 import re
 
 nom = user("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
 ben = user("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
+chan1 = channel("chatime", True, 1, 5)
 
 data = {
-    "accounts": [nom, ben]
+    "accounts": [nom, ben],
+    "channels": [chan1]
 }
 
 app = Flask(__name__)
@@ -135,29 +137,34 @@ def user_profile_uploadphoto():
 @app.route('/standup/start', methods=['POST'])
 def standup_start():
     token = request.form.get("token") #assume token is valid
-    channel = request.form.get("channel_id")
+    channel = int(request.form.get("channel_id"))
     valid = False
     ch_counter = 0
     for ch in data["channels"]:
         if channel == ch.channel_id:
             valid = True
+            if ch.is_standup == True:
+                raise Exception("AccessError") # standup is already in progress
         elif valid == False:
             ch_counter += 1
     if valid == False:
         raise Exception("ValueError") # channel does not exist
 
-    check_in_channel(token, ch_counter)
+    #check_in_channel(token, ch_counter)
 
     data["channels"][ch_counter].is_standup = True
     data["channels"][ch_counter].standup_time = datetime.now()
-    standup_finish = data["channels"][ch_counter].standup_time + timedelta(minutes=15)
+    finish = data["channels"][ch_counter].standup_time + timedelta(minutes=15)
+    standup_finish = finish.replace(tzinfo=timezone.utc).timestamp()
 
-    return dumps({standup_finish})
+    return dumps({
+    "time_finish": standup_finish
+    })
 
 @app.route('/standup/send', methods=['POST'])
 def standup_send():
     token = request.form.get("token") # assume token is valid
-    channel = request.form.get("channel_id")
+    channel = int(request.form.get("channel_id"))
     valid = False
     ch_counter = 0
     for ch in data["channels"]:
@@ -174,11 +181,13 @@ def standup_send():
     if len(message) > 1000:
         raise Exception("ValueError") # message too long
 
-    check_in_channel(token, ch_counter)
+    #check_in_channel(token, ch_counter)
 
     # TODO: how to check if standup has finished?
     data["channels"][ch_counter].standup_messages.append(message)
-    return dumps({})
+    return dumps({
+    "message": data["channels"][ch_counter].standup_messages
+    })
 
 @app.route('/search', methods=['GET'])
 def search():
