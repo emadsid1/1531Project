@@ -1,11 +1,20 @@
 from flask import Flask, request
 from json import dumps
 from uuid import uuid4
+from flask_mail import Mail, Message
 from class_defines import data, user, channel, mesg, reacts, account_count
 import re
 import jwt
 
 app = Flask(__name__)
+
+app.config.update(
+    MAIL_SERVER='smtp.gmail.com',
+    MAIL_PORT=465,
+    MAIL_USE_SSL=True,
+    MAIL_USERNAME = 'snakeflask3@gmail.com',
+    MAIL_PASSWORD = "snake.flask123"
+)
 
 # Echo functions
 @app.route('/echo/post', methods = ['POST'])
@@ -100,9 +109,14 @@ def reset_request():
     email = request.form.get('email')
     for acc in data['accounts']:
         if acc.email == email:
-            # TODO SEND EMAIL
-            acc.reset_code = 'RESETCODE'
-            return dumps({})
+            mail = Mail(app)
+            resetcode = str(uuid4())
+            msg = Message("RESETCODE!",
+                sender="snakeflask3@gmail.com",
+                recipients=[email])
+            msg.body = "Please use this reset code to reset your password: " +'(' + resetcode + ')'
+            mail.send(msg)
+            acc.reset_code = resetcode
     return dumps({})
 
 @app.route('/auth/passwordreset/reset', methods = ['POST'])
@@ -118,8 +132,7 @@ def reset_reset():
                 return dumps({})
             else:
                 raise ValueError('password is too short (min length of 6)')
-    raise ValueError('reset code is invalid')
-    pass
+    raise ValueError('reset code is not valid')
 
 # Helpers
 def check_email(email):
@@ -130,5 +143,3 @@ def check_email(email):
 # Run flask
 if __name__ == '__main__':
     app.run(debug=True)
-
-# TODO email sending, check assumptions (when to login when to logout etc)
