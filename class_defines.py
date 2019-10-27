@@ -38,7 +38,7 @@ class mesg:
     def __init__(self, sender, create_time, message, message_id, channel_id, is_later):
         self.message = message          # string
         self.message_id = message_id    # string of a unique id
-        self.sender = sender            # type user
+        self.sender = sender            # type user_id
         self.create_time = create_time  # date_time (depends on is_later)
         self.in_channel = channel_id    # channel id of which the message is blong to
         self.reaction = None            # active reaction
