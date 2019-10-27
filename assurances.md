@@ -42,6 +42,4 @@ The standup was tested in that created channel by first calling it, and then by 
 
 ## Epic 4 Assurances
 
-These aspects were tested using both manual testing, trying all different aspects and trying to break the code ensuring for appropriate exceptions to be raised and by also considered branch coverage and linting.
-
-Users can then create channels that they are either a owner, admin or member of (providing different permissions). If a channel is public people can both join and be invited to, while if a channel is private, people can only be invited into one, and cannot join without and invite.
+Overall, these aspects were tested by using a mixture of Postman API and the test functions that we wrote for iteration 1. We ensured that every branch was covered in our testing, and that appropriate exceptions were raised when we tried to break our functions. Pylint was also used to ensure that all code was written in a good style.
