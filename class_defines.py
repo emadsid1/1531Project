@@ -41,7 +41,7 @@ class mesg:
         self.sender = sender            # type user
         self.create_time = create_time  # date_time (depends on is_later)
         self.in_channel = channel_id    # channel id of which the message is blong to
-        self.reaction = []              # facebooks reacts similar list of
+        self.reaction = None            # active reaction
         self.reacted_user = []          # list of user ids that has reacted to this message
         self.is_pinned = False          # pin flag
         self.is_later = is_later        # when to send message
@@ -49,5 +49,6 @@ class mesg:
 
 class reacts():
     def __init__(self, reacter, react_type, react_id):
-        self.reacter = reacter    # type user
-        self.react_id = react_id  # react id of the reaction (for iteration 2 this is 1)
+        self.reacter = reacter          # type user
+        self.react_type = react_type    # reaction types
+        self.react_id = react_id        # react id of the reaction (for iteration 2 this is 1)
