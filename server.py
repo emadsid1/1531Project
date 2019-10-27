@@ -4,6 +4,7 @@ import re
 import jwt
 from json import dumps
 from uuid import uuid4
+from flask_mail import Mail, Message
 from flask_cors import CORS
 from flask import Flask, request
 from datetime import datetime, timezone, timedelta
