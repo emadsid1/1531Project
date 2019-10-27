@@ -486,18 +486,6 @@ def channel_messages():
 @app.route('/message/sendlater', methods=['POST'])
 def send_later():
     global data
-
-    # TESTING
-    # user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
-    # channel1 = channel('kenny channel', True, 123456, 15)
-    # data['accounts'].append(user1)
-    # data['channels'].append(channel1)
-    # data['channels'][0].owners.append(user1.u_id)
-    # data['channels'][0].admins.append(user1.u_id)
-    # data['channels'][0].members.append(user1.u_id)
-    # data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
-    # TESTING
-
     token = request.form.get('token')
     msg = request.form.get('message')
     chan_id = int(request.form.get('channel_id'))
@@ -532,12 +520,6 @@ def send_later():
 @app.route('/message/send', methods=['POST'])
 def mesg_send():
     global data
-
-    # TESTING
-    # data['accounts'].append(user('email', 'password', 'first', 'last', 'handle', 'token', 12345))
-    # data['channels'].append(channel('kenny channel', True, 123456, 15))
-    # TESTING
-
     sending_time = datetime.now()
     token = request.form.get('token')
     msg = request.form.get('message')
@@ -558,18 +540,6 @@ def mesg_send():
 @app.route('/message/remove', methods=['DELETE'])    # TODO no channel id???????
 def mesg_remove():
     global data
-
-    # TESTING
-    # user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
-    # channel1 = channel('kenny channel', True, 123456, 15)
-    # data['accounts'].append(user1)
-    # data['channels'].append(channel1)
-    # data['channels'][0].owners.append(user1.u_id)
-    # data['channels'][0].admins.append(user1.u_id)
-    # data['channels'][0].members.append(user1.u_id)
-    # data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
-    # TESTING
-
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     remover = user_from_token(token)
@@ -589,18 +559,6 @@ def mesg_remove():
 @app.route('/message/edit', methods=['PUT'])
 def mesg_edit():
     global data
-
-    # TESTING
-    # user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
-    # channel1 = channel('kenny channel', True, 123456, 15)
-    # data['accounts'].append(user1)
-    # data['channels'].append(channel1)
-    # data['channels'][0].owners.append(user1.u_id)
-    # data['channels'][0].admins.append(user1.u_id)
-    # data['channels'][0].members.append(user1.u_id)
-    # data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
-    # TESTING
-
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     new_message = request.form.get('message')
@@ -622,18 +580,6 @@ def mesg_edit():
 @app.route('/message/react', methods=['POST'])
 def mesg_react():
     global data
-
-    # TESTING
-    # user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
-    # channel1 = channel('kenny channel', True, 123456, 15)
-    # data['accounts'].append(user1)
-    # data['channels'].append(channel1)
-    # data['channels'][0].owners.append(user1.u_id)
-    # data['channels'][0].admins.append(user1.u_id)
-    # data['channels'][0].members.append(user1.u_id)
-    # data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
-    # TESTING
-
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     react_id = int(request.form.get('react_id'))
@@ -652,18 +598,6 @@ def mesg_react():
 @app.route('/message/unreact', methods=['POST'])
 def mesg_unreact():
     global data
-
-    # TESTING
-    # user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
-    # channel1 = channel('kenny channel', True, 123456, 15)
-    # data['accounts'].append(user1)
-    # data['channels'].append(channel1)
-    # data['channels'][0].owners.append(user1.u_id)
-    # data['channels'][0].admins.append(user1.u_id)
-    # data['channels'][0].members.append(user1.u_id)
-    # data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
-    # TESTING
-
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     react_id = int(request.form.get('react_id'))
@@ -681,18 +615,6 @@ def mesg_unreact():
 @app.route('/message/pin', methods=['POST'])
 def mesg_pin():
     global data
-
-    # TESTING
-    # user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
-    # channel1 = channel('kenny channel', True, 123456, 15)
-    # data['accounts'].append(user1)
-    # data['channels'].append(channel1)
-    # data['channels'][0].owners.append(user1.u_id)
-    # data['channels'][0].admins.append(user1.u_id)
-    # data['channels'][0].members.append(user1.u_id)
-    # data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
-    # TESTING
-
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     pinner = user_from_token(token)
@@ -713,18 +635,6 @@ def mesg_pin():
 @app.route('/message/unpin', methods=['POST'])
 def mesg_unpin():
     global data
-
-    # TESTING
-    # user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
-    # channel1 = channel('kenny channel', True, 123456, 15)
-    # data['accounts'].append(user1)
-    # data['channels'].append(channel1)
-    # data['channels'][0].owners.append(user1.u_id)
-    # data['channels'][0].admins.append(user1.u_id)
-    # data['channels'][0].members.append(user1.u_id)
-    # data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
-    # TESTING
-
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     unpinner = user_from_token(token)
@@ -741,7 +651,6 @@ def mesg_unpin():
     return dumps({
 
     })
-
 
 @app.route('/user/profile', methods=['GET'])
 def user_profile():
