@@ -275,7 +275,7 @@ def message_send_test():
 
     # testing
     # raises AccessError if unauthorised user tries to send message
-    with pytest.raises(AccessError, ):
+    with pytest.raises(AccessError):
         message_send(token2, channelID, "This is from Ken")
     # raises ValueError if the message is more than 1000 characters but exact 1000 characters is fine
     with pytest.raises(ValueError):
