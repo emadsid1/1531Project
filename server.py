@@ -160,7 +160,7 @@ def auth_login():
         raise ValueError('email and/or password does not match any account')
     token = jwt.encode({'email': email}, password, algorithm = 'HS256')
     data['accounts'][i].token = token.decode('utf-8')
-    return dumps({'u_id': data['accounts'][i].user_id, 'token': token.decode('utf-8')})
+    return dumps({'u_id': data['accounts'][i].u_id, 'token': token.decode('utf-8')})
 
 @app.route('/auth/logout', methods = ['POST'])
 def auth_logout():
