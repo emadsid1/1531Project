@@ -1,5 +1,6 @@
 from flask import Flask, request
 from json import dumps
+from uuid import uuid4
 from class_defines import data, user, channel, mesg, reacts, account_count
 import re
 import jwt
@@ -34,7 +35,7 @@ def auth_login():
         raise ValueError('email and/or password does not match any account')
     token = jwt.encode({'email': email}, password, algorithm = 'HS256')
     data['accounts'][i].token = token.decode('utf-8')
-    return dumps({'u_id': 12345, 'token': token.decode('utf-8')})
+    return dumps({'u_id': data['accounts'][i].user_id, 'token': token.decode('utf-8')})
 
 @app.route('/auth/logout', methods = ['POST'])
 def auth_logout():
@@ -90,8 +91,9 @@ def auth_register():
         account_count += 1
     handle.lower()
     token = jwt.encode({'email': email}, password, algorithm = 'HS256')
-    data['accounts'].append(user(email, password, first, last, handle, token.decode('utf-8')))
-    return dumps({'token': token.decode('utf-8'), 'handle': handle})
+    user_id = str(uuid4())
+    data['accounts'].append(user(email, password, first, last, handle, token.decode('utf-8'), user_id))
+    return dumps({'u_id': user_id,'token': token.decode('utf-8')})
 
 @app.route('/auth/passwordreset/request', methods = ['POST'])
 def reset_request():

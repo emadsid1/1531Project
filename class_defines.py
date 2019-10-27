@@ -6,13 +6,13 @@ data = {
 account_count = 0
 
 class user():
-    def __init__(self, email, password, first, last, handle, token):
+    def __init__(self, email, password, first, last, handle, token, user_id):
         self.email = email
         self.password = password
         self.name_first = first
         self.name_last = last
         self.handle = handle
-        self.user_id = ''
+        self.u_id = user_id
         self.token = token # login token
         self.prof_pic = ''  # URL to pic
         self.in_channel = []    # list of channels the user is in
