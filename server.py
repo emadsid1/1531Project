@@ -4,6 +4,7 @@ import re
 import jwt
 from json import dumps
 from uuid import uuid4
+from flask_mail import Mail, Message
 from flask_cors import CORS
 from flask import Flask, request
 from datetime import datetime, timezone, timedelta
@@ -12,6 +13,13 @@ from class_defines import data, user, channel, mesg, reacts
 
 app = Flask(__name__)
 CORS(app)
+app.config.update(
+    MAIL_SERVER='smtp.gmail.com',
+    MAIL_PORT=465,
+    MAIL_USE_SSL=True,
+    MAIL_USERNAME = 'snakeflask3@gmail.com',
+    MAIL_PASSWORD = "snake.flask123"
+)
 
 # Helper functions
 # Helper from jeff's auth
@@ -152,7 +160,7 @@ def auth_login():
         raise ValueError('email and/or password does not match any account')
     token = jwt.encode({'email': email}, password, algorithm = 'HS256')
     data['accounts'][i].token = token.decode('utf-8')
-    return dumps({'u_id': data['accounts'][i].user_id, 'token': token.decode('utf-8')})
+    return dumps({'u_id': data['accounts'][i].u_id, 'token': token.decode('utf-8')})
 
 @app.route('/auth/logout', methods = ['POST'])
 def auth_logout():
@@ -217,9 +225,14 @@ def reset_request():
     email = request.form.get('email')
     for acc in data['accounts']:
         if acc.email == email:
-            # TODO SEND EMAIL
-            acc.reset_code = 'RESETCODE'
-            return dumps({})
+            mail = Mail(app)
+            resetcode = str(uuid4())
+            msg = Message("RESETCODE!",
+                sender="snakeflask3@gmail.com",
+                recipients=[email])
+            msg.body = "Please use this reset code to reset your password: " +'(' + resetcode + ')'
+            mail.send(msg)
+            acc.reset_code = resetcode
     return dumps({})
 
 @app.route('/auth/passwordreset/reset', methods = ['POST'])
@@ -235,8 +248,7 @@ def reset_reset():
                 return dumps({})
             else:
                 raise ValueError('password is too short (min length of 6)')
-    raise ValueError('reset code is invalid')
-    pass
+    raise ValueError('reset code is not valid')
 
 @app.route('/channel/create', methods = ['POST'])
 def channel_create():
