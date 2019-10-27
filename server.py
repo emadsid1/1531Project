@@ -41,7 +41,7 @@ def user_from_uid(u_id):
 
 def max_20_characters(name):
     if len(name) <= 20:
-        return True 
+        return True
     else:
         return False
 
@@ -248,7 +248,7 @@ def channel_create():
     global data
     token = request.form.get('token')
     name = request.form.get('name')
-    is_public = request.form.get('is_public') 
+    is_public = request.form.get('is_public')
 
     #TESTING
     #data['accounts'].append(user('email', 'password', 'first', 'last', 'handle', token))
@@ -256,15 +256,15 @@ def channel_create():
 
     if max_20_characters(name) == False:
         raise ValueError('name is more than 20 characters')
-    else: 
+    else:
         channel_id = int(uuid.uuid4())
         data['channels'].append(channel(name, is_public, channel_id, False))
         index = channel_index(channel_id)
         data['channels'][index].owners.append(user_from_token(token))
         data['channels'][index].members.append(user_from_token(token))
 
-        # add channel to user's list of channels 
-    
+        # add channel to user's list of channels
+
     return dumps({
         'channel_id' : channel_id
     })
@@ -302,7 +302,7 @@ def channel_join():
     if data['channels'][index].is_public == False:
         # check if authorised user is an admin
         valid = 0
-        for admin_acc in data['channels'][index].admins: 
+        for admin_acc in data['channels'][index].admins:
             if admin_acc.token == token:
                 valid = 1
         if valid == 0:
@@ -346,14 +346,14 @@ def channel_add_owner():
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
 
-    # check if user with u_id is already owner 
+    # check if user with u_id is already owner
     if user_from_uid(u_id) in data['channels'][index].owners:
         raise ValueError('User with u_id is already an owner')
 
     # check if authorised user is an owner of this channel
     if user_from_token(token) not in data['channels'][index].owners:
         raise AccessError('Authorised user not an owner of this channel')
-    
+
     acct = user_from_uid(u_id)
     data['channels'][index].owners.append(acct)
 
@@ -377,7 +377,7 @@ def channel_remove_owner():
     # raise AccessError if token is not an owner of this channel
     if user_from_token(token) not in data['channels'][index].owners:
         raise AccessError('authorised user is not an owner of this channel')
-    
+
     acct = user_from_uid(u_id)
     data['channels'][index].owners.pop(acct)
 
@@ -457,7 +457,7 @@ def channel_messages():
     no_total_messages = len(data['channels'][index].messages)
     if start > no_total_messages:
         raise ValueError('start is greater than no. of total messages')
-    
+
     messages = []
     i = start
     for i in data['channels'][index].messages[i]:
@@ -476,7 +476,7 @@ def channel_messages():
         if i == no_total_messages:
             end = -1
             break
-    
+
     return dumps({
         'messages': messages,
         'start': start,
@@ -526,9 +526,9 @@ def send_later():
         # time sent reached and no exceptions raised, send the message
         current_channel.messages.append(mesg(sender, sending_time, msg, msg_id, chan_id, True))
     return dumps({
-        'message_id': msg_id,    
+        'message_id': msg_id,
     })
-    
+
 @app.route('/message/send', methods=['POST'])
 def mesg_send():
     global data
@@ -616,9 +616,9 @@ def mesg_edit():
     # edit the message if no exceptions raiseds
     found_msg.message = new_message
     return dumps({
-        
+
     })
-    
+
 @app.route('/message/react', methods=['POST'])
 def mesg_react():
     global data
@@ -707,9 +707,9 @@ def mesg_pin():
     # pin the message if no exceptions raised
     found_msg.is_pinned = True
     return dumps({
-        
+
     })
-    
+
 @app.route('/message/unpin', methods=['POST'])
 def mesg_unpin():
     global data
@@ -739,7 +739,7 @@ def mesg_unpin():
     # unpin the message if no exceptions raised
     found_msg.is_pinned = False
     return dumps({
-        
+
     })
 
 
@@ -920,4 +920,4 @@ def admin_userpermission_change():
     return dumps({})
 
 if __name__ == '__main__':
-    APP.run(port=(sys.argv[1] if len(sys.argv) > 1 else 5000))
+    app.run(port=(sys.argv[1] if len(sys.argv) > 1 else 5000))
