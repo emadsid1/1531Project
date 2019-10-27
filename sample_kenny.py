@@ -88,13 +88,24 @@ def send_later():
     dt_sent = datetime.fromtimestamp(sent_stamp)
     if len(msg) > 1000:
         raise ValueError('Message is more than 1000 words!')
+    elif dt_sent < datetime.now():
+        raise ValueError('Time sent is a value in the past!')
     else:
         sender = user_from_token(token)
         current_channel = find_channel(chan_id)
+        # check if the sender has joined the channel
+        has_joined = False
+        for chan in sender.in_channel:
+            if find_channel(chan) == current_channel:
+                has_joined == True
+        if has_joined == False:
+            raise AccessError('You have not joined this channel yet, join first!')
+        # generate a globally unique id
         msg_id = int(uuid4())
         while 1:                                    # TODO not sure if this is right
             if datetime.now() == dt_sent:
                 break
+        # time sent reached and no exceptions raised, send the message
         current_channel.messages.append(mesg(sender, sending_time, msg, msg_id, chan_id, True))
     return dumps({
         'message_id': msg_id,    
@@ -243,6 +254,7 @@ def mesg_unreact():
         raise ValueError('Invalid React ID!')
     elif found_msg.reaction == None:
         raise ValueError('This message does not contain an active React!')
+    # unreact the message if no exceptions raised
     found_msg.reaction = None
     return dumps({
 
