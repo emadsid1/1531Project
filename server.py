@@ -250,7 +250,7 @@ def reset_reset():
                 raise ValueError('password is too short (min length of 6)')
     raise ValueError('reset code is not valid')
 
-@app.route('/channel/create', methods = ['POST'])
+@app.route('/channels/create', methods = ['POST'])
 def channel_create():
     global data
     token = request.form.get('token')
@@ -264,7 +264,7 @@ def channel_create():
     if max_20_characters(name) == False:
         raise ValueError('name is more than 20 characters')
     else:
-        channel_id = int(uuid.uuid4())
+        channel_id = int(uuid4())
         data['channels'].append(channel(name, is_public, channel_id, False))
         index = channel_index(channel_id)
         data['channels'][index].owners.append(user_from_token(token))
@@ -395,7 +395,7 @@ def channel_remove_owner():
 def channel_details():
     global data
     token = request.args.get('token')
-    channel_id = int(request.args.get('channel_id'))
+    channel_id = request.args.get('channel_id') # supposed to be an int
 
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
@@ -404,7 +404,7 @@ def channel_details():
     if user_from_token(token) not in data['channels'][index].members or user_from_token(token) not in data['channels'][index].owners or user_from_token(token) not in data['channels'][index].admins:
         raise AccessError('authorised user is not in channel')
 
-    name = data['channels'][index].name
+    channel_name = data['channels'][index].name
     owner_members = data['channels'][index].owners
     all_members = data['channels'][index].members
 
@@ -414,7 +414,7 @@ def channel_details():
         'members': all_members
     })
 
-@app.route('/channel/list', methods = ['GET'])
+@app.route('/channels/list', methods = ['GET'])
 def channel_list():
     global data
     token = request.args.get('token')
@@ -433,7 +433,7 @@ def channel_list():
         'channels': channel_list
     })
 
-@app.route('/channel/listall', methods = ['GET'])
+@app.route('/channels/listall', methods = ['GET'])
 def channel_listall():
     global data
     token = request.args.get('token')
@@ -668,7 +668,7 @@ def user_profile():
     for acc in data["accounts"]:
         if token == acc.token: # note: assumes token is valid
             valid = True
-            if int(request.args.get("u_id")) == acc.u_id:
+            if request.args.get("u_id") == acc.u_id: # supposed to be an int
                 user["email"] = acc.email
                 user["name_first"] = acc.name_first
                 user["name_last"] = acc.name_last

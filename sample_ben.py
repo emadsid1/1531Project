@@ -48,14 +48,12 @@ def user_profile():
             else:
                 raise Exception("ValueError") # wrong u_id
     if valid == False:
-        raise Exception("ValueError") # invalid token
+        raise Exception("AccessError") # invalid token
     return dumps({
     "email": user["email"],
     "name_first": user["name_first"],
     "name_last": user["name_last"],
     "handle_str": user["handle_str"]
-    # "dataToken": data["accounts"][0].token,
-    # "token": token
     })
 
 @app.route('/user/profile/setname', methods=['PUT'])
@@ -76,7 +74,7 @@ def user_profile_setname():
             acc.name_first = name_first
             acc.name_last = name_last
         else:
-            raise Exception("ValueError") # invalid token
+            raise Exception("AccessError") # invalid token
 
     return dumps({})
 
@@ -99,7 +97,7 @@ def user_profile_email():
     if found is not False:
         data["accounts"][counter].email = email
     else:
-        raise Exception("ValueError") # token is invalid
+        raise Exception("AccessError") # token is invalid
     return dumps({})
 
 @app.route('/user/profile/sethandle', methods=['PUT'])
@@ -121,7 +119,7 @@ def user_profile_sethandle():
     if found is not False:
         data["accounts"][counter].handle = handle
     else:
-        raise Exception("ValueError") #token is invalid
+        raise Exception("AccessError") #token is invalid
     return dumps({})
 
 @app.route('/user/profiles/uploadphoto', methods=['POST'])
@@ -150,7 +148,7 @@ def standup_start():
     if valid == False:
         raise Exception("ValueError") # channel does not exist
 
-    #check_in_channel(token, ch_counter)
+    check_in_channel(token, ch_counter)
 
     data["channels"][ch_counter].is_standup = True
     data["channels"][ch_counter].standup_time = datetime.now()
@@ -181,13 +179,11 @@ def standup_send():
     if len(message) > 1000:
         raise Exception("ValueError") # message too long
 
-    #check_in_channel(token, ch_counter)
+    check_in_channel(token, ch_counter)
 
     # TODO: how to check if standup has finished?
     data["channels"][ch_counter].standup_messages.append(message)
-    return dumps({
-    "message": data["channels"][ch_counter].standup_messages
-    })
+    return dumps({})
 
 @app.route('/search', methods=['GET'])
 def search():
@@ -213,20 +209,47 @@ def search():
 
 @app.route('/admin/userpermission/change', methods=['POST'])
 def admin_userpermission_change():
-    perm_id = request.form.get("permission_id")
+    perm_id = int(request.form.get("permission_id"))
     if perm_id < 1 or perm_id > 3:
         raise Exception("ValueError") # invalid perm_id
-    user_id = request.form.get("u_id")
+    user_id = int(request.form.get("u_id"))
     valid = False
+    has_permission = False
     token = request.form.get("token") # assume token is valid
-    for acc in data["accounts"]:
-        if token == acc.token:
-            if acc.permission_id == 3:
-                raise Exception("AccessError") # members do not have permission to change perm_id
-        if user_id == acc.user_id:
-            valid = True
+    for ch in data["channels"]:
+        for own in ch.owners:
+            if token == own.token:
+                has_permission = True
+            if user_id == acc.user_id:
+                valid = True
+                if perm_id != 1:
+                    remove(own)
+                    user = own
+        for ad in ch.admins:
+            if token == ad.token:
+                has_permission = True
+            if user_id == acc.user_id:
+                valid = True
+                if perm_id != 2:
+                    remove(acc)
+                    user = acc
+        for mem in ch.members:
+            if user_id == acc.user_id:
+                valid = True
+                if perm_id != 3:
+                    remove(mem)
+                    user = mem
+    if has_permission == False:
+        raise Exception("AccessError") # members cannot use this function
     if valid == False:
         raise Exception("ValueError") # user does not exist
+    for add in data["channels"]:
+        if perm_id == 1:
+            add.owners.append(user)
+        if perm_id == 2:
+            add.admins.append(user)
+        if perm_id == 3:
+            add.members.append(user)
     return dumps({})
 
 # Helper functions
