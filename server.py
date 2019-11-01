@@ -10,6 +10,7 @@ from flask import Flask, request
 from datetime import datetime, timezone, timedelta
 from Error import AccessError
 from class_defines import data, user, channel, mesg, reacts
+from auth_functions import *
 
 app = Flask(__name__)
 CORS(app)
@@ -145,33 +146,12 @@ def echo2():
     })
 
 @app.route('/auth/login', methods = ['POST'])
-def auth_login():
-    global data
-    valid = False
-    i = 0
-    email = request.form.get('email')
-    check_email(email)
-    password = request.form.get('password')
-    for counter, acc in enumerate(data['accounts']):
-        if acc.email == email and acc.password == password:
-                i = counter
-                valid = True
-    if (not(valid)):
-        raise ValueError('email and/or password does not match any account')
-    token = jwt.encode({'email': email}, password, algorithm = 'HS256')
-    data['accounts'][i].token = token.decode('utf-8')
-    return dumps({'u_id': data['accounts'][i].u_id, 'token': token.decode('utf-8')})
+def route_auth_login():
+    return auth_login()
 
 @app.route('/auth/logout', methods = ['POST'])
-def auth_logout():
-    token = request.form.get('token')
-    if token == '':
-        return dumps({'is_success': False})
-    for acc in data['accounts']:
-        if token == acc.token:
-            acc.token = ''
-            return dumps({'is_success': True})
-    return dumps({'is_success': False})
+def route_auth_logout():
+    return auth_logout()
 
 @app.route('/auth/register', methods = ['POST'])
 def auth_register():
