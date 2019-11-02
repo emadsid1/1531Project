@@ -17,7 +17,7 @@ class user():
         self.prof_pic = ''      # URL to pic
         self.in_channel = []    # list of channels the user is in
         self.reset_code = ''
-        self.is_slackr_owner
+        self.is_slackr_owner = False    # MAY NEED TO CHANGE
 
 class channel():
     def __init__(self, name, is_public, channel_id, standup_time):

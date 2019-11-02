@@ -1,13 +1,9 @@
-import sys
-import re
 import jwt
+import re
 from json import dumps
 from uuid import uuid4
-from flask_mail import Mail, Message
-from flask_cors import CORS
 from flask import Flask, request
-from datetime import datetime, timezone, timedelta
-from Error import AccessError
+from flask_mail import Mail, Message
 from class_defines import data, user, channel, mesg, reacts
 
 def auth_login():
@@ -79,11 +75,11 @@ def auth_register():
         account_count += 1
     handle.lower()
     token = jwt.encode({'email': email}, password, algorithm = 'HS256')
-    user_id = str(uuid4())
+    user_id = int(uuid4())
     data['accounts'].append(user(email, password, first, last, handle, token.decode('utf-8'), user_id))
     return dumps({'u_id': user_id,'token': token.decode('utf-8')})
 
-def reset_request():
+def reset_request(app):
     email = request.form.get('email')
     for acc in data['accounts']:
         if acc.email == email:

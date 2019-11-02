@@ -11,6 +11,7 @@ from datetime import datetime, timezone, timedelta
 from Error import AccessError
 from class_defines import data, user, channel, mesg, reacts
 from auth_functions import *
+from helper_functions import *
 
 app = Flask(__name__)
 CORS(app)
@@ -21,115 +22,6 @@ app.config.update(
     MAIL_USERNAME = 'snakeflask3@gmail.com',
     MAIL_PASSWORD = "snake.flask123"
 )
-
-# Helper functions
-# Helper from jeff's auth
-def check_email(email):
-    regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
-    if(not(re.search(regex,email))):    # if not valid email
-        raise ValueError('not a valid email')
-
-# Helpers from Emad's channel
-# channel invite vs join, invite needed to join a private channel. passive v active.
-# given a token, returns acc with that token
-def user_from_token(token):
-    global data
-    for acc in data['accounts']:
-        #print(acc)
-        if acc.token == token:
-            return acc
-    raise AccessError('token does not exist for any user')
-
-# given u_id, returns acc with that u_id
-def user_from_uid(u_id):
-    global data
-    for acc in enumerate(data['accounts']):
-        if int(acc.user_id) == int(u_id):
-            return acc
-    raise AccessError('u_id does not exist for any user')
-
-def max_20_characters(name):
-    if len(name) <= 20:
-        return True
-    else:
-        return False
-
-def channel_index(channel_id):
-    global data
-    index = 0
-    for i in data['channels']:
-        if i.channel_id == channel_id:
-            return index
-        index = index + 1
-    raise ValueError('channel does not exist')
-
-# Helpers from kenny's message
-# find the correct channel base on the channel_id
-def find_channel(chan_id):
-    global data
-    channel_found = False
-    for chan in data['channels']:
-        if chan.channel_id == chan_id:
-            channel_found = True
-            return chan
-    if channel_found == False:
-        raise AccessError('Channel does not exit, please join or create a channel first!')
-
-# find the correct message base on the message_id
-def find_msg(msg_id):
-    global data
-    message_found = False
-    for chan in data['channels']:
-        for msg in chan.messages:
-            if msg.message_id == msg_id:
-                message_found = True
-                return msg
-    if message_found == False:
-        raise ValueError('Message does not exists!')
-
-# check if a user is an owner of a given channel
-def check_owner(channel, u_id):
-    global data
-    for user_id in channel.owners:
-        if user_id == u_id:
-            return True
-    return False
-
-# check if a user is an admin of a given channel
-def check_admin(channel, u_id):
-    for user_id in channel.admins:
-        if user_id == u_id:
-            return True
-    return False
-
-# check if a user is an member of a given channel
-def check_member(channel, u_id):
-    for user_id in channel.members:
-        if user_id == u_id:
-            return True
-    return False
-
-# Helper from Ben's profile and standup
-def check_in_channel(token, channel_index):
-    in_channel = False
-    for acc in data["channels"][channel_index].owners: # search owners list
-        if token == acc.token:
-            in_channel = True
-    if in_channel == False:
-        for acc in data["channels"][channel_index].admins: # search admins list
-            if token == acc.token:
-                in_channel = True
-    if in_channel == False:
-        for acc in data["channels"][channel_index].members: # search members list
-            if token == acc.token:
-                in_channel = True
-    if in_channel == False: # if the user is not in the channel, raise an error
-        raise AccessError("You are currently not in this channel.") # TODO: need to write this function
-# End of helper functions
-
-# @app.route('/auth/register', methods=['POST'])
-# def echo4():
-#     pass
 
 @app.route('/echo/get', methods=['GET'])
 def echo1():
@@ -154,81 +46,16 @@ def route_auth_logout():
     return auth_logout()
 
 @app.route('/auth/register', methods = ['POST'])
-def auth_register():
-    global data
-    global account_count
-
-    email = request.form.get('email')
-    check_email(email)
-
-    password = request.form.get('password')
-    if (len(password) < 6): # if password is too short
-        raise ValueError('password is too short (min length of 6)')
-
-    first = request.form.get('name_first')
-    if (not(1 <= len(first) and len(first) <= 50)): # if name is not between 1 and 50 characters long
-        raise ValueError('first name must be between 1 and 50 characters long')
-
-    last = request.form.get('name_last')
-    if (not(1 <= len(last) and len(last) <= 50)):   # if name is not between 1 and 50 characters long
-        raise ValueError('last name must be between 1 and 50 characters long')
-
-    handle = first + last
-    if len(handle) > 20:
-        handle = handle[:20]
-    curr = 0
-    new = 0
-    for acc in data['accounts']:
-        if acc.email == email:  # if email is already registered
-            raise ValueError('email already matches an existing account')
-        if acc.handle.startswith(first + last): # confirm handle is unique
-            if handle == first + last:
-                handle += '0'
-            else:
-                new = int(acc.handle.split(first + last)[1]) + 1
-                if curr <= new:
-                    handle = first + last + str(new)
-                    curr = new
-        elif handle == (first + last)[:20]:
-            handle += '0'
-    if len(handle) > 20:
-        handle = hex(account_count)
-        account_count += 1
-    handle.lower()
-    token = jwt.encode({'email': email}, password, algorithm = 'HS256')
-    user_id = str(uuid4())
-    data['accounts'].append(user(email, password, first, last, handle, token.decode('utf-8'), user_id))
-    return dumps({'u_id': user_id,'token': token.decode('utf-8')})
+def route_auth_register():
+    return auth_register()
 
 @app.route('/auth/passwordreset/request', methods = ['POST'])
-def reset_request():
-    email = request.form.get('email')
-    for acc in data['accounts']:
-        if acc.email == email:
-            mail = Mail(app)
-            resetcode = str(uuid4())
-            msg = Message("RESETCODE!",
-                sender="snakeflask3@gmail.com",
-                recipients=[email])
-            msg.body = "Please use this reset code to reset your password: " +'(' + resetcode + ')'
-            mail.send(msg)
-            acc.reset_code = resetcode
-    return dumps({})
+def route_reset_request():
+    return reset_request(app)
 
 @app.route('/auth/passwordreset/reset', methods = ['POST'])
-def reset_reset():
-    code = request.form.get('reset_code')
-    password = request.form.get('new_password')
-    for acc in data['accounts']:
-        if code == acc.reset_code:
-            if len(password) >= 6:
-                acc.password = password
-                acc.reset_code = ''
-                acc.token = ''
-                return dumps({})
-            else:
-                raise ValueError('password is too short (min length of 6)')
-    raise ValueError('reset code is not valid')
+def route_reset_reset():
+    return reset_reset()
 
 @app.route('/channels/create', methods = ['POST'])
 def channel_create():
