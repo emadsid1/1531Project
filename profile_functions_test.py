@@ -82,7 +82,7 @@ def user_profiles_uploadphoto_test():
     token = authRegDict["token"]
     #SETUP TESTS END
     assert user_profiles_uploadphoto(token, "http://test_url.com/example.html", 0, 0, 1024, 1024)
-    with pytest.raises(ValueError:
+    with pytest.raises(ValueError):
         assert user_profiles_uploadphoto(token, "http://test_url.com/negativeexample.html", -1, 0, 1024, 1024)
         assert user_profiles_uploadphoto(token, "http://test_url.com/negativeexample2.html", 0, -1, 1024, 1024)
         assert user_profiles_uploadphoto(token, "http://test_url.com/startgreaterthanendx.html", 1000, 0, 900, 1024)

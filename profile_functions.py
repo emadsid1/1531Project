@@ -7,14 +7,14 @@ import re
 import auth_functions, channel_functions, message_functions, profile_functions, helper_functions
 
 
-nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
-ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
-chan1 = channel("chatime", True, 1, 5)
-
-data = {
-    "accounts": [nom, ben],
-    "channels": [chan1]
-}
+# nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
+# ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
+# chan1 = channel("chatime", True, 1, 5)
+#
+# data = {
+#     "accounts": [nom, ben],
+#     "channels": [chan1]
+# }
 
 def user_profile(token):
     global data
@@ -139,7 +139,7 @@ def standup_start(token, channel, length):
     "time_finish": standup_finish
     })
 
-def standup_active():
+def standup_active(token, channel):
     pass
 
 def standup_send(token, channel, message):
