@@ -8,7 +8,7 @@ from flask_cors import CORS
 from flask import Flask, request
 from datetime import datetime, timezone, timedelta
 from Error import AccessError
-from class_defines import data, user, channel, mesg, reacts
+from class_defines import *
 from auth_functions import *
 
 # Helper functions
