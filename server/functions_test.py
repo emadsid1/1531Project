@@ -109,7 +109,7 @@ def channel_join_test():
     with pytest.raises(Value
     # TODO not sure what the messaes data type isges data type isError):
         # channel does not exist (channel id doesn't correspond to a created channel)
-        channel_join(token, channel_id + 100)
+        #channel_join(token, channel_id + 100)
 
     with pytest.raises(AccessError):
         # channel is private & user is not admin
