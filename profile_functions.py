@@ -5,8 +5,8 @@ from datetime import datetime, timedelta, timezone
 from Error import AccessError
 import re
 
-nom = user("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
-ben = user("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
+nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
+ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
 chan1 = channel("chatime", True, 1, 5)
 
 data = {
@@ -110,6 +110,9 @@ def user_profile_uploadphoto():
     # how to get image size?
     return dumps({})
 
+def users_all():
+    pass
+
 def standup_start():
     token = request.form.get("token") #assume token is valid
     channel = int(request.form.get("channel_id"))
@@ -160,6 +163,9 @@ def standup_send():
     # TODO: how to check if standup has finished?
     data["channels"][ch_counter].standup_messages.append(message)
     return dumps({})
+
+def standup_active():
+    pass
 
 def search():
     token = request.args.get("token")
