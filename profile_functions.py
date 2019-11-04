@@ -14,24 +14,6 @@ data = {
     "channels": [chan1]
 }
 
-app = Flask(__name__)
-
-@app.route('/echo/get', methods=['GET'])
-def echo1():
-    """ Description of function """
-    return dumps({
-        'echo' : request.args.get('echo'),
-    })
-
-@app.route('/echo/post', methods=['POST'])
-def echo2():
-    """ Description of function """
-    return dumps({
-        'echo' : request.form.get('echo'),
-    })
-
-
-@app.route('/user/profile', methods=['GET'])
 def user_profile():
     global data
     token = request.args.get("token")
@@ -56,7 +38,6 @@ def user_profile():
     "handle_str": user["handle_str"]
     })
 
-@app.route('/user/profile/setname', methods=['PUT'])
 def user_profile_setname():
     global data
     token = str(request.form.get("token")) #assume token is valid
@@ -79,7 +60,6 @@ def user_profile_setname():
     return dumps({})
 
 
-@app.route('/user/profile/setemail', methods=['PUT'])
 def user_profile_email():
     global data
     token = request.form.get("token") # assume token is valid
@@ -100,7 +80,6 @@ def user_profile_email():
         raise Exception("AccessError") # token is invalid
     return dumps({})
 
-@app.route('/user/profile/sethandle', methods=['PUT'])
 def user_profile_sethandle():
     global data
     token = request.form.get("token") # assume token is valid
@@ -122,7 +101,6 @@ def user_profile_sethandle():
         raise Exception("AccessError") #token is invalid
     return dumps({})
 
-@app.route('/user/profiles/uploadphoto', methods=['POST'])
 # DOES NOT NEED TO BE COMPLETED UNTIL ITERATION 3
 def user_profile_uploadphoto():
     request = request.get("img_url")
@@ -132,7 +110,6 @@ def user_profile_uploadphoto():
     # how to get image size?
     return dumps({})
 
-@app.route('/standup/start', methods=['POST'])
 def standup_start():
     token = request.form.get("token") #assume token is valid
     channel = int(request.form.get("channel_id"))
@@ -159,7 +136,6 @@ def standup_start():
     "time_finish": standup_finish
     })
 
-@app.route('/standup/send', methods=['POST'])
 def standup_send():
     token = request.form.get("token") # assume token is valid
     channel = int(request.form.get("channel_id"))
@@ -185,7 +161,6 @@ def standup_send():
     data["channels"][ch_counter].standup_messages.append(message)
     return dumps({})
 
-@app.route('/search', methods=['GET'])
 def search():
     token = request.args.get("token")
     for acc in data["accounts"]:
@@ -207,7 +182,6 @@ def search():
 
     return dumps({messages})
 
-@app.route('/admin/userpermission/change', methods=['POST'])
 def admin_userpermission_change():
     perm_id = int(request.form.get("permission_id"))
     if perm_id < 1 or perm_id > 3:
