@@ -5,6 +5,8 @@ from class_defines import data, channel, user
 from Error import AccessError
 from sample_ben import check_in_channel
 
+# testing
+
 app = Flask(__name__)
 #channel invite vs join, invite needed to join a private channel. passive v active.
 
