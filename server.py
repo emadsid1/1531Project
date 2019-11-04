@@ -468,20 +468,30 @@ def mesg_unpin():
 
 @app.route('/user/profile', methods=['GET'])
 def route_user_profile():
-    return user_profile()
+    global data
+    token = request.args.get("token")
+    user_id = user_from_token(token)
+    return user_profile(token, user_id)
 
 @app.route('/user/profile/setname', methods=['PUT'])
 def route_user_profile_setname():
-    return user_profile_setname()
-
+    global data
+    token = request.form.get("token")
+    name_first = request.form.get("name_first")
+    name_last = request.form.get("name_last")
+    return user_profile_setname(token, name_first, name_last)
 
 @app.route('/user/profile/setemail', methods=['PUT'])
 def route_user_profile_email():
-    return user_profile_email()
+    token = request.form.get("token")
+    email = request.form.get("email")
+    return user_profile_email(token, email)
 
 @app.route('/user/profile/sethandle', methods=['PUT'])
 def route_user_profile_sethandle():
-    return user_profile_sethandle()
+    token = request.form.get("token")
+    handle = request.form.get("handle_str")
+    return user_profile_sethandle(token, handle)
 
 @app.route('/user/profiles/uploadphoto', methods=['POST'])
 # DOES NOT NEED TO BE COMPLETED UNTIL ITERATION 3
@@ -494,7 +504,10 @@ def route_users_all():
 
 @app.route('/standup/start', methods=['POST'])
 def route_standup_start():
-    return standup_start()
+    token = request.form.get("token")
+    channel = request.form.get("channel_id")
+    length = request.form.get("length")
+    return standup_start(token, channel, length)
 
 @app.route('/standup/active', methods=['GET'])
 def route_standup_active():
@@ -502,15 +515,23 @@ def route_standup_active():
 
 @app.route('/standup/send', methods=['POST'])
 def route_standup_send():
-    return standup_send()
+    token = request.form.get("token")
+    channel = request.form.get("channel_id")
+    message = request.form.get("message")
+    return standup_send(token, channel, message)
 
 @app.route('/search', methods=['GET'])
 def route_search():
-    return search()
+    token = request.args.get("token")
+    query_str = request.args.get("query_str")
+    return search(token, query_str)
 
 @app.route('/admin/userpermission/change', methods=['POST'])
 def route_admin_userpermission_change():
-    return admin_userpermission_change()
+    token = request.args.get("token")
+    user_id = int(request.form.get("u_id"))
+    perm_id = int(request.form.get("permission_id"))
+    return admin_userpermission_change(token, user_id, perm_id)
 
 if __name__ == '__main__':
     app.run(port=(sys.argv[1] if len(sys.argv) > 1 else 5000))

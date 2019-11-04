@@ -1,5 +1,5 @@
 import pytest
-import auth_functions, channel_functions, message_functions, profile_functions
+import auth_functions, channel_functions, message_functions, profile_functions, helper_functions
 from Error import AccessError
 from datetime import datetime, timedelta
 
