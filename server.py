@@ -500,7 +500,8 @@ def route_user_profile_uploadphoto():
 
 @app.route('/users/all', methods=['GET'])
 def route_users_all():
-    return users_all()
+    token = request.form.get("token")
+    return users_all(token)
 
 @app.route('/standup/start', methods=['POST'])
 def route_standup_start():
@@ -511,7 +512,9 @@ def route_standup_start():
 
 @app.route('/standup/active', methods=['GET'])
 def route_standup_active():
-    return standup_active()
+    token = request.form.get("token")
+    channel = request.form.get("channel_id")
+    return standup_active(token, channel)
 
 @app.route('/standup/send', methods=['POST'])
 def route_standup_send():

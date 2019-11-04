@@ -101,8 +101,16 @@ def user_profile_uploadphoto():
     # how to get image size?
     return dumps({})
 
-def users_all():
-    pass
+def users_all(token):
+    user_list = []
+    valid = False
+    for acc in data["accounts"]:
+        user_list.append(acc)
+        if token == acc.token:
+            valid = True
+    if valid == False:
+        raise Exception("AccessError") # token is invalid
+    return dumps(user_list)
 
 def standup_start(token, channel, length):
     # TODO: write length into standup
@@ -117,12 +125,14 @@ def standup_start(token, channel, length):
             ch_counter += 1
     if valid == False:
         raise Exception("ValueError") # channel does not exist
+    if length <= 0:
+        raise Exception("ValueError") # standup length needs to be greater than 0
 
     check_in_channel(token, ch_counter)
 
     data["channels"][ch_counter].is_standup = True
     data["channels"][ch_counter].standup_time = datetime.now()
-    finish = data["channels"][ch_counter].standup_time + timedelta(minutes=15)
+    finish = data["channels"][ch_counter].standup_time + timedelta(seconds=length)
     standup_finish = finish.replace(tzinfo=timezone.utc).timestamp()
 
     return dumps({
