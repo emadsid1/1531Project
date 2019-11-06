@@ -3,12 +3,9 @@ from datetime import datetime
 from json import dumps
 from class_defines import data, channel, user
 from Error import AccessError
-from helper_functions import check_in_channel
-
-# testing
+#from helper_functions import check_in_channel
 
 app = Flask(__name__)
-#channel invite vs join, invite needed to join a private channel. passive v active.
 
 # given a token, returns acc with that token
 def user_from_token(token):
@@ -29,7 +26,7 @@ def user_from_uid(u_id):
 
 def max_20_characters(name):
     if len(name) <= 20:
-        return True
+        return True 
     else:
         return False
 
@@ -37,33 +34,37 @@ def channel_index(channel_id):
     global data
     index = 0
     for i in data['channels']:
-        if i.channel_id == channel_id:
+        #TESTING:
+        #print(i.channel_id)
+        if int(i.channel_id) == int(channel_id):
             return index
         index = index + 1
+    
     raise ValueError('channel does not exist')
+
 
 @app.route('/channel/create', methods = ['POST'])
 def channel_create():
     global data
     token = request.form.get('token')
     name = request.form.get('name')
-    is_public = request.form.get('is_public')
+    is_public = request.form.get('is_public') 
 
-    #TESTING
-    #data['accounts'].append(user('email', 'password', 'first', 'last', 'handle', token))
-    #TESTING
+    #TESTING:
+    data['accounts'].append(user('email', 'password', 'first', 'last', 'handle', token, token))
+
 
     if max_20_characters(name) == False:
         raise ValueError('name is more than 20 characters')
-    else:
-        channel_id = int(uuid.uuid4())
+    else: 
+        channel_id = int(uuid4())
         data['channels'].append(channel(name, is_public, channel_id, False))
         index = channel_index(channel_id)
         data['channels'][index].owners.append(user_from_token(token))
         data['channels'][index].members.append(user_from_token(token))
 
-        # add channel to user's list of channels
-
+        # add channel to user's list of channels 
+    
     return dumps({
         'channel_id' : channel_id
     })
@@ -78,7 +79,7 @@ def channel_invite():
 
     # raise AccessError if authorised user not in channel (check_in_channel)
     # raise ValueError if channel_id doesn't exist (channel_index)
-    check_in_channel(token, channel_index(channel_id)) # use Ben's funct.
+    #check_in_channel(token, channel_index(channel_id)) # use Ben's funct.
 
     # raise ValueError if u_id doesnt refer to a valid user:TODO
 
@@ -101,7 +102,7 @@ def channel_join():
     if data['channels'][index].is_public == False:
         # check if authorised user is an admin
         valid = 0
-        for admin_acc in data['channels'][index].admins:
+        for admin_acc in data['channels'][index].admins: 
             if admin_acc.token == token:
                 valid = 1
         if valid == 0:
@@ -145,14 +146,14 @@ def channel_add_owner():
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
 
-    # check if user with u_id is already owner
+    # check if user with u_id is already owner 
     if user_from_uid(u_id) in data['channels'][index].owners:
         raise ValueError('User with u_id is already an owner')
 
     # check if authorised user is an owner of this channel
     if user_from_token(token) not in data['channels'][index].owners:
         raise AccessError('Authorised user not an owner of this channel')
-
+    
     acct = user_from_uid(u_id)
     data['channels'][index].owners.append(acct)
 
@@ -176,7 +177,7 @@ def channel_remove_owner():
     # raise AccessError if token is not an owner of this channel
     if user_from_token(token) not in data['channels'][index].owners:
         raise AccessError('authorised user is not an owner of this channel')
-
+    
     acct = user_from_uid(u_id)
     data['channels'][index].owners.pop(acct)
 
@@ -187,23 +188,44 @@ def channel_remove_owner():
 def channel_details():
     global data
     token = request.args.get('token')
-    channel_id = int(request.args.get('channel_id'))
+    channel_id = request.args.get('channel_id')
+
+
+    #TESTING
+    print("token: "+token)
+    print("channel_id: "+channel_id)
+    #TESTING
 
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
 
     # raise AccessError if authorised user isn't in channel
-    if user_from_token(token) not in data['channels'][index].members or user_from_token(token) not in data['channels'][index].owners or user_from_token(token) not in data['channels'][index].admins:
-        raise AccessError('authorised user is not in channel')
+    #if user_from_token(token) not in data['channels'][index].members or user_from_token(token) not in data['channels'][index].owners or user_from_token(token) not in data['channels'][index].admins:
+    #    raise AccessError('authorised user is not in channel')
 
-    name = data['channels'][index].name
-    owner_members = data['channels'][index].owners
-    all_members = data['channels'][index].members
+    #TODO:
+    #create a list of names of users of owners & all members, then append to it from the user class. 
+    #user class itself is not JSON serialisable 
+
+    channel_name = data['channels'][index].name
+
+    owners_uid = []
+    members_uid = []
+
+    
+    for i in data['channels'][index].owners:
+        owners_uid.append(i.handle)
+    
+    #for i in data['channels'][index].members:
+    #   members_uid.append(i.handle)
+    
+    #owner_members = data['channels'][index].owners
+    #all_members = data['channels'][index].members
 
     return dumps({
         'name': channel_name,
-        'owners': owner_members,
-        'members': all_members
+        'owners': owners_uid,
+        'members': members_uid
     })
 
 @app.route('/channel/list', methods = ['GET'])
@@ -256,7 +278,7 @@ def channel_messages():
     no_total_messages = len(data['channels'][index].messages)
     if start > no_total_messages:
         raise ValueError('start is greater than no. of total messages')
-
+    
     messages = []
     i = start
     for i in data['channels'][index].messages[i]:
@@ -275,7 +297,7 @@ def channel_messages():
         if i == no_total_messages:
             end = -1
             break
-
+    
     return dumps({
         'messages': messages,
         'start': start,
