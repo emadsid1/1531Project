@@ -7,6 +7,11 @@ import re
 import auth_functions, channel_functions, message_functions, helper_functions
 import jwt
 
+perm_owner = 1
+perm_admin = 2
+perm_user = 3
+
+
 
 # nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
 # ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
@@ -184,12 +189,21 @@ def search(token, query_str):
 
     return dumps({messages})
 
-def admin_userpermission_change(token, user_id, perm_id):
-    # TODO: @jeff feel free to delete this, tbh it's pretty unreadable
-    if perm_id < 1 or perm_id > 3:
-        raise Exception("ValueError") # invalid perm_id
-    valid = False
-    has_permission = False
+def admin_userpermission_change(token, u_id, p_id):
+    global data
+    # # TODO: @jeff feel free to delete this, tbh it's pretty unreadable 
+    # # LMAO feelsbad @ben
+    # if not(perm_owner < p_id or p_id < perm_user):
+    #     raise ValueError('permission_id does not refer to a value permission') # invalid perm_id
+    # for acc in data['accounts']:
+    #     if acc.token == token:
+    #         if not(acc.perm_id >= p_id):    # does not have permission to change p_id
+    #             raise AccessError('The authorised user is not an admin or owner')
+    # for acc in data['accounts']:
+    #     if int(acc.user_id) == int(u_id):
+    #         acc.perm_id = p_id
+    #         return dumps({})
+    # raise ValueError('u_id does not refer to a valid user')
     for ch in data["channels"]:
         for own in ch.owners:
             if token == own.token:

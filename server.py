@@ -10,7 +10,7 @@ from flask import Flask, request
 from datetime import datetime, timezone, timedelta
 from Error import AccessError
 from class_defines import data, User, channel, mesg, reacts
-from auth_functions import auth_login, auth_logout, auth_register, reset_request, reset_reset
+from auth import auth_login, auth_logout, auth_register, reset_request, reset_reset
 from helper_functions import *
 
 app = Flask(__name__)
@@ -45,7 +45,7 @@ def route_auth_login():
 
 @app.route('/auth/logout', methods = ['POST'])
 def route_auth_logout():
-    token = requets.form.get('token')
+    token = request.form.get('token')
     return auth_logout(token)
 
 @app.route('/auth/register', methods = ['POST'])

@@ -9,7 +9,6 @@ from flask import Flask, request
 from datetime import datetime, timezone, timedelta
 from Error import AccessError
 from class_defines import *
-from auth_functions import *
 
 # Helper functions
 # Helper from jeff's auth
