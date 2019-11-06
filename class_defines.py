@@ -1,11 +1,6 @@
-data = {
-    'accounts': [],
-    'channels': []
-}
-
 account_count = 0
 
-class user():
+class User():
     def __init__(self, email, password, first, last, handle, token, user_id):
         self.email = email
         self.password = password
@@ -52,3 +47,8 @@ class reacts():
     def __init__(self, reacter, react_id):
         self.reacter = reacter          # type user
         self.react_id = react_id        # react id of the reaction (for iteration 2 this is 1)
+
+data = {
+    'accounts': [User('chiefjief5@gmail.com', 'password', 'Jeffrey', 'Oh', 'JeffreyOh', '', 12345)],
+    'channels': []
+}

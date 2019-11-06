@@ -9,8 +9,8 @@ from flask_cors import CORS
 from flask import Flask, request
 from datetime import datetime, timezone, timedelta
 from Error import AccessError
-from class_defines import data, user, channel, mesg, reacts
-from auth_functions import *
+from class_defines import data, User, channel, mesg, reacts
+from auth_functions import auth_login, auth_logout, auth_register, reset_request, reset_reset
 from helper_functions import *
 
 app = Flask(__name__)
@@ -39,23 +39,33 @@ def echo2():
 
 @app.route('/auth/login', methods = ['POST'])
 def route_auth_login():
-    return auth_login()
+    email = request.form.get('email')
+    password = request.form.get('password')
+    return auth_login(email, password)
 
 @app.route('/auth/logout', methods = ['POST'])
 def route_auth_logout():
-    return auth_logout()
+    token = requets.form.get('token')
+    return auth_logout(token)
 
 @app.route('/auth/register', methods = ['POST'])
 def route_auth_register():
-    return auth_register()
+    email = request.form.get('email')
+    password = request.form.get('password')
+    first = request.form.get('name_first')
+    last = request.form.get('name_last')
+    return auth_register(email, password, first, last)
 
 @app.route('/auth/passwordreset/request', methods = ['POST'])
 def route_reset_request():
-    return reset_request(app)
+    email = request.form.get('email')
+    return reset_request(app, email)
 
 @app.route('/auth/passwordreset/reset', methods = ['POST'])
 def route_reset_reset():
-    return reset_reset()
+    code = request.form.get('reset_code')
+    new_password = request.form.get('new_password')
+    return reset_reset(code, new_password)
 
 @app.route('/channels/create', methods = ['POST'])
 def channel_create():
