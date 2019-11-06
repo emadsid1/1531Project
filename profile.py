@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 from Error import AccessError
 import re
 import auth_functions, channel_functions, message_functions, helper_functions
+import jwt
 
 
 # nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
