@@ -14,7 +14,7 @@ class User():
         self.reset_code = ''
         self.is_slackr_owner = False    # MAY NEED TO CHANGE
 
-class channel():
+class Channel():
     def __init__(self, name, is_public, channel_id, standup_time):
         self.owners = []                    # list of users
         self.admins = []                    # list of users admins cant change owner permissions
