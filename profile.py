@@ -4,7 +4,13 @@ from class_defines import user, channel, mesg, reacts #data
 from datetime import datetime, timedelta, timezone
 from Error import AccessError
 import re
-import auth_functions, channel_functions, message_functions, profile_functions, helper_functions
+import auth_functions, channel_functions, message_functions, helper_functions
+import jwt
+
+perm_owner = 1
+perm_admin = 2
+perm_user = 3
+
 
 
 # nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
@@ -183,12 +189,21 @@ def search(token, query_str):
 
     return dumps({messages})
 
-def admin_userpermission_change(token, user_id, perm_id):
-    # TODO: @jeff feel free to delete this, tbh it's pretty unreadable
-    if perm_id < 1 or perm_id > 3:
-        raise Exception("ValueError") # invalid perm_id
-    valid = False
-    has_permission = False
+def admin_userpermission_change(token, u_id, p_id):
+    global data
+    # # TODO: @jeff feel free to delete this, tbh it's pretty unreadable 
+    # # LMAO feelsbad @ben
+    # if not(perm_owner < p_id or p_id < perm_user):
+    #     raise ValueError('permission_id does not refer to a value permission') # invalid perm_id
+    # for acc in data['accounts']:
+    #     if acc.token == token:
+    #         if not(acc.perm_id >= p_id):    # does not have permission to change p_id
+    #             raise AccessError('The authorised user is not an admin or owner')
+    # for acc in data['accounts']:
+    #     if int(acc.user_id) == int(u_id):
+    #         acc.perm_id = p_id
+    #         return dumps({})
+    # raise ValueError('u_id does not refer to a valid user')
     for ch in data["channels"]:
         for own in ch.owners:
             if token == own.token:
@@ -226,26 +241,26 @@ def admin_userpermission_change(token, user_id, perm_id):
     return dumps({})
 
 # Helper functions
-def check_email(email):
-    regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
-    if(not(re.search(regex,email))):    # if not valid email
-        raise Exception('ValueError')
-
-def check_in_channel(token, channel_index):
-    in_channel = False
-    for acc in data["channels"][channel_index].owners: # search owners list
-        if token == acc.token:
-            in_channel = True
-    if in_channel == False:
-        for acc in data["channels"][channel_index].admins: # search admins list
-            if token == acc.token:
-                in_channel = True
-    if in_channel == False:
-        for acc in data["channels"][channel_index].members: # search members list
-            if token == acc.token:
-                in_channel = True
-    if in_channel == False: # if the user is not in the channel, raise an error
-        raise Exception("AccessError") # TODO: need to write this function
+# def check_email(email):
+#     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+#     if(not(re.search(regex,email))):    # if not valid email
+#         raise Exception('ValueError')
+#
+# def check_in_channel(token, channel_index):
+#     in_channel = False
+#     for acc in data["channels"][channel_index].owners: # search owners list
+#         if token == acc.token:
+#             in_channel = True
+#     if in_channel == False:
+#         for acc in data["channels"][channel_index].admins: # search admins list
+#             if token == acc.token:
+#                 in_channel = True
+#     if in_channel == False:
+#         for acc in data["channels"][channel_index].members: # search members list
+#             if token == acc.token:
+#                 in_channel = True
+#     if in_channel == False: # if the user is not in the channel, raise an error
+#         raise Exception("AccessError") # TODO: need to write this function
 
 if __name__ == '__main__':
     app.run(debug=True)

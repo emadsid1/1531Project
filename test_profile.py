@@ -1,9 +1,9 @@
 import pytest
-import auth_functions, channel_functions, message_functions, profile_functions, helper_functions
+import auth_functions, channel_functions, message_functions, profile, helper_functions
 from Error import AccessError
 from datetime import datetime, timedelta
 
-def user_profile_test():
+def test_user_profile():
     # set up
     # user1(admin)
     registerDict1 = auth_register("kenny@gmail.com", "123456", "kenny", "han")
@@ -24,7 +24,7 @@ def user_profile_test():
     with pytest,raises(ValueError):
         userProfile = user_profile(token1, "@#$%^&*!")
 
-def user_profile_setname_test():
+def test_user_profile_setname():
     #user_profile_setname(token, firstname, lastname), no return value
     #SETUP TESTS BEGIN
     #create token:
@@ -41,7 +41,7 @@ def user_profile_setname_test():
         user_profile_setname(token, "lmao", "This is a really long last name, more than 50 characters")
         user_profile_setname(token, "This is a really long first name, more than 50 characters", "This is a really long last name, more than 50 characters")
 
-def user_profile_setemail_test():
+def test_user_profile_setemail():
     #user_profile_setemail(token, email), no return value
     #SETUP TESTS BEGIN
     #create token:
@@ -60,7 +60,7 @@ def user_profile_setemail_test():
         user_profile_setemail(token, "bad email")
         user_profile_setemail(token, email2) #using another user's email
 
-def user_profile_sethandle_test():
+def test_user_profile_sethandle():
     #user_profile_sethandle(token, handle_str), no return value
     #SETUP TESTS BEGIN
     #create token:
@@ -74,7 +74,7 @@ def user_profile_sethandle_test():
     with pytest.raises(ValueError):
         user_profile_sethandle(token, "This handle is way too long")
 
-def user_profiles_uploadphoto_test():
+def test_user_profiles_uploadphoto():
     #user_profiles_uploadphoto(token, img_url, x_start, y_start, x_end, y_end), no return value
     #SETUP TESTS BEGIN
     #create token:
@@ -88,7 +88,7 @@ def user_profiles_uploadphoto_test():
         assert user_profiles_uploadphoto(token, "http://test_url.com/startgreaterthanendx.html", 1000, 0, 900, 1024)
         assert user_profiles_uploadphoto(token, "http://test_url.com/startgreaterthanendy.html", 0, 1000, 1024, 900)
 
-def standup_start_test():
+def test_standup_start():
     #standup_start(token, channel_id), returns time_finish
     #SETUP TESTS BEGIN
     #create new users:
@@ -106,7 +106,7 @@ def standup_start_test():
         assert standup_start(token2, chanId)
     #TODO: figure out how to test the time
 
-def standup_send_test():
+def test_standup_send():
     #standup_send(token, channel_id, message), no return value
     #SETUP TESTS BEGIN
     #create new users:
@@ -140,7 +140,7 @@ def standup_send_test():
         assert standup_send(token, chanId2, "Standup message with wrong chanId")
     #TODO: how to represent standup time
 
-def search_test():
+def test_search():
     #search(token, query_str), returns messages
     #SETUP TESTS BEGIN
     #create new users:
@@ -161,7 +161,7 @@ def search_test():
     assert len(searchResultsList) == 2
     assert searchResultsList2 == False #list should be empty
 
-def admin_userpermission_change_test():
+def test_admin_userpermission_change():
     #admin_userpermission_change(token, u_id, permission_id), no return value
     #SETUP TESTS BEGIN
     #create new admin:

@@ -1,11 +1,6 @@
-data = {
-    'accounts': [],
-    'channels': []
-}
-
 account_count = 0
 
-class user():
+class User():
     def __init__(self, email, password, first, last, handle, token, user_id):
         self.email = email
         self.password = password
@@ -19,7 +14,7 @@ class user():
         self.reset_code = ''
         self.is_slackr_owner = False    # MAY NEED TO CHANGE
 
-class channel():
+class Channel():
     def __init__(self, name, is_public, channel_id, standup_time):
         self.owners = []                    # list of users
         self.admins = []                    # list of users admins cant change owner permissions
@@ -35,7 +30,7 @@ class channel():
     def get_standup_time():
         return self.standup_time
 
-class mesg:
+class Mesg:
     def __init__(self, sender, create_time, message, message_id, channel_id, is_later):
         self.message = message          # string
         self.message_id = message_id    # string of a unique id
@@ -48,7 +43,12 @@ class mesg:
         self.is_later = is_later        # when to send message
         self.is_unread = True           # read or not
 
-class reacts():
+class Reacts():
     def __init__(self, reacter, react_id):
         self.reacter = reacter          # type user
         self.react_id = react_id        # react id of the reaction (for iteration 2 this is 1)
+
+data = {
+    'accounts': [User('chiefjief5@gmail.com', 'password', 'Jeffrey', 'Oh', 'JeffreyOh', '', 12345)],
+    'channels': []
+}
