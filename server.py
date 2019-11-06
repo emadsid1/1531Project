@@ -9,7 +9,7 @@ from flask_cors import CORS
 from flask import Flask, request
 from datetime import datetime, timezone, timedelta
 from Error import AccessError
-from class_defines import data, User, channel, mesg, reacts
+from class_defines import data, User, Channel, Mesg, Reacts
 from auth import auth_login, auth_logout, auth_register, reset_request, reset_reset
 from message_functions import send_later, msg_send, msg_remove, msg_edit, msg_pin, msg_unpin, msg_react, msg_unreact
 
