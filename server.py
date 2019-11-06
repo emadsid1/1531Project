@@ -10,6 +10,7 @@ from Error import AccessError
 from class_defines import data, User, Channel, Mesg, Reacts
 from auth import auth_login, auth_logout, auth_register, reset_request, reset_reset
 from message import send_later, msg_send, msg_remove, msg_edit, msg_pin, msg_unpin, msg_react, msg_unreact
+from helper_functions import * # TODO CHANGE LATER, KEEP FOR NOW
 
 app = Flask(__name__)
 CORS(app)
@@ -80,7 +81,7 @@ def channel_create():
         raise ValueError('name is more than 20 characters')
     else:
         channel_id = int(uuid4())
-        data['channels'].append(channel(name, is_public, channel_id, False))
+        data['channels'].append(Channel(name, is_public, channel_id, False))
         index = channel_index(channel_id)
         data['channels'][index].owners.append(user_from_token(token))
         data['channels'][index].members.append(user_from_token(token))

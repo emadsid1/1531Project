@@ -5,6 +5,7 @@ from flask import Flask, request
 from flask_mail import Mail, Message
 from class_defines import data, User
 from helper_functions import check_email
+#TODO LOGIN TOKEN CHECK
 
 def auth_login(email, password):
     global data
