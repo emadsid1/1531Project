@@ -226,27 +226,5 @@ def admin_userpermission_change(token, user_id, perm_id):
             add.members.append(user)
     return dumps({})
 
-# Helper functions
-# def check_email(email):
-#     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
-#     if(not(re.search(regex,email))):    # if not valid email
-#         raise Exception('ValueError')
-#
-# def check_in_channel(token, channel_index):
-#     in_channel = False
-#     for acc in data["channels"][channel_index].owners: # search owners list
-#         if token == acc.token:
-#             in_channel = True
-#     if in_channel == False:
-#         for acc in data["channels"][channel_index].admins: # search admins list
-#             if token == acc.token:
-#                 in_channel = True
-#     if in_channel == False:
-#         for acc in data["channels"][channel_index].members: # search members list
-#             if token == acc.token:
-#                 in_channel = True
-#     if in_channel == False: # if the user is not in the channel, raise an error
-#         raise Exception("AccessError") # TODO: need to write this function
-
 if __name__ == '__main__':
     app.run(debug=True)
