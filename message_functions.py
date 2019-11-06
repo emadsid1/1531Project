@@ -1,4 +1,3 @@
-
 '''
 Message functions by Kenny Han z5206270 (just to make pylint happy XD)
 '''
@@ -13,13 +12,25 @@ from class_defines import data, User, Channel, Mesg, Reacts
 from helper_functions import find_channel, find_msg, check_admin, check_owner, check_member, user_from_token, user_from_uid
     
 def send_later(token, msg, chan_id, sent_stamp):
+    # TESTING
+    user1 = User('email', 'password', 'first', 'last', 'handle', 'token', 1111)
+    channel1 = Channel('kenny channel', True, 123456, 15)
+    data['accounts'].append(user1)
+    data['channels'].append(channel1)
+    data['channels'][0].owners.append(user1.u_id)
+    data['channels'][0].admins.append(user1.u_id)
+    data['channels'][0].members.append(user1.u_id)
+    data['channels'][0].messages.append(Mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
+    # TESTING
     # make the integer stamp input float so that it can be used with the time() function
     float_time = float(sent_stamp)
     time_out = float_time - time()
     if time_out < 0:
         raise ValueError('Time sent is a value in the past!')
+    # create a new thread apart from the main thread, while other function calls are still allowed
     send = Timer(time_out, msg_send, (token, msg, chan_id))
     send.start()
+    return dumps('Waiting')
 
 def msg_send(token, msg, chan_id):
     global data
@@ -58,7 +69,10 @@ def msg_edit(token, msg_id, new_msg):
     editor = user_from_token(token)
     found_msg = find_msg(msg_id)
     msg_channel = find_channel(found_msg.in_channel)
-    if len(new_msg) > 1000:
+    # iter3 update: if the new msg is empty, delete the message
+    if new_msg == '':
+        msg_remove(token, msg_id)
+    elif len(new_msg) > 1000:
         raise ValueError('Message is more than 1000 words!')
     elif found_msg.sender != editor:
         raise AccessError('You do not have the permission to edit this message as you are not the sender!')
