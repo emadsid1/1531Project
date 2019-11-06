@@ -7,10 +7,6 @@ import re
 import auth_functions, channel_functions, message_functions, helper_functions
 import jwt
 
-perm_owner = 1
-perm_admin = 2
-perm_user = 3
-
 # nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
 # ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
 # chan1 = channel("chatime", True, 1, 5)
@@ -188,10 +184,10 @@ def search(token, query_str):
     return dumps({messages})
 
 def admin_userpermission_change(token, u_id, p_id):
-    global data
+    global data # TODO once a permission change is made, promote user to their app permission
     # # TODO: @jeff feel free to delete this, tbh it's pretty unreadable 
     # # LMAO feelsbad @ben
-    # if not(perm_owner < p_id or p_id < perm_user):
+    # if not(perm_owner < p_id or p_id < perm_member):
     #     raise ValueError('permission_id does not refer to a value permission') # invalid perm_id
     # for acc in data['accounts']:
     #     if acc.token == token:

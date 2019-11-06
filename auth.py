@@ -5,7 +5,6 @@ from flask import Flask, request
 from flask_mail import Mail, Message
 from class_defines import data, User
 from helper_functions import check_email
-#TODO LOGIN TOKEN CHECK
 
 def auth_login(email, password):
     global data
@@ -36,7 +35,7 @@ def auth_register(email, password, first, last):
 
     check_email(email)
 
-    if (len(password) < 6): # if password is too short
+    if (len(password) <= 6): # if password is too short
         raise ValueError('password is too short (min length of 6)')
 
     if (not(1 <= len(first) and len(first) <= 50)): # if name is not between 1 and 50 characters long
