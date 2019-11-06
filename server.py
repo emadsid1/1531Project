@@ -467,225 +467,74 @@ def mesg_unpin():
     })
 
 @app.route('/user/profile', methods=['GET'])
-def user_profile():
+def route_user_profile():
     global data
     token = request.args.get("token")
-    valid = False
-    user = {}
-    for acc in data["accounts"]:
-        if token == acc.token: # note: assumes token is valid
-            valid = True
-            if request.args.get("u_id") == acc.u_id: # supposed to be an int
-                user["email"] = acc.email
-                user["name_first"] = acc.name_first
-                user["name_last"] = acc.name_last
-                user["handle_str"] = acc.handle
-            else:
-                raise ValueError("Your user_id is incorrect.") # wrong u_id
-    if valid == False:
-        raise AccessError("Your token is invalid.") # invalid token
-    return dumps({
-    "email": user["email"],
-    "name_first": user["name_first"],
-    "name_last": user["name_last"],
-    "handle_str": user["handle_str"]
-    })
+    user_id = user_from_token(token)
+    return user_profile(token, user_id)
 
 @app.route('/user/profile/setname', methods=['PUT'])
-def user_profile_setname():
+def route_user_profile_setname():
     global data
-    token = str(request.form.get("token")) #assume token is valid
-
-    name_first = str(request.form.get("name_first"))
-    if not(len(name_first) >= 1 and len(name_first) <= 50):
-        raise ValueError("Your firstname is not between 1 and 50 characters in length.")
-
-    name_last = str(request.form.get("name_last"))
-    if not(len(name_last) >= 1 and len(name_last) <= 50):
-        raise ValueError("Your surname is not between 1 and 50 characters in length.")
-
-    for acc in data["accounts"]:
-        if token == acc.token:
-            acc.name_first = name_first
-            acc.name_last = name_last
-        else:
-            raise AccessError("Your token is invalid.") # invalid token
-
-    return dumps({})
-
+    token = request.form.get("token")
+    name_first = request.form.get("name_first")
+    name_last = request.form.get("name_last")
+    return user_profile_setname(token, name_first, name_last)
 
 @app.route('/user/profile/setemail', methods=['PUT'])
-def user_profile_email():
-    global data
-    token = request.form.get("token") # assume token is valid
+def route_user_profile_email():
+    token = request.form.get("token")
     email = request.form.get("email")
-    check_email(email)
-    counter = 0
-    found = False
-    for acc in data["accounts"]:
-        if token == acc.token:
-            found = True
-        if email == acc.email:
-            raise ValueError("This email is already being used by another user.") # email already being used
-        if found is False:
-            counter += 1
-    if found is not False:
-        data["accounts"][counter].email = email
-    else:
-        raise AccessError("Your token is invalid.") # token is invalid
-    return dumps({})
+    return user_profile_email(token, email)
 
 @app.route('/user/profile/sethandle', methods=['PUT'])
-def user_profile_sethandle():
-    global data
-    token = request.form.get("token") # assume token is valid
-    handle = str(request.form.get("handle_str"))
-    if len(handle) < 3 or len(handle) > 20:
-        raise ValueError("Your handle is not between 3 and 20 characters in length.") # handle has incorrect number of chars
-    counter = 0
-    found = False
-    for acc in data["accounts"]:
-        if token == acc.token:
-            found = True
-        if handle == acc.handle:
-            raise ValueError("This handle is already being used by another user.") # handle already being used
-        if found is False:
-            counter += 1
-    if found is not False:
-        data["accounts"][counter].handle = handle
-    else:
-        raise AccessError("Your token is invalid.") #token is invalid
-    return dumps({})
+def route_user_profile_sethandle():
+    token = request.form.get("token")
+    handle = request.form.get("handle_str")
+    return user_profile_sethandle(token, handle)
 
 @app.route('/user/profiles/uploadphoto', methods=['POST'])
 # DOES NOT NEED TO BE COMPLETED UNTIL ITERATION 3
-def user_profile_uploadphoto():
-    request = request.get("img_url")
-    if request != 200:
-        raise Exception("ValueError")
-    url = request.form.get("img_url")
-    # how to get image size?
-    return dumps({})
+def route_user_profile_uploadphoto():
+    return user_profile_uploadphoto()
+
+@app.route('/users/all', methods=['GET'])
+def route_users_all():
+    token = request.form.get("token")
+    return users_all(token)
 
 @app.route('/standup/start', methods=['POST'])
-def standup_start():
-    token = request.form.get("token") #assume token is valid
-    channel = int(request.form.get("channel_id"))
-    valid = False
-    ch_counter = 0
-    for ch in data["channels"]:
-        if channel == ch.channel_id:
-            valid = True
-            if ch.is_standup == True:
-                raise ValueError("A standup is already in progress.") # standup is already in progress
-        elif valid == False:
-            ch_counter += 1
-    if valid == False:
-        raise ValueError("Your channel_id does not exist.") # channel does not exist
+def route_standup_start():
+    token = request.form.get("token")
+    channel = request.form.get("channel_id")
+    length = request.form.get("length")
+    return standup_start(token, channel, length)
 
-    check_in_channel(token, ch_counter)
-
-    data["channels"][ch_counter].is_standup = True
-    data["channels"][ch_counter].standup_time = datetime.now()
-    finish = data["channels"][ch_counter].standup_time + timedelta(minutes=15)
-    standup_finish = finish.replace(tzinfo=timezone.utc).timestamp()
-
-    return dumps({
-    "time_finish": standup_finish
-    })
+@app.route('/standup/active', methods=['GET'])
+def route_standup_active():
+    token = request.form.get("token")
+    channel = request.form.get("channel_id")
+    return standup_active(token, channel)
 
 @app.route('/standup/send', methods=['POST'])
-def standup_send():
-    token = request.form.get("token") # assume token is valid
-    channel = int(request.form.get("channel_id"))
-    valid = False
-    ch_counter = 0
-    for ch in data["channels"]:
-        if channel == ch.channel_id:
-            if ch.is_standup == False:
-                raise ValueError("A standup is not currently in progress.") # standup is not happening atm
-            valid = True
-        elif valid == False:
-            ch_counter += 1
-    if valid == False:
-        raise ValueError("Your channel_id does not exist.") # channel does not exist
-
+def route_standup_send():
+    token = request.form.get("token")
+    channel = request.form.get("channel_id")
     message = request.form.get("message")
-    if len(message) > 1000:
-        raise ValueError("Your message is over 1000 characters in length.") # message too long
-
-    check_in_channel(token, ch_counter)
-
-    # TODO: how to check if standup has finished?
-    data["channels"][ch_counter].standup_messages.append(message)
-    return dumps({})
+    return standup_send(token, channel, message)
 
 @app.route('/search', methods=['GET'])
-def search():
+def route_search():
     token = request.args.get("token")
-    for acc in data["accounts"]:
-        if token == acc.token:
-            ch_list = acc.in_channel
     query_str = request.args.get("query_str")
-    messages = []
-    for ch in ch_list: # assume in_channel object is list of channel classes
-        for msg in ch.messages:
-            if query_str in msg.message:
-                messages.append({
-                    "message_id": msg.message_id,
-                    "u_id": msg.sender.user_id,
-                    "message": msg.message,
-                    "time_created": msg.create_time,
-                    "reacts": msg.reaction,
-                    "is_pinned": msg.pin
-                })
-
-    return dumps({messages})
+    return search(token, query_str)
 
 @app.route('/admin/userpermission/change', methods=['POST'])
-def admin_userpermission_change():
-    perm_id = int(request.form.get("permission_id"))
-    if perm_id < 1 or perm_id > 3:
-        raise ValueError("Your permission_id is not valid.") # invalid perm_id
+def route_admin_userpermission_change():
+    token = request.args.get("token")
     user_id = int(request.form.get("u_id"))
-    valid = False
-    has_permission = False
-    token = request.form.get("token") # assume token is valid
-    for ch in data["channels"]:
-        for own in ch.owners:
-            if token == own.token:
-                has_permission = True
-            if user_id == acc.user_id:
-                valid = True
-                if perm_id != 1:
-                    remove(own)
-                    user = own
-        for ad in ch.admins:
-            if token == ad.token:
-                has_permission = True
-            if user_id == acc.user_id:
-                valid = True
-                if perm_id != 2:
-                    remove(acc)
-                    user = acc
-        for mem in ch.members:
-            if user_id == acc.user_id:
-                valid = True
-                if perm_id != 3:
-                    remove(mem)
-                    user = mem
-    if has_permission == False:
-        raise AccessError("Only owners and admins can change permissions.") # members cannot use this function
-    if valid == False:
-        raise ValueError("Your user_id is incorrect.") # user does not exist
-    for add in data["channels"]:
-        if perm_id == 1:
-            add.owners.append(user)
-        if perm_id == 2:
-            add.admins.append(user)
-        if perm_id == 3:
-            add.members.append(user)
-    return dumps({})
+    perm_id = int(request.form.get("permission_id"))
+    return admin_userpermission_change(token, user_id, perm_id)
 
 if __name__ == '__main__':
     app.run(port=(sys.argv[1] if len(sys.argv) > 1 else 5000))

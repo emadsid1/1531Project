@@ -3,7 +3,6 @@ from datetime import datetime
 from json import dumps
 from class_defines import data, channel, user
 from Error import AccessError
-from uuid import uuid4
 #from helper_functions import check_in_channel
 
 app = Flask(__name__)

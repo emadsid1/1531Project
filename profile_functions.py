@@ -4,19 +4,20 @@ from class_defines import user, channel, mesg, reacts #data
 from datetime import datetime, timedelta, timezone
 from Error import AccessError
 import re
+import auth_functions, channel_functions, message_functions, profile_functions, helper_functions
 
-nom = user("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
-ben = user("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
-chan1 = channel("chatime", True, 1, 5)
 
-data = {
-    "accounts": [nom, ben],
-    "channels": [chan1]
-}
+# nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
+# ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
+# chan1 = channel("chatime", True, 1, 5)
+#
+# data = {
+#     "accounts": [nom, ben],
+#     "channels": [chan1]
+# }
 
-def user_profile():
+def user_profile(token):
     global data
-    token = request.args.get("token")
     valid = False
     user = {}
     for acc in data["accounts"]:
@@ -38,15 +39,10 @@ def user_profile():
     "handle_str": user["handle_str"]
     })
 
-def user_profile_setname():
+def user_profile_setname(token, name_first, name_last):
     global data
-    token = str(request.form.get("token")) #assume token is valid
-
-    name_first = str(request.form.get("name_first"))
     if not(len(name_first) >= 1 and len(name_first) <= 50):
         raise Exception("ValueError")
-
-    name_last = str(request.form.get("name_last"))
     if not(len(name_last) >= 1 and len(name_last) <= 50):
         raise Exception("ValueError")
 
@@ -56,14 +52,11 @@ def user_profile_setname():
             acc.name_last = name_last
         else:
             raise Exception("AccessError") # invalid token
-
     return dumps({})
 
 
-def user_profile_email():
+def user_profile_email(token, email):
     global data
-    token = request.form.get("token") # assume token is valid
-    email = request.form.get("email")
     check_email(email)
     counter = 0
     found = False
@@ -80,10 +73,8 @@ def user_profile_email():
         raise Exception("AccessError") # token is invalid
     return dumps({})
 
-def user_profile_sethandle():
+def user_profile_sethandle(token, handle):
     global data
-    token = request.form.get("token") # assume token is valid
-    handle = str(request.form.get("handle_str"))
     if len(handle) < 3 or len(handle) > 20:
         raise Exception("ValueError") # handle has incorrect number of chars
     counter = 0
@@ -110,9 +101,19 @@ def user_profile_uploadphoto():
     # how to get image size?
     return dumps({})
 
-def standup_start():
-    token = request.form.get("token") #assume token is valid
-    channel = int(request.form.get("channel_id"))
+def users_all(token):
+    user_list = []
+    valid = False
+    for acc in data["accounts"]:
+        user_list.append(acc)
+        if token == acc.token:
+            valid = True
+    if valid == False:
+        raise Exception("AccessError") # token is invalid
+    return dumps(user_list)
+
+def standup_start(token, channel, length):
+    # TODO: write length into standup
     valid = False
     ch_counter = 0
     for ch in data["channels"]:
@@ -124,21 +125,24 @@ def standup_start():
             ch_counter += 1
     if valid == False:
         raise Exception("ValueError") # channel does not exist
+    if length <= 0:
+        raise Exception("ValueError") # standup length needs to be greater than 0
 
     check_in_channel(token, ch_counter)
 
     data["channels"][ch_counter].is_standup = True
     data["channels"][ch_counter].standup_time = datetime.now()
-    finish = data["channels"][ch_counter].standup_time + timedelta(minutes=15)
+    finish = data["channels"][ch_counter].standup_time + timedelta(seconds=length)
     standup_finish = finish.replace(tzinfo=timezone.utc).timestamp()
 
     return dumps({
     "time_finish": standup_finish
     })
 
-def standup_send():
-    token = request.form.get("token") # assume token is valid
-    channel = int(request.form.get("channel_id"))
+def standup_active(token, channel):
+    pass
+
+def standup_send(token, channel, message):
     valid = False
     ch_counter = 0
     for ch in data["channels"]:
@@ -151,7 +155,6 @@ def standup_send():
     if valid == False:
         raise Exception("ValueError") # channel does not exist
 
-    message = request.form.get("message")
     if len(message) > 1000:
         raise Exception("ValueError") # message too long
 
@@ -161,12 +164,10 @@ def standup_send():
     data["channels"][ch_counter].standup_messages.append(message)
     return dumps({})
 
-def search():
-    token = request.args.get("token")
+def search(token, query_str):
     for acc in data["accounts"]:
         if token == acc.token:
             ch_list = acc.in_channel
-    query_str = request.args.get("query_str")
     messages = []
     for ch in ch_list: # assume in_channel object is list of channel classes
         for msg in ch.messages:
@@ -182,14 +183,12 @@ def search():
 
     return dumps({messages})
 
-def admin_userpermission_change():
-    perm_id = int(request.form.get("permission_id"))
+def admin_userpermission_change(token, user_id, perm_id):
+    # TODO: @jeff feel free to delete this, tbh it's pretty unreadable
     if perm_id < 1 or perm_id > 3:
         raise Exception("ValueError") # invalid perm_id
-    user_id = int(request.form.get("u_id"))
     valid = False
     has_permission = False
-    token = request.form.get("token") # assume token is valid
     for ch in data["channels"]:
         for own in ch.owners:
             if token == own.token:

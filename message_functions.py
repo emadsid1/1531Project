@@ -3,69 +3,9 @@ from datetime import datetime, timezone
 from uuid import uuid4
 from json import dumps
 from Error import AccessError
-from class_defines import data, user, channel, mesg, reacts
-from sample_emad import user_from_token, user_from_uid
+from class_defines import *
+from helper_functions import *
 
-app = Flask(__name__)
-
-# helper functions
-# find the correct channel base on the channel_id
-def find_channel(chan_id):
-    global data
-    channel_found = False
-    for chan in data['channels']:
-        if chan.channel_id == chan_id:
-            channel_found = True
-            return chan
-    if channel_found == False:
-        raise AccessError('Channel does not exit, please join or create a channel first!')
-
-# find the correct message base on the message_id
-def find_msg(msg_id):
-    global data
-    message_found = False
-    for chan in data['channels']:
-        for msg in chan.messages:
-            if msg.message_id == msg_id:
-                message_found = True
-                return msg
-    if message_found == False:
-        raise ValueError('Message does not exists!')
-
-# check if a user is an owner of a given channel
-def check_owner(channel, u_id):
-    global data
-    for user_id in channel.owners:
-        if user_id == u_id:
-            return True
-    return False
-
-# check if a user is an admin of a given channel
-def check_admin(channel, u_id):
-    for user_id in channel.admins:
-        if user_id == u_id:
-            return True
-    return False
-
-# check if a user is an member of a given channel
-def check_member(channel, u_id):
-    for user_id in channel.members:
-        if user_id == u_id:
-            return True
-    return False
-# end of helper functions
-
-@app.route('/echo/post', methods = ['POST'])
-def echo_post():
-    echo_input = request.form.get('echo')
-    return dumps({'echo': echo_input})
-
-@app.route('/echo/get', methods = ['GET'])
-def echo_get():
-    echo_input = requets.args.get('echo')
-    return dumps({'echo': echo_input})
-
-@app.route('/message/sendlater', methods=['POST'])
 def send_later():
     global data
     # TESTING
@@ -109,7 +49,6 @@ def send_later():
         'message_id': msg_id,    
     })
     
-@app.route('/message/send', methods=['POST'])
 def mesg_send():
     global data
 
@@ -135,8 +74,7 @@ def mesg_send():
         'message_id': msg_id,
     })
 
-@app.route('/message/remove', methods=['DELETE'])    # TODO no channel id???????
-def mesg_remove():
+def mesg_remove():  # TODO no channel id???????
     global data
 
     # TESTING
@@ -166,7 +104,6 @@ def mesg_remove():
 
     })
 
-@app.route('/message/edit', methods=['PUT'])
 def mesg_edit():
     global data
 
@@ -199,7 +136,6 @@ def mesg_edit():
         
     })
     
-@app.route('/message/react', methods=['POST'])
 def mesg_react():
     global data
 
@@ -229,7 +165,6 @@ def mesg_react():
 
     })
 
-@app.route('/message/unreact', methods=['POST'])
 def mesg_unreact():
     global data
 
@@ -258,7 +193,6 @@ def mesg_unreact():
 
     })
 
-@app.route('/message/pin', methods=['POST'])
 def mesg_pin():
     global data
 
@@ -290,7 +224,6 @@ def mesg_pin():
         
     })
     
-@app.route('/message/unpin', methods=['POST'])
 def mesg_unpin():
     global data
 
