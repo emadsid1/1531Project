@@ -5,7 +5,6 @@ from uuid import uuid4
 from flask_mail import Mail, Message
 from flask_cors import CORS
 from flask import Flask, request
-from datetime import datetime, timezone, timedelta
 from Error import AccessError
 from class_defines import data, User, Channel, Mesg, Reacts
 from auth import auth_login, auth_logout, auth_register, reset_request, reset_reset
@@ -15,9 +14,9 @@ from helper_functions import * # TODO CHANGE LATER, KEEP FOR NOW
 app = Flask(__name__)
 CORS(app)
 app.config.update(
-    MAIL_SERVER='smtp.gmail.com',
-    MAIL_PORT=465,
-    MAIL_USE_SSL=True,
+    MAIL_SERVER ='smtp.gmail.com',
+    MAIL_PORT = 465,
+    MAIL_USE_SSL = True,
     MAIL_USERNAME = 'snakeflask3@gmail.com',
     MAIL_PASSWORD = "snake.flask123"
 )
