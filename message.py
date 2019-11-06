@@ -13,14 +13,14 @@ from helper_functions import find_channel, find_msg, check_admin, check_owner, c
     
 def send_later(token, msg, chan_id, sent_stamp):
     # TESTING
-    user1 = User('email', 'password', 'first', 'last', 'handle', 'token', 1111)
-    channel1 = Channel('kenny channel', True, 123456, 15)
-    data['accounts'].append(user1)
-    data['channels'].append(channel1)
-    data['channels'][0].owners.append(user1.u_id)
-    data['channels'][0].admins.append(user1.u_id)
-    data['channels'][0].members.append(user1.u_id)
-    data['channels'][0].messages.append(Mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
+    # user1 = User('email', 'password', 'first', 'last', 'handle', 'token', 1111)
+    # channel1 = Channel('kenny channel', True, 123456, 15)
+    # data['accounts'].append(user1)
+    # data['channels'].append(channel1)
+    # data['channels'][0].owners.append(user1.u_id)
+    # data['channels'][0].admins.append(user1.u_id)
+    # data['channels'][0].members.append(user1.u_id)
+    # data['channels'][0].messages.append(Mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
     # TESTING
     # make the integer stamp input float so that it can be used with the time() function
     float_time = float(sent_stamp)
