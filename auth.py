@@ -32,7 +32,6 @@ def auth_logout(token):
 
 def auth_register(email, password, first, last):
     global data
-    global account_count
 
     check_email(email)
 
@@ -64,8 +63,8 @@ def auth_register(email, password, first, last):
         elif handle == (first + last)[:20]:
             handle += '0'
     if len(handle) > 20:
-        handle = hex(account_count)
-        account_count += 1
+        handle = hex(data['account_count'])
+        data['account_count'] += 1
     handle.lower()
     token = jwt.encode({'email': email}, password, algorithm = 'HS256')
     user_id = int(uuid4())

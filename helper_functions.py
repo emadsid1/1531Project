@@ -1,14 +1,6 @@
-import sys
 import re
-import jwt
-from json import dumps
-from uuid import uuid4
-from flask_mail import Mail, Message
-from flask_cors import CORS
-from flask import Flask, request
-from datetime import datetime, timezone, timedelta
 from Error import AccessError
-from class_defines import data, User, Channel, Mesg, Reacts
+from class_defines import data, User, Channel
 
 # Helper functions
 # Helper from jeff's auth

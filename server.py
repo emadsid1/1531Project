@@ -1,7 +1,5 @@
 """Flask server"""
 import sys
-import re
-import jwt
 from json import dumps
 from uuid import uuid4
 from flask_mail import Mail, Message
@@ -11,7 +9,7 @@ from datetime import datetime, timezone, timedelta
 from Error import AccessError
 from class_defines import data, User, Channel, Mesg, Reacts
 from auth import auth_login, auth_logout, auth_register, reset_request, reset_reset
-from message_functions import send_later, msg_send, msg_remove, msg_edit, msg_pin, msg_unpin, msg_react, msg_unreact
+from message import send_later, msg_send, msg_remove, msg_edit, msg_pin, msg_unpin, msg_react, msg_unreact
 
 app = Flask(__name__)
 CORS(app)

@@ -1,6 +1,8 @@
 import threading
 
-account_count = 0
+perm_owner = 1
+perm_admin = 2
+perm_user = 3
 
 class User():
     def __init__(self, email, password, first, last, handle, token, user_id):
@@ -15,9 +17,11 @@ class User():
         self.in_channel = []    # list of channels the user is in
         self.reset_code = ''
         self.is_slackr_owner = False    # MAY NEED TO CHANGE
+        # self.perm_id = perm_user
 
 class Channel():
     def __init__(self, name, is_public, channel_id, standup_time):
+        # TODO may need to change permission structure
         self.owners = []                    # list of users
         self.admins = []                    # list of users admins cant change owner permissions
         self.members = []                   # list of users
@@ -28,7 +32,7 @@ class Channel():
         self.is_standup = False             # standup flag
         self.standup_time = standup_time    # standup_time start - any variable can be passed in as long as is_standup is False
         self.standup_messages = []          # list of standup messages - cleared after every standup
-
+    # TODO Do we need this?
     def get_standup_time():
         return self.standup_time
 
@@ -56,5 +60,6 @@ class Threads(threading.Thread):
 
 data = {
     'accounts': [User('chiefjief5@gmail.com', 'password', 'Jeffrey', 'Oh', 'JeffreyOh', '', 12345)],
-    'channels': []
+    'channels': [],
+    'account_count': 0
 }

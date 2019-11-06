@@ -11,8 +11,6 @@ perm_owner = 1
 perm_admin = 2
 perm_user = 3
 
-
-
 # nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
 # ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
 # chan1 = channel("chatime", True, 1, 5)
