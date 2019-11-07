@@ -258,7 +258,7 @@ def standup_end(token, channel):
     current_channel = find_channel(channel)
     message_id = int(uuid4())
     message_list = []
-    for msg in data["channels"][channel].standup_messages:
+    for msg in current_channel.standup_messages:
         msg_user = " ".join(msg)
         message_list.append(msg_user)
     stdup_summary = "\n".join(message_list)

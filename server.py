@@ -393,7 +393,7 @@ def route_user_profile_uploadphoto():
 
 @app.route('/users/all', methods=['GET'])
 def route_users_all():
-    token = request.form.get("token")
+    token = request.args.get("token")
     return users_all(token)
 
 @app.route('/standup/start', methods=['POST'])
