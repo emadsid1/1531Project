@@ -2,7 +2,7 @@ from json import dumps
 from class_defines import User, Mesg, data
 from datetime import datetime, timedelta, timezone
 from Error import AccessError
-from helper_functions import *
+from helper_functions import * # TODO: change this *
 
 # nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
 # ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
@@ -91,6 +91,7 @@ def user_profile_sethandle(token, handle):
 
 # DOES NOT NEED TO BE COMPLETED UNTIL ITERATION 3
 def user_profile_uploadphoto():
+    global data
     request = request.get("img_url")
     if request != 200:
         raise Exception("ValueError")
@@ -99,6 +100,7 @@ def user_profile_uploadphoto():
     return dumps({})
 
 def users_all(token):
+    global data
     user_list = []
     valid = False
     for acc in data["accounts"]:
@@ -110,58 +112,58 @@ def users_all(token):
     return dumps(user_list)
 
 def standup_start(token, channel, length):
-    # TODO: write length into standup
-    valid = False
-    ch_counter = 0
-    for ch in data["channels"]:
-        if channel == ch.channel_id:
-            valid = True
-            if ch.is_standup == True:
-                raise Exception("AccessError") # standup is already in progress
-        elif valid == False:
-            ch_counter += 1
-    if valid == False:
-        raise Exception("ValueError") # channel does not exist
+    global data
+    ch_num = find_channel(channel) # raises ValueError if channel does not exist
+    if data["channels"][ch_num].is_standup == True:
+        raise Exception("AccessError") # standup is already in progress
     if length <= 0:
         raise Exception("ValueError") # standup length needs to be greater than 0
+    check_in_channel(token, ch_num) # raises AccessError if user is not in channel
 
-    check_in_channel(token, ch_counter)
-
-    data["channels"][ch_counter].is_standup = True
-    data["channels"][ch_counter].standup_time = datetime.now()
-    finish = data["channels"][ch_counter].standup_time + timedelta(seconds=length)
+    # starts standup
+    data["channels"][ch_num].is_standup = True
+    finish = datetime.now() + timedelta(seconds=length)
+    data["channels"][ch_num].standup_time = finish
     standup_finish = finish.replace(tzinfo=timezone.utc).timestamp()
+    t = Timer(length, standup_active, (token, channel))
+    t.start()
 
     return dumps({
-    "time_finish": standup_finish
+        "time_finish": standup_finish
     })
 
 def standup_active(token, channel):
-    pass
+    global data
+    ch_num = find_channel(channel) # raises AccessError if channel does not exist
+    check_in_channel(token, ch_num) # raises AccessError if user is not in channel
+    if data["channels"][ch_num].is_standup == False:
+        finish = None
+    else:
+        if data["channels"][ch_num].standup_time < datetime.now():
+            data["channels"][ch_num].is_standup = False
+            standup_end() # TODO: write this function
+        else:
+            finish = data["channels"][ch_num].standup_time
+    return dumps({
+        "is_active": data["channels"][ch_num].is_standup,
+        "time_finish": finish
+    })
 
 def standup_send(token, channel, message):
-    valid = False
-    ch_counter = 0
-    for ch in data["channels"]:
-        if channel == ch.channel_id:
-            if ch.is_standup == False:
-                raise Exception("ValueError") # standup is not happening atm
-            valid = True
-        elif valid == False:
-            ch_counter += 1
-    if valid == False:
-        raise Exception("ValueError") # channel does not exist
-
+    global data
+    ch_num = find_channel(channel) # raises AccessError if channel does not exist
+    if data["channels"][ch_num].is_standup == False:
+        raise Exception("ValueError") # standup is not happening atm
     if len(message) > 1000:
         raise Exception("ValueError") # message too long
-
-    check_in_channel(token, ch_counter)
+    check_in_channel(token, ch_num) # raises AccessError if user is not in channel
 
     # TODO: how to check if standup has finished?
-    data["channels"][ch_counter].standup_messages.append(message)
+    data["channels"][ch_num].standup_messages.append(message)
     return dumps({})
 
 def search(token, query_str):
+    global data
     for acc in data["accounts"]:
         if token == acc.token:
             ch_list = acc.in_channel
