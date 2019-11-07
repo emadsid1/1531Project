@@ -106,7 +106,14 @@ def users_all(token):
     user_list = []
     valid = False
     for acc in data["accounts"]:
-        user_list.append(acc)
+        user_list.append({
+            "u_id": acc.u_id,
+            "email": acc.email,
+            "name_first": acc.name_first,
+            "name_last": acc.name_last,
+            "handle_str": acc.handle,
+            "prof_pic": acc.prof_pic
+        })
         if token == acc.token:
             valid = True
     if valid == False:
