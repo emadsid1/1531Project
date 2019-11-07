@@ -1,8 +1,10 @@
 from json import dumps
 from class_defines import User, Mesg, data
 from datetime import datetime, timedelta, timezone
+from uuid import uuid4
 from Error import AccessError
-from helper_functions import * # TODO: change this *
+from message import msg_send
+from helper_functions import find_channel, find_msg, check_admin, check_owner, check_member, user_from_token, user_from_uid
 
 # nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
 # ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
@@ -141,7 +143,7 @@ def standup_active(token, channel):
     else:
         if data["channels"][ch_num].standup_time < datetime.now():
             data["channels"][ch_num].is_standup = False
-            standup_end() # TODO: write this function
+            standup_end(token, ch_num) # TODO: write this function
         else:
             finish = data["channels"][ch_num].standup_time
     return dumps({
@@ -159,7 +161,10 @@ def standup_send(token, channel, message):
     check_in_channel(token, ch_num) # raises AccessError if user is not in channel
 
     # TODO: how to check if standup has finished?
-    data["channels"][ch_num].standup_messages.append(message)
+    msg_send(token, message, channel)
+    user_index = user_from_token(token)
+    user = data["accounts"][user_index].handle
+    data["channels"][ch_num].standup_messages.append([user, message])
     return dumps({})
 
 def search(token, query_str):
@@ -244,5 +249,17 @@ def admin_userpermission_change(token, u_id, p_id):
     #         add.members.append(user)
     # return dumps({})
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# not included in the function list, but useful to have
+# sends the summary of the standup messages
+def standup_end(token, channel):
+    global data
+    send_time = datetime.now()
+    sender = user_from_token(token)
+    current_channel = find_channel(channel)
+    message_id = int(uuid4())
+    message_list = []
+    for msg in data["channels"][channel].standup_messages:
+        msg_user = " ".join(msg)
+        message_list.append(msg_user)
+    stdup_summary = "\n".join(message_list)
+    current_channel.messages.append(Mesg(sender, send_time, stdup_summary, msg_id, channel, False))
