@@ -53,7 +53,7 @@ def find_channel(chan_id):
             channel_found = True
             return chan
     if channel_found == False:
-        raise AccessError('Channel does not exit, please join or create a channel first!')
+        raise AccessError('Channel does not exist, please join or create a channel first!')
 
 # find the correct message base on the message_id
 def find_msg(msg_id):
@@ -65,7 +65,7 @@ def find_msg(msg_id):
                 message_found = True
                 return msg
     if message_found == False:
-        raise ValueError('Message does not exists!')
+        raise ValueError('Message does not exist!')
 
 # check if a user is an owner of a given channel
 def check_owner(channel, u_id):
@@ -95,10 +95,10 @@ def check_in_channel(token, channel_index):
     for acc in data["channels"][channel_index].owners: # search owners list
         if token == acc.token:
             in_channel = True
-    if in_channel == False:
-        for acc in data["channels"][channel_index].admins: # search admins list
-            if token == acc.token:
-                in_channel = True
+    # if in_channel == False:
+    #     for acc in data["channels"][channel_index].admins: # search admins list
+    #         if token == acc.token:
+    #             in_channel = True
     if in_channel == False:
         for acc in data["channels"][channel_index].members: # search members list
             if token == acc.token:
