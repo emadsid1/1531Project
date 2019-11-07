@@ -1,11 +1,8 @@
 from json import dumps
-from flask import Flask, request
-from class_defines import user, channel, mesg, reacts #data
+from class_defines import User, Mesg, data
 from datetime import datetime, timedelta, timezone
 from Error import AccessError
-import re
-import auth_functions, channel_functions, message_functions, helper_functions
-import jwt
+from helper_functions import *
 
 # nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
 # ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
@@ -184,55 +181,66 @@ def search(token, query_str):
     return dumps({messages})
 
 def admin_userpermission_change(token, u_id, p_id):
-    global data # TODO once a permission change is made, promote user to their app permission
-    # # TODO: @jeff feel free to delete this, tbh it's pretty unreadable 
-    # # LMAO feelsbad @ben
-    # if not(perm_owner < p_id or p_id < perm_member):
-    #     raise ValueError('permission_id does not refer to a value permission') # invalid perm_id
-    # for acc in data['accounts']:
-    #     if acc.token == token:
-    #         if not(acc.perm_id >= p_id):    # does not have permission to change p_id
-    #             raise AccessError('The authorised user is not an admin or owner')
-    # for acc in data['accounts']:
-    #     if int(acc.user_id) == int(u_id):
-    #         acc.perm_id = p_id
-    #         return dumps({})
-    # raise ValueError('u_id does not refer to a valid user')
-    for ch in data["channels"]:
-        for own in ch.owners:
-            if token == own.token:
-                has_permission = True
-            if user_id == acc.user_id:
-                valid = True
-                if perm_id != 1:
-                    remove(own)
-                    user = own
-        for ad in ch.admins:
-            if token == ad.token:
-                has_permission = True
-            if user_id == acc.user_id:
-                valid = True
-                if perm_id != 2:
-                    remove(acc)
-                    user = acc
-        for mem in ch.members:
-            if user_id == acc.user_id:
-                valid = True
-                if perm_id != 3:
-                    remove(mem)
-                    user = mem
-    if has_permission == False:
-        raise Exception("AccessError") # members cannot use this function
-    if valid == False:
-        raise Exception("ValueError") # user does not exist
-    for add in data["channels"]:
-        if perm_id == 1:
-            add.owners.append(user)
-        if perm_id == 2:
-            add.admins.append(user)
-        if perm_id == 3:
-            add.members.append(user)
-    return dumps({})
+    global data
+    if not(perm_owner < p_id or p_id < perm_member):
+        raise ValueError('permission_id does not refer to a value permission') # invalid perm_id
+    for acc in data['accounts']:
+        if acc.token == token:
+            if not(acc.perm_id >= p_id):    # does not have permission to change p_id
+                raise AccessError('The authorised user is not an admin or owner')
+    # CHECK how users stored in channels
+    for acc in data['accounts']:
+        if acc.user_id == u_id:
+            acc.perm_id = p_id
+            if p_id == perm_member:
+                for chan in data['channels']:
+                    if u_id in chan.owners:
+                        chan.owners.remove(u_id)
+                    if not(u_id in chan.members):
+                        chan.members.append(u_id)
+            else:
+                for chan in data['channels']:
+                    if u_id in chan.members:
+                        chan.members.remove(u_id)
+                    if not(u_id in chan.owners):
+                        chan.owners.append(u_id)
+            return dumps({})
+    raise ValueError('u_id does not refer to a valid user')
+    # for ch in data["channels"]:
+    #     for own in ch.owners:
+    #         if token == own.token:
+    #             has_permission = True
+    #         if user_id == acc.user_id:
+    #             valid = True
+    #             if perm_id != 1:
+    #                 remove(own)
+    #                 user = own
+    #     for ad in ch.admins:
+    #         if token == ad.token:
+    #             has_permission = True
+    #         if user_id == acc.user_id:
+    #             valid = True
+    #             if perm_id != 2:
+    #                 remove(acc)
+    #                 user = acc
+    #     for mem in ch.members:
+    #         if user_id == acc.user_id:
+    #             valid = True
+    #             if perm_id != 3:
+    #                 remove(mem)
+    #                 user = mem
+    # if has_permission == False:
+    #     raise Exception("AccessError") # members cannot use this function
+    # if valid == False:
+    #     raise Exception("ValueError") # user does not exist
+    # for add in data["channels"]:
+    #     if perm_id == 1:
+    #         add.owners.append(user)
+    #     if perm_id == 2:
+    #         add.admins.append(user)
+    #     if perm_id == 3:
+    #         add.members.append(user)
+    # return dumps({})
 
 if __name__ == '__main__':
     app.run(debug=True)
