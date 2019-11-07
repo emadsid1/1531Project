@@ -112,7 +112,7 @@ def users_all(token):
             "name_first": acc.name_first,
             "name_last": acc.name_last,
             "handle_str": acc.handle,
-            "prof_pic": acc.prof_pic
+            "profile_img_url": acc.prof_pic
         })
         if token == acc.token:
             valid = True
