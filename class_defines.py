@@ -29,7 +29,7 @@ class Channel():
         self.is_public = is_public          # public status
         self.channel_id = channel_id
         self.is_standup = False             # standup flag
-        self.standup_time = standup_time    # standup_time start - any variable can be passed in as long as is_standup is False
+        self.standup_time = standup_time    # standup_time end - any variable can be passed in as long as is_standup is False
         self.standup_messages = []          # list of standup messages - cleared after every standup
 
 class Mesg:
@@ -49,10 +49,6 @@ class Reacts():
     def __init__(self, reacter, react_id):
         self.reacter = reacter          # type user
         self.react_id = react_id        # react id of the reaction (for iteration 2 this is 1)
-
-class Threads(threading.Thread):
-    def __init__(self, time):
-        self.time = time                # either standup_end time or message_send time
 
 data = {
     'accounts': [User('chiefjief5@gmail.com', '123456', 'Jeffrey', 'Oh', 'JeffreyOh', '', 0), User('kennyhan9831@gmail.com', '1234567', 'Jun', 'Han', 'JunHan', '', 1)],
