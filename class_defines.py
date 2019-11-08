@@ -1,5 +1,3 @@
-import threading
-
 perm_owner = 1
 perm_admin = 2
 perm_member = 3
