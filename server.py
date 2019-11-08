@@ -364,7 +364,7 @@ def route_msg_unpin():
 def route_user_profile():
     global data
     token = request.args.get("token")
-    user_id = user_from_token(token)
+    user_id = request.args.get("u_id")
     return user_profile(token, user_id)
 
 @app.route('/user/profile/setname', methods=['PUT'])

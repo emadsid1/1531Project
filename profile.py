@@ -1,5 +1,5 @@
 from json import dumps
-from class_defines import User, Mesg, data
+from class_defines import User, Mesg, Channel, data
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from Error import AccessError
@@ -8,34 +8,26 @@ from helper_functions import find_channel, find_msg, check_admin, check_owner, c
 
 # nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
 # ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
-# chan1 = channel("chatime", True, 1, 5)
+# chan1 = Channel("chatime", True, 1, 5)
 #
 # data = {
 #     "accounts": [nom, ben],
 #     "channels": [chan1]
 # }
 
-def user_profile(token):
+# TODO: fix user_profile
+def user_profile(token, user_id):
     global data
-    valid = False
-    user = {}
-    for acc in data["accounts"]:
-        if token == acc.token: # note: assumes token is valid
-            valid = True
-            if int(request.args.get("u_id")) == acc.u_id:
-                user["email"] = acc.email
-                user["name_first"] = acc.name_first
-                user["name_last"] = acc.name_last
-                user["handle_str"] = acc.handle
-            else:
-                raise Exception("ValueError") # wrong u_id
-    if valid == False:
-        raise Exception("AccessError") # invalid token
+    user_num = user_from_uid(user_id) # raises AccessError if u_id invalid
+    user = user_from_token(token) # raises AccessError if invalid token
+    if user != data["accounts"][user_num]:
+        raise ValueError("Token does not match u_id!")
     return dumps({
-    "email": user["email"],
-    "name_first": user["name_first"],
-    "name_last": user["name_last"],
-    "handle_str": user["handle_str"]
+        "email": user.email,
+        "name_first": user.name_first,
+        "name_last": user.name_last,
+        "handle_str": user.handle,
+        "profile_img_url": user.prof_pic
     })
 
 def user_profile_setname(token, name_first, name_last):
@@ -45,6 +37,7 @@ def user_profile_setname(token, name_first, name_last):
     if not(len(name_last) >= 1 and len(name_last) <= 50):
         raise Exception("ValueError")
 
+    l = []
     for acc in data["accounts"]:
         if token == acc.token:
             acc.name_first = name_first
@@ -118,7 +111,9 @@ def users_all(token):
             valid = True
     if valid == False:
         raise Exception("AccessError") # token is invalid
-    return dumps(user_list)
+    return dumps({
+        "users": user_list
+    })
 
 def standup_start(token, channel, length):
     global data
