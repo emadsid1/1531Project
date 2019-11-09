@@ -20,13 +20,19 @@ def user_from_token(token):
             return acc
     raise AccessError('token does not exist for any user')
 
-# given u_id, returns acc with that u_id
+#given u_id, returns acc with that u_id
+# def user_from_uid(u_id):
+#     global data
+#     for counter, acc in enumerate(data['accounts']):
+#         if str(acc.u_id) == str(u_id):
+#             return acc
+#     raise AccessError('u_id does not exist for any user')
 def user_from_uid(u_id):
     global data
-    for counter, acc in enumerate(data['accounts']):
-        if int(acc.u_id) == int(u_id):
-            return counter
-    raise AccessError('u_id does not exist for any user')
+    for acc in data["accounts"]:
+        if str(acc.u_id) == str(u_id):
+            return acc
+    raise AccessError("u_id does not exist for any user")
 
 def max_20_characters(name):
     if len(name) <= 20:
