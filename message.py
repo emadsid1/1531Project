@@ -1,7 +1,6 @@
 '''
 Message functions by Kenny Han z5206270 (just to make pylint happy XD) <- TODO LMAO
 '''
-from flask import Flask, request
 from json import dumps
 from Error import AccessError
 from datetime import datetime, timezone
@@ -12,25 +11,16 @@ from class_defines import data, User, Channel, Mesg, Reacts
 from helper_functions import find_channel, find_msg, check_admin, check_owner, check_member, user_from_token, user_from_uid
     
 def send_later(token, msg, chan_id, sent_stamp):
-    # TESTING
-    # user1 = User('email', 'password', 'first', 'last', 'handle', 'token', 1111)
-    # channel1 = Channel('kenny channel', True, 123456, 15)
-    # data['accounts'].append(user1)
-    # data['channels'].append(channel1)
-    # data['channels'][0].owners.append(user1.u_id)
-    # data['channels'][0].admins.append(user1.u_id)
-    # data['channels'][0].members.append(user1.u_id)
-    # data['channels'][0].messages.append(Mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
-    # TESTING
-    # make the integer stamp input float so that it can be used with the time() function
-    float_time = float(sent_stamp)
-    time_out = float_time - time()
-    if time_out < 0:
+    # get the number of second of the waiting interval for sending the msg later
+    later_period = sent_stamp - datetime.now().replace(tzinfo=timezone.utc).timestamp()
+    if later_period < 0:
         raise ValueError('Time sent is a value in the past!')
     # create a new thread apart from the main thread, while other function calls are still allowed
-    send = Timer(time_out, msg_send, (token, msg, chan_id))
+    send = Timer(later_period, msg_send, (token, msg, chan_id))
     send.start()
-    return dumps('Waiting')
+    return dumps({
+        'wait for(seconds)': later_period,
+    })
 
 def msg_send(token, msg, chan_id):
     global data
