@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from Error import AccessError
 from message import msg_send
-from helper_functions import find_channel, find_msg, check_admin, check_owner, check_member, user_from_token, user_from_uid
+from helper_functions import check_email, find_channel, find_msg, check_admin, check_owner, check_member, user_from_token, user_from_uid
 
 # nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
 # ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
@@ -15,19 +15,22 @@ from helper_functions import find_channel, find_msg, check_admin, check_owner, c
 #     "channels": [chan1]
 # }
 
-# TODO: fix user_profile
+# TODO: fix user_profile to work with u_id
 def user_profile(token, user_id):
     global data
-    user_num = user_from_uid(user_id) # raises AccessError if u_id invalid
+    # print(user_id)
+    # user = user_from_uid(user_id) # raises AccessError if u_id invalid
     user = user_from_token(token) # raises AccessError if invalid token
-    if user != data["accounts"][user_num]:
-        raise ValueError("Token does not match u_id!")
+    # if user != data["accounts"][user_num]:
+    #     raise ValueError("Token does not match u_id!")
     return dumps({
         "email": user.email,
         "name_first": user.name_first,
         "name_last": user.name_last,
         "handle_str": user.handle,
-        "profile_img_url": user.prof_pic
+        "profile_img_url": user.prof_pic,
+        # "token": token,
+        # "u_id": user_id
     })
 
 def user_profile_setname(token, name_first, name_last):
@@ -36,14 +39,9 @@ def user_profile_setname(token, name_first, name_last):
         raise Exception("ValueError")
     if not(len(name_last) >= 1 and len(name_last) <= 50):
         raise Exception("ValueError")
-
-    l = []
-    for acc in data["accounts"]:
-        if token == acc.token:
-            acc.name_first = name_first
-            acc.name_last = name_last
-        else:
-            raise Exception("AccessError") # invalid token
+    user = user_from_token(token) # raises AccessError if invalid token
+    user.name_first = name_first
+    user.name_last = name_last
     return dumps({})
 
 
