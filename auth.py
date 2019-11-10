@@ -1,7 +1,6 @@
 import jwt
 from json import dumps
 from uuid import uuid4
-from flask import Flask, request
 from flask_mail import Mail, Message
 from class_defines import data, User
 from helper_functions import check_email
@@ -30,7 +29,7 @@ def auth_logout(token):
             return dumps({'is_success': True})
     return dumps({'is_success': False})
 
-def auth_register(email, password, first, last):
+def auth_register(email, password, first, last): # TODO FIRST USER IS OWNER?
     global data
 
     check_email(email)
@@ -52,22 +51,22 @@ def auth_register(email, password, first, last):
     for acc in data['accounts']:
         if acc.email == email:  # if email is already registered
             raise ValueError('email already matches an existing account')
-        if acc.handle.startswith(first + last): # confirm handle is unique
-            if handle == first + last:
-                handle += '0'
-            else:
+        if acc.handle.startswith(first + last): # Checking exact name repetitions
+            if handle == first + last:  # If handle is base concantate case
+                handle += '0'   # Add zero on end
+            else:   # If NOT base case, take off number on end and add 1
                 new = int(acc.handle.split(first + last)[1]) + 1
-                if curr <= new:
+                if curr <= new: # If new number is larger replace
                     handle = first + last + str(new)
                     curr = new
-        elif handle == (first + last)[:20]:
+        elif handle == (first + last)[:20]: # If name is truncate case and is already 20 characters
             handle += '0'
-    if len(handle) > 20:
+    if len(handle) > 20:    # If handle is too long make handle the hexadecimal number of account_count
         handle = hex(data['account_count'])
-        data['account_count'] += 1
+    user_id = data['account_count']
+    data['account_count'] += 1
     handle.lower()
     token = jwt.encode({'email': email}, password, algorithm = 'HS256')
-    user_id = int(uuid4())
     data['accounts'].append(User(email, password, first, last, handle, token.decode('utf-8'), user_id))
     return dumps({'u_id': user_id,'token': token.decode('utf-8')})
 

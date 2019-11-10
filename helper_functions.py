@@ -28,6 +28,12 @@ def user_from_uid(u_id):
             return acc
     raise AccessError('u_id does not exist for any user')
 
+# given email, returns acc with that email
+def user_from_email(email):
+    for acc in data['accounts']:
+        if email == acc.email:
+            return 
+
 def max_20_characters(name):
     if len(name) <= 20:
         return True
