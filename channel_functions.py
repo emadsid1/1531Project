@@ -7,6 +7,7 @@ from Error import AccessError
 from uuid import uuid4
 from auth import auth_register
 import jwt
+import json
 
 #TESTING:
 import pytest
@@ -26,7 +27,7 @@ def user_from_token(token):
         if encoded.decode('utf-8') == acc.token:
             return acc
         #    token = jwt.encode({'email': email}, password, algorithm = 'HS256')   
-        decoded = jwt.decode(acc.token, acc.password, algorithm = 'HS256')
+        #decoded = jwt.decode(acc.token, acc.password, algorithm = 'HS256')
         #print(decoded)
         #print(decoded['email'])
         #print(type(acc.token))
@@ -79,7 +80,7 @@ def channels_create(token, name, is_public):
         acct.in_channel.append(channel_id)
     
     return dumps({
-        'channel_id' : channel_id
+        'channel_id': channel_id
     })
 
 def test_channels_create():
@@ -95,6 +96,8 @@ def channel_invite(token, channel_id, u_id):
     # raise AccessError if authorised user not in channel
     # check if channel_id is part of User's in_channel list
     acct = user_from_token(token)
+    #print(acct.in_channel)
+    #print(channel_id)
     #print(acct.in_channel)
     if (channel_id in acct.in_channel) == False:
         raise AccessError('authorised user is not in channel')
@@ -113,21 +116,27 @@ def channel_invite(token, channel_id, u_id):
 
 def test_channel_invite():
     #SETUP START
-    auth_register_dict = auth_register("goodemail@gmail.com", "password123456", "John", "Smith")
-    token = auth_register_dict[1]
+    auth_register_dict = json.loads(auth_register("goodemail@gmail.com", "password123456", "John", "Smith"))
+    token = auth_register_dict['token']
     print("token: "+token)
+    print("auth_register_dict: "+auth_register_dict['token'])
+
 
     auth_register_dict2 = auth_register("emad@gmail.com", "password142256", "Emad", "Siddiqui")
     token2 = auth_register_dict2[1]
-    print("token2: "+token2)
+    #print("token2: "+token2)
+    #print(auth_register_dict2)
 
     auth_register_dict3 = auth_register("email@gmail.com", "password13456", "Firstname", "Lastname")
     uid3 = auth_register_dict3[0]
 
     #TODO: channel_register ENCODE/DECODE is making user_from_token not work
     channel_dict = channels_create(token, "tokenchannel", True) # create token's channel
-    channel_id = channel_dict[0]
+    #print(channel_dict)
+    channel_id = channel_dict[15] #TODO: can't get channel_id number from dumps dictionary 
     #SETUP END
+
+    channel_invite(token, channel_id, uid3)
 
     with pytest.raises(Exception): # Following should raise exceptions
         channel_invite(token2, channel_id, uid3) #AccessError since token2 is not authorised
