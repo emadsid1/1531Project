@@ -6,6 +6,7 @@ from Error import AccessError
 #from helper_functions import check_in_channel
 from uuid import uuid4
 from auth import auth_register
+import jwt
 
 #TESTING:
 import pytest
@@ -18,10 +19,14 @@ app = Flask(__name__)
 def user_from_token(token):
     global data
     for acc in data['accounts']:
-        # print(acc.token)
-        # print(type(acc.token))
-        # print(type(token))
-        # print(token)
+        #print("acc.token: "+acc.token)
+        #    token = jwt.encode({'email': email}, password, algorithm = 'HS256')   
+        decoded = jwt.decode(acc.token, acc.password, algorithm = 'HS256')
+        #print(decoded)
+        #print(decoded['email'])
+        #print(type(acc.token))
+        #print(type(token))
+        #print("token: "+token)
         if acc.token == token:
             return acc
     raise AccessError('token does not exist for any user')
@@ -79,7 +84,7 @@ def test_channels_create():
 def channel_invite(token, channel_id, u_id):
     global data
     #TESTING
-    #channel_id = channel_create(token, 'Channelforinv', True) #wont work since channel_create doesn't return purely an int
+    #channel_id = channels_create(token, 'Channelforinv', True) #wont work since channels_create doesn't return purely an int
     #print(channel_id)
 
     # raise AccessError if authorised user not in channel
@@ -105,15 +110,17 @@ def test_channel_invite():
     #SETUP START
     auth_register_dict = auth_register("goodemail@gmail.com", "password123456", "John", "Smith")
     token = auth_register_dict[1]
+    print("token: "+token)
 
     auth_register_dict2 = auth_register("emad@gmail.com", "password123456", "Emad", "Siddiqui")
     token2 = auth_register_dict2[1]
+    print("token2: "+token2)
 
     auth_register_dict3 = auth_register("email@gmail.com", "password123456", "Firstname", "Lastname")
     uid3 = auth_register_dict3[0]
 
     #TODO: channel_register ENCODE/DECODE is making user_from_token not work
-    channel_dict = channel_create(token, "tokenchannel", True) # create token's channel
+    channel_dict = channels_create(token, "tokenchannel", True) # create token's channel
     channel_id = channel_dict[0]
     #SETUP END
 
