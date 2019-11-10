@@ -1,3 +1,6 @@
+'''
+This is tests for message functions
+'''
 import pytest
 from auth import auth_login, auth_logout, auth_register, reset_request, reset_reset
 from channel_functions import channel_create, channel_invite, channel_join, channel_leave, channel_add_owner, channel_remove_owner, channel_details, channel_list, channel_listall, channel_messages
