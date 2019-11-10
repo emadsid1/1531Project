@@ -14,7 +14,7 @@ class User():
         self.u_id = user_id
         self.token = token      # login token
         self.prof_pic = ''      # URL to pic
-        self.in_channel = []    # list of channels the user is in
+        self.in_channel = []    # list of channels the user is in, stored as channel_id
         self.reset_code = ''
         self.perm_id = perm_member # For slackr permissions
 
@@ -55,7 +55,7 @@ class Threads(threading.Thread):
         self.time = time                # either standup_end time or message_send time
 
 data = {
-    'accounts': [User('chiefjief5@gmail.com', '123456', 'Jeffrey', 'Oh', 'JeffreyOh', '', 0), User('kennyhan9831@gmail.com', '1234567', 'Jun', 'Han', 'JunHan', '', 1)],
+    'accounts': [User('chiefjief5@gmail.com', '123456', 'Jeffrey', 'Oh', 'JeffreyOh', 1234, 0), User('kennyhan9831@gmail.com', '1234567', 'Jun', 'Han', 'JunHan', '12345', 1)],
     'channels': [],
     'account_count': 0
 }
