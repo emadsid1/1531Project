@@ -20,12 +20,12 @@ app = Flask(__name__)
 def user_from_token(token):
     global data
     for acc in data['accounts']:
-        encoded = jwt.encode({'email': acc.email}, acc.password, algorithm = 'HS256')
+        #encoded = jwt.encode({'email': acc.email}, acc.password, algorithm = 'HS256')
         #print(encoded.decode('utf-8'))
         #print("acc.token: "+acc.token)
 
-        if encoded.decode('utf-8') == acc.token:
-            return acc
+        #if encoded.decode('utf-8') == acc.token:
+        #    return acc
         #    token = jwt.encode({'email': email}, password, algorithm = 'HS256')   
         #decoded = jwt.decode(acc.token, acc.password, algorithm = 'HS256')
         #print(decoded)
@@ -33,15 +33,15 @@ def user_from_token(token):
         #print(type(acc.token))
         #print(type(token))
         #print("token: "+token)
-        #if acc.token == token:
-        #    return acc
+        if acc.token == token:
+            return acc
     raise AccessError('token does not exist for any user')
 
 # given u_id, returns acc with that u_id
 def user_from_uid(u_id):
     global data
     for acc in data['accounts']:
-        if acc.user_id == u_id:
+        if acc.u_id == u_id:
             return acc
     raise AccessError('u_id does not exist for any user')
 
@@ -98,7 +98,7 @@ def channel_invite(token, channel_id, u_id):
     acct = user_from_token(token)
     #print(acct.in_channel)
     #print(channel_id)
-    #print(acct.in_channel)
+    print(acct.in_channel)
     if (channel_id in acct.in_channel) == False:
         raise AccessError('authorised user is not in channel')
 
@@ -119,25 +119,27 @@ def test_channel_invite():
     auth_register_dict = json.loads(auth_register("goodemail@gmail.com", "password123456", "John", "Smith"))
     token = auth_register_dict['token']
     print("token: "+token)
-    print("auth_register_dict: "+auth_register_dict['token'])
+    #print("auth_register_dict: "+auth_register_dict['token'])
 
 
-    auth_register_dict2 = auth_register("emad@gmail.com", "password142256", "Emad", "Siddiqui")
-    token2 = auth_register_dict2[1]
-    #print("token2: "+token2)
+    auth_register_dict2 = json.loads(auth_register("emad@gmail.com", "password142256", "Emad", "Siddiqui"))
+    token2 = auth_register_dict2['token']
+    print("token2: "+token2)
     #print(auth_register_dict2)
 
-    auth_register_dict3 = auth_register("email@gmail.com", "password13456", "Firstname", "Lastname")
-    uid3 = auth_register_dict3[0]
+    auth_register_dict3 = json.loads(auth_register("email@gmail.com", "password13456", "Firstname", "Lastname"))
+    uid3 = auth_register_dict3['u_id']
 
     #TODO: channel_register ENCODE/DECODE is making user_from_token not work
-    channel_dict = channels_create(token, "tokenchannel", True) # create token's channel
+    channel_dict = json.loads(channels_create(token, "tokenchannel", True)) # create token's channel
     #print(channel_dict)
-    channel_id = channel_dict[15] #TODO: can't get channel_id number from dumps dictionary 
+    channel_id = channel_dict['channel_id'] #TODO: can't get channel_id number from dumps dictionary 
     #SETUP END
 
     channel_invite(token, channel_id, uid3)
 
+    print(channel_id)
+    
     with pytest.raises(Exception): # Following should raise exceptions
         channel_invite(token2, channel_id, uid3) #AccessError since token2 is not authorised
     
