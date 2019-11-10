@@ -1,3 +1,6 @@
+'''
+This is tests for message functions
+'''
 import pytest
 from auth import auth_login, auth_logout, auth_register, reset_request, reset_reset
 from channel_functions import channel_create, channel_invite, channel_join, channel_leave, channel_add_owner, channel_remove_owner, channel_details, channel_list, channel_listall, channel_messages
@@ -7,85 +10,93 @@ from helper_functions import check_email, user_from_token, user_from_uid, max_20
 from Error import AccessError
 from datetime import datetime, timedelta
     
+def message_sendlater_test():
+    # setup
+    user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
+    channel1 = channel('kenny channel', True, 123456, 15)
+    data['accounts'].append(user1)
+    data['channels'].append(channel1)
+    data['channels'][0].owners.append(user1.u_id)
+    data['channels'][0].admins.append(user1.u_id)
+    data['channels'][0].members.append(user1.u_id)
+    data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
+    # setup end
+
+def message_send_test():
+    # setup
+    data['accounts'].append(user('email', 'password', 'first', 'last', 'handle', 'token', 12345))
+    data['channels'].append(channel('kenny channel', True, 123456, 15))
+    # setup end
+
+def message_remove_test():
+    # setup
+    user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
+    channel1 = channel('kenny channel', True, 123456, 15)
+    data['accounts'].append(user1)
+    data['channels'].append(channel1)
+    data['channels'][0].owners.append(user1.u_id)
+    data['channels'][0].admins.append(user1.u_id)
+    data['channels'][0].members.append(user1.u_id)
+    data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
+    # setup end
     
-    # TESTING
-    # user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
-    # channel1 = channel('kenny channel', True, 123456, 15)
-    # data['accounts'].append(user1)
-    # data['channels'].append(channel1)
-    # data['channels'][0].owners.append(user1.u_id)
-    # data['channels'][0].admins.append(user1.u_id)
-    # data['channels'][0].members.append(user1.u_id)
-    # data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
-    # TESTING
+def message_edit_test():
+    # setup
+    user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
+    channel1 = channel('kenny channel', True, 123456, 15)
+    data['accounts'].append(user1)
+    data['channels'].append(channel1)
+    data['channels'][0].owners.append(user1.u_id)
+    data['channels'][0].admins.append(user1.u_id)
+    data['channels'][0].members.append(user1.u_id)
+    data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
+    # setup end
 
-    # TESTING
-    # data['accounts'].append(user('email', 'password', 'first', 'last', 'handle', 'token', 12345))
-    # data['channels'].append(channel('kenny channel', True, 123456, 15))
-    # TESTING
+def message_react_test():
+    # setup
+    user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
+    channel1 = channel('kenny channel', True, 123456, 15)
+    data['accounts'].append(user1)
+    data['channels'].append(channel1)
+    data['channels'][0].owners.append(user1.u_id)
+    data['channels'][0].admins.append(user1.u_id)
+    data['channels'][0].members.append(user1.u_id)
+    data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
+    # setup end
 
-    # TESTING
-    # user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
-    # channel1 = channel('kenny channel', True, 123456, 15)
-    # data['accounts'].append(user1)
-    # data['channels'].append(channel1)
-    # data['channels'][0].owners.append(user1.u_id)
-    # data['channels'][0].admins.append(user1.u_id)
-    # data['channels'][0].members.append(user1.u_id)
-    # data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
-    # TESTING
-    
-    # TESTING
-    # user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
-    # channel1 = channel('kenny channel', True, 123456, 15)
-    # data['accounts'].append(user1)
-    # data['channels'].append(channel1)
-    # data['channels'][0].owners.append(user1.u_id)
-    # data['channels'][0].admins.append(user1.u_id)
-    # data['channels'][0].members.append(user1.u_id)
-    # data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
-    # TESTING
+def message_unreact_test():
+    # setup
+    user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
+    channel1 = channel('kenny channel', True, 123456, 15)
+    data['accounts'].append(user1)
+    data['channels'].append(channel1)
+    data['channels'][0].owners.append(user1.u_id)
+    data['channels'][0].admins.append(user1.u_id)
+    data['channels'][0].members.append(user1.u_id)
+    data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
+    # setup end
 
-    # TESTING
-    # user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
-    # channel1 = channel('kenny channel', True, 123456, 15)
-    # data['accounts'].append(user1)
-    # data['channels'].append(channel1)
-    # data['channels'][0].owners.append(user1.u_id)
-    # data['channels'][0].admins.append(user1.u_id)
-    # data['channels'][0].members.append(user1.u_id)
-    # data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
-    # TESTING
-    
-    # TESTING
-    # user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
-    # channel1 = channel('kenny channel', True, 123456, 15)
-    # data['accounts'].append(user1)
-    # data['channels'].append(channel1)
-    # data['channels'][0].owners.append(user1.u_id)
-    # data['channels'][0].admins.append(user1.u_id)
-    # data['channels'][0].members.append(user1.u_id)
-    # data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
-    # TESTING
+def message_pin_test():
+    # setup
+    user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
+    channel1 = channel('kenny channel', True, 123456, 15)
+    data['accounts'].append(user1)
+    data['channels'].append(channel1)
+    data['channels'][0].owners.append(user1.u_id)
+    data['channels'][0].admins.append(user1.u_id)
+    data['channels'][0].members.append(user1.u_id)
+    data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
+    # setup end
 
-    # TESTING
-    # user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
-    # channel1 = channel('kenny channel', True, 123456, 15)
-    # data['accounts'].append(user1)
-    # data['channels'].append(channel1)
-    # data['channels'][0].owners.append(user1.u_id)
-    # data['channels'][0].admins.append(user1.u_id)
-    # data['channels'][0].members.append(user1.u_id)
-    # data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
-    # TESTING
+def message_unpin_test():
+    # setup
+    user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
+    channel1 = channel('kenny channel', True, 123456, 15)
+    data['accounts'].append(user1)
+    data['channels'].append(channel1)
+    data['channels'][0].owners.append(user1.u_id)
+    data['channels'][0].admins.append(user1.u_id)
+    data['channels'][0].members.append(user1.u_id)
+    data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
+    # setup end
 
-    # TESTING
-    # user1 = user('email', 'password', 'first', 'last', 'handle', 'token', 1111)
-    # channel1 = channel('kenny channel', True, 123456, 15)
-    # data['accounts'].append(user1)
-    # data['channels'].append(channel1)
-    # data['channels'][0].owners.append(user1.u_id)
-    # data['channels'][0].admins.append(user1.u_id)
-    # data['channels'][0].members.append(user1.u_id)
-    # data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
-    # TESTING
