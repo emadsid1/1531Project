@@ -9,6 +9,7 @@ from Error import AccessError
 from class_defines import data, User, Channel, Mesg, Reacts
 from auth import auth_login, auth_logout, auth_register, reset_request, reset_reset
 from message import send_later, msg_send, msg_remove, msg_edit, msg_pin, msg_unpin, msg_react, msg_unreact
+from channel_functions import channel_create
 from helper_functions import * # TODO CHANGE LATER, KEEP FOR NOW
 
 app = Flask(__name__)
@@ -67,29 +68,10 @@ def route_reset_reset():
 
 @app.route('/channels/create', methods = ['POST'])
 def channel_create():
-    global data
     token = request.form.get('token')
     name = request.form.get('name')
     is_public = request.form.get('is_public')
-
-    #TESTING
-    #data['accounts'].append(user('email', 'password', 'first', 'last', 'handle', token))
-    #TESTING
-
-    if max_20_characters(name) == False:
-        raise ValueError('name is more than 20 characters')
-    else:
-        channel_id = int(uuid4())
-        data['channels'].append(Channel(name, is_public, channel_id, False))
-        index = channel_index(channel_id)
-        data['channels'][index].owners.append(user_from_token(token))
-        data['channels'][index].members.append(user_from_token(token))
-
-        # add channel to user's list of channels
-
-    return dumps({
-        'channel_id' : channel_id
-    })
+    return channel_create(token, name, is_public)
 
 @app.route('/channel/invite', methods = ['POST'])
 def channel_invite():
