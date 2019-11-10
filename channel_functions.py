@@ -1,26 +1,46 @@
 from flask import Flask, request, flash
 from datetime import datetime
 from json import dumps
-#from class_defines import data, channel, user
+from class_defines import data, Channel, User
 from Error import AccessError
 #from helper_functions import check_in_channel
+from uuid import uuid4
+from auth import auth_register
+import jwt
+
+#TESTING:
+import pytest
+from Error import AccessError
 
 app = Flask(__name__)
 
 # given a token, returns acc with that token
+#TODO: Incorporate JWT decrypt to get it working with auth
 def user_from_token(token):
     global data
     for acc in data['accounts']:
-        #print(acc)
-        if acc.token == token:
+        encoded = jwt.encode({'email': acc.email}, acc.password, algorithm = 'HS256')
+        #print(encoded.decode('utf-8'))
+        #print("acc.token: "+acc.token)
+
+        if encoded.decode('utf-8') == acc.token:
             return acc
+        #    token = jwt.encode({'email': email}, password, algorithm = 'HS256')
+        decoded = jwt.decode(acc.token, acc.password, algorithm = 'HS256')
+        #print(decoded)
+        #print(decoded['email'])
+        #print(type(acc.token))
+        #print(type(token))
+        #print("token: "+token)
+        #if acc.token == token:
+        #    return acc
     raise AccessError('token does not exist for any user')
 
 # given u_id, returns acc with that u_id
 def user_from_uid(u_id):
     global data
-    for acc in enumerate(data['accounts']):
-        if int(acc.user_id) == int(u_id):
+    for acc in data['accounts']:
+        if acc.user_id == u_id:
             return acc
     raise AccessError('u_id does not exist for any user')
 
@@ -42,58 +62,84 @@ def channel_index(channel_id):
 
     raise ValueError('channel does not exist')
 
-
-@app.route('/channel/create', methods = ['POST'])
-def channel_create():
+def channels_create(token, name, is_public):
     global data
-    token = request.form.get('token')
-    name = request.form.get('name')
-    is_public = request.form.get('is_public')
-
-    #TESTING:
-    data['accounts'].append(user('email', 'password', 'first', 'last', 'handle', token, token))
-
 
     if max_20_characters(name) == False:
         raise ValueError('name is more than 20 characters')
     else:
         channel_id = int(uuid4())
-        data['channels'].append(channel(name, is_public, channel_id, False))
+        data['channels'].append(Channel(name, is_public, channel_id, False))
         index = channel_index(channel_id)
         data['channels'][index].owners.append(user_from_token(token))
         data['channels'][index].members.append(user_from_token(token))
 
         # add channel to user's list of channels
+        acct = user_from_token(token)
+        acct.in_channel.append(channel_id)
 
     return dumps({
         'channel_id' : channel_id
     })
 
-@app.route('/channel/invite', methods = ['POST'])
-def channel_invite():
-    #token, channel_id, u_id
+def test_channels_create():
+    with pytest.raises(Exception): # Following should raise exceptions
+        channels_create('valid token', 'This is a string that is much longer than the max length', True)
+
+def channel_invite(token, channel_id, u_id):
     global data
-    token = request.form.get('token')
-    channel_id = int(request.form.get('channel_id'))
-    u_id = int(request.form.get('u_id'))
+    #TESTING
+    #channel_id = channels_create(token, 'Channelforinv', True) #wont work since channels_create doesn't return purely an int
+    #print(channel_id)
 
-    # raise AccessError if authorised user not in channel (check_in_channel)
+    # raise AccessError if authorised user not in channel
+    # check if channel_id is part of User's in_channel list
+    acct = user_from_token(token)
+    #print(acct.in_channel)
+    if (channel_id in acct.in_channel) == False:
+        raise AccessError('authorised user is not in channel')
+
     # raise ValueError if channel_id doesn't exist (channel_index)
-    #check_in_channel(token, channel_index(channel_id)) # use Ben's funct.
-
-    # raise ValueError if u_id doesnt refer to a valid user:TODO
-
     index = channel_index(channel_id)
     data['channels'][index].members.append(u_id)
-    print(data['channels'][index].members)
+
+    # add channel to user's list of channels
+    acct = user_from_uid(u_id)
+    acct.in_channel.append(channel_id)
+
+    #print(data['channels'][index].members)
     return dumps({
     })
 
-@app.route('/channel/join', methods = ['POST'])
-def channel_join():
+def test_channel_invite():
+    #SETUP START
+    auth_register_dict = auth_register("goodemail@gmail.com", "password123456", "John", "Smith")
+    token = auth_register_dict[1]
+    print("token: "+token)
+
+    auth_register_dict2 = auth_register("emad@gmail.com", "password142256", "Emad", "Siddiqui")
+    token2 = auth_register_dict2[1]
+    print("token2: "+token2)
+
+    auth_register_dict3 = auth_register("email@gmail.com", "password13456", "Firstname", "Lastname")
+    uid3 = auth_register_dict3[0]
+
+    #TODO: channel_register ENCODE/DECODE is making user_from_token not work
+    channel_dict = channels_create(token, "tokenchannel", True) # create token's channel
+    channel_id = channel_dict[0]
+    #SETUP END
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_invite(token2, channel_id, uid3) #AccessError since token2 is not authorised
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_invite(token, 00000000000, uid3) #ValueError since channel_id does not exist
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_invite(token, channel_id, (uid3+8)) #ValueError since u_id does not exist
+
+def channel_join(token, channel_id):
     global data
-    token = request.form.get('token')
-    channel_id = int(request.form.get('channel_id'))
 
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
@@ -116,12 +162,8 @@ def channel_join():
     return dumps({
     })
 
-@app.route('/channel/leave', methods = ['POST'])
-def channel_leave():
+def channel_leave(token, channel_id):
     global data
-    token = request.form.get('token')
-    channel_id = int(request.form.get('channel_id'))
-
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
 
@@ -136,12 +178,8 @@ def channel_leave():
     return dumps({
     })
 
-@app.route('/channel/addowner', methods = ['POST'])
-def channel_add_owner():
+def channel_add_owner(token, channel_id, u_id):
     global data
-    token = request.form.get('token')
-    channel_id = int(request.form.get('channel_id'))
-    u_id = int(request.form.get('u_id'))
 
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
@@ -160,12 +198,8 @@ def channel_add_owner():
     return dumps({
     })
 
-@app.route('/channel/removeowner', methods = ['POST'])
-def channel_remove_owner():
+def channel_remove_owner(token, channel_id, u_id):
     global data
-    token = request.form.get('token')
-    channel_id = int(request.form.get('channel_id'))
-    u_id = int(request.form.get('u_id'))
 
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
@@ -184,43 +218,27 @@ def channel_remove_owner():
     return dumps({
     })
 
-@app.route('/channel/details', methods = ['GET'])
-def channel_details():
+def channel_details(token, channel_id):
     global data
-    token = request.args.get('token')
-    channel_id = request.args.get('channel_id')
-
-
-    #TESTING
-    print("token: "+token)
-    print("channel_id: "+channel_id)
-    #TESTING
 
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
 
-    # raise AccessError if authorised user isn't in channel
-    #if user_from_token(token) not in data['channels'][index].members or user_from_token(token) not in data['channels'][index].owners or user_from_token(token) not in data['channels'][index].admins:
-    #    raise AccessError('authorised user is not in channel')
-
-    #TODO:
-    #create a list of names of users of owners & all members, then append to it from the user class.
-    #user class itself is not JSON serialisable
+    # raise AccessError('authorised user is not in channel')
+    acct = user_from_token(token)
+    if (channel_id in acct.in_channel) == False:
+        raise AccessError('authorised user is not in channel')
 
     channel_name = data['channels'][index].name
 
     owners_uid = []
     members_uid = []
 
-
     for i in data['channels'][index].owners:
-        owners_uid.append(i.handle)
+        owners_uid.append(i.u_id)
 
-    #for i in data['channels'][index].members:
-    #   members_uid.append(i.handle)
-
-    #owner_members = data['channels'][index].owners
-    #all_members = data['channels'][index].members
+    for i in data['channels'][index].members:
+       members_uid.append(i.u_id)
 
     return dumps({
         'name': channel_name,
@@ -228,10 +246,8 @@ def channel_details():
         'members': members_uid
     })
 
-@app.route('/channel/list', methods = ['GET'])
-def channel_list():
+def channels_list(token):
     global data
-    token = request.args.get('token')
 
     # testing set up
     #data['channels'][0].members.append(user_from_token(token))
@@ -247,25 +263,19 @@ def channel_list():
         'channels': channel_list
     })
 
-@app.route('/channel/listall', methods = ['GET'])
-def channel_listall():
+def channels_listall(token):
     global data
-    token = request.args.get('token')
 
     channel_list = []
     for channel in data['channels']:
-        channel_list.append('Name: '+channel.name +' Public? '+ channel.is_public)
+        channel_list.append(channel.name)
 
     return dumps({
         'channels': channel_list
     })
 
-@app.route('/channel/messages', methods = ['GET'])
 def channel_messages():
     global data
-    token = request.args.get('token')
-    channel_id = int(request.args.get('channel_id'))
-    start = int(request.args.get('start'))
 
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)

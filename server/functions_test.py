@@ -222,10 +222,10 @@ def channels_listall_test():
     # lists all user 2's channels but not user 1's  channel since it is private
     assert channels_listall(token2) = ["User 2's public channel", "User 2's second public channel"] #assume channel order in list doesn't matter ***
 
-def channels_create_test()
-    assert channels_create('valid token', 'Jeffrey', True) == 12345
+def test_channels_create():
+    channel_create(1234, 'Mychannel', True)
     with pytest.raises(Exception): # Following should raise exceptions
-        assert channels_create('valid token', 'This is a string that is much longer than the max length', True)
+        channels_create('valid token', 'This is a string that is much longer than the max length', True)
 
 def message_sendlater_test():
     auth_register_dict = auth_register("emad@gmail.com", "123456", "Emad", "Siddiqui")
