@@ -19,7 +19,12 @@ app = Flask(__name__)
 def user_from_token(token):
     global data
     for acc in data['accounts']:
+        encoded = jwt.encode({'email': acc.email}, acc.password, algorithm = 'HS256')
+        #print(encoded.decode('utf-8'))
         #print("acc.token: "+acc.token)
+
+        if encoded.decode('utf-8') == acc.token:
+            return acc
         #    token = jwt.encode({'email': email}, password, algorithm = 'HS256')   
         decoded = jwt.decode(acc.token, acc.password, algorithm = 'HS256')
         #print(decoded)
@@ -27,8 +32,8 @@ def user_from_token(token):
         #print(type(acc.token))
         #print(type(token))
         #print("token: "+token)
-        if acc.token == token:
-            return acc
+        #if acc.token == token:
+        #    return acc
     raise AccessError('token does not exist for any user')
 
 # given u_id, returns acc with that u_id
@@ -112,11 +117,11 @@ def test_channel_invite():
     token = auth_register_dict[1]
     print("token: "+token)
 
-    auth_register_dict2 = auth_register("emad@gmail.com", "password123456", "Emad", "Siddiqui")
+    auth_register_dict2 = auth_register("emad@gmail.com", "password142256", "Emad", "Siddiqui")
     token2 = auth_register_dict2[1]
     print("token2: "+token2)
 
-    auth_register_dict3 = auth_register("email@gmail.com", "password123456", "Firstname", "Lastname")
+    auth_register_dict3 = auth_register("email@gmail.com", "password13456", "Firstname", "Lastname")
     uid3 = auth_register_dict3[0]
 
     #TODO: channel_register ENCODE/DECODE is making user_from_token not work
