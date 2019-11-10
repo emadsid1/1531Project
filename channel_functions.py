@@ -118,22 +118,15 @@ def test_channel_invite():
     #SETUP START
     auth_register_dict = json.loads(auth_register("goodemail@gmail.com", "password123456", "John", "Smith"))
     token = auth_register_dict['token']
-    print("token: "+token)
-    #print("auth_register_dict: "+auth_register_dict['token'])
-
 
     auth_register_dict2 = json.loads(auth_register("emad@gmail.com", "password142256", "Emad", "Siddiqui"))
     token2 = auth_register_dict2['token']
-    print("token2: "+token2)
-    #print(auth_register_dict2)
 
     auth_register_dict3 = json.loads(auth_register("email@gmail.com", "password13456", "Firstname", "Lastname"))
     uid3 = auth_register_dict3['u_id']
 
-    #TODO: channel_register ENCODE/DECODE is making user_from_token not work
     channel_dict = json.loads(channels_create(token, "tokenchannel", True)) # create token's channel
-    #print(channel_dict)
-    channel_id = channel_dict['channel_id'] #TODO: can't get channel_id number from dumps dictionary 
+    channel_id = channel_dict['channel_id']
     #SETUP END
 
     channel_invite(token, channel_id, uid3)
@@ -173,6 +166,27 @@ def channel_join(token, channel_id):
     return dumps({
     })
 
+def test_channel_join():
+    #SETUP START
+    auth_register_dict = json.loads(auth_register("goodemail1@gmail.com", "password123456", "John1", "Smith1"))
+    token = auth_register_dict['token']
+
+    auth_register_dict2 = json.loads(auth_register("emad1@gmail.com", "password142256", "Emad1", "Siddiqui1"))
+    token2 = auth_register_dict2['token']
+
+    auth_register_dict3 = json.loads(auth_register("email1@gmail.com", "password13456", "Firstname1", "Lastname1"))
+    uid3 = auth_register_dict3['u_id']
+
+    channel_dict = json.loads(channels_create(token, "tokenchannel", False)) # create PRIVATE token's channel
+    channel_id = channel_dict['channel_id']
+    #SETUP END
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_join(token2, channel_id) #channel is PRIVATE & token2 is not an admin
+    
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_invite(token, 00000000000, uid3) #ValueError since channel_id does not exist
+    
 def channel_leave(token, channel_id):
     global data
     # raise ValueError if channel_id doesn't exist (channel_index)
