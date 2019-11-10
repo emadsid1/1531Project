@@ -1,9 +1,14 @@
 from flask import Flask, request, flash
 from datetime import datetime
 from json import dumps
-from class_defines import data, channel, user
+from class_defines import data, Channel, User
 from Error import AccessError
 #from helper_functions import check_in_channel
+from uuid import uuid4
+
+#TESTING:
+import pytest
+from Error import AccessError
 
 app = Flask(__name__)
 
@@ -11,7 +16,10 @@ app = Flask(__name__)
 def user_from_token(token):
     global data
     for acc in data['accounts']:
-        #print(acc)
+        # print(acc.token)
+        # print(type(acc.token))
+        # print(type(token))
+        # print(token)
         if acc.token == token:
             return acc
     raise AccessError('token does not exist for any user')
@@ -42,32 +50,30 @@ def channel_index(channel_id):
     
     raise ValueError('channel does not exist')
 
-
-@app.route('/channel/create', methods = ['POST'])
-def channel_create():
+def channel_create(token, name, is_public):
     global data
-    token = request.form.get('token')
-    name = request.form.get('name')
-    is_public = request.form.get('is_public') 
-
-    #TESTING:
-    data['accounts'].append(user('email', 'password', 'first', 'last', 'handle', token, token))
-
 
     if max_20_characters(name) == False:
         raise ValueError('name is more than 20 characters')
     else: 
         channel_id = int(uuid4())
-        data['channels'].append(channel(name, is_public, channel_id, False))
+        data['channels'].append(Channel(name, is_public, channel_id, False))
         index = channel_index(channel_id)
         data['channels'][index].owners.append(user_from_token(token))
         data['channels'][index].members.append(user_from_token(token))
 
         # add channel to user's list of channels 
+        acct = user_from_token(token)
+        acct.in_channel.append(channel_id)
     
     return dumps({
         'channel_id' : channel_id
     })
+
+def test_channels_create():
+    channel_create(1234, 'Mychannel', True)
+    with pytest.raises(Exception): # Following should raise exceptions
+        channels_create('valid token', 'This is a string that is much longer than the max length', True)
 
 @app.route('/channel/invite', methods = ['POST'])
 def channel_invite():
@@ -77,7 +83,9 @@ def channel_invite():
     channel_id = int(request.form.get('channel_id'))
     u_id = int(request.form.get('u_id'))
 
-    # raise AccessError if authorised user not in channel (check_in_channel)
+    # raise AccessError if authorised user not in channel, check if token is in user class
+    
+
     # raise ValueError if channel_id doesn't exist (channel_index)
     #check_in_channel(token, channel_index(channel_id)) # use Ben's funct.
 
