@@ -145,53 +145,71 @@ def route_send_later():
     msg = request.form.get('message')
     chan_id = int(request.form.get('channel_id'))
     sent_stamp = int(request.form.get('time_sent'))
-    return send_later(token, msg, chan_id, sent_stamp)
+    return dumps(send_later(token, msg, chan_id, sent_stamp))
 
 @app.route('/message/send', methods=['POST'])
 def route_msg_send():
     token = request.form.get('token')
     msg = request.form.get('message')
     chan_id = int(request.form.get('channel_id'))
-    return msg_send(token, msg, chan_id)
+    return dumps(msg_send(token, msg, chan_id))
 
 @app.route('/message/remove', methods=['DELETE'])
 def route_msg_remove():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
-    return msg_remove(token, msg_id)
+    msg_remove(token, msg_id)
+    return dumps({
+
+    })
 
 @app.route('/message/edit', methods=['PUT'])
 def route_msg_edit():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     new_message = request.form.get('message')
-    return msg_edit(token, msg_id, new_message)
+    msg_edit(token, msg_id, new_message)
+    return dumps({
+
+    })
 
 @app.route('/message/react', methods=['POST'])
 def route_msg_react():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     react_id = int(request.form.get('react_id'))
-    return msg_react(token, msg_id, react_id)
+    msg_react(token, msg_id, react_id)
+    return dumps({
+
+    })
 
 @app.route('/message/unreact', methods=['POST'])
 def route_msg_unreact():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     react_id = int(request.form.get('react_id'))
-    return msg_unreact(toekn, msg_id, react_id)
+    msg_unreact(toekn, msg_id, react_id)
+    return dumps({
+
+    })
 
 @app.route('/message/pin', methods=['POST'])
 def route_msg_pin():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
-    return msg_pin(token, msg_id)
+    msg_pin(token, msg_id)
+    return dumps({
+
+    })
 
 @app.route('/message/unpin', methods=['POST'])
 def route_msg_unpin():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
-    return msg_unpin(token, msg_id)
+    msg_unpin(token, msg_id)
+    return dumps({
+        
+    })
 
 @app.route('/user/profile', methods=['GET'])
 def route_user_profile():
