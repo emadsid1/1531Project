@@ -251,18 +251,46 @@ def channel_add_owner(token, channel_id, u_id):
     index = channel_index(channel_id)
 
     # check if user with u_id is already owner 
-    if user_from_uid(u_id) in data['channels'][index].owners:
+    if user_from_uid(u_id).u_id in data['channels'][index].owners:
         raise ValueError('User with u_id is already an owner')
 
     # check if authorised user is an owner of this channel
-    if user_from_token(token) not in data['channels'][index].owners:
+    if user_from_token(token).u_id not in data['channels'][index].owners:
         raise AccessError('Authorised user not an owner of this channel')
     
-    acct = user_from_uid(u_id)
-    data['channels'][index].owners.append(acct)
+    data['channels'][index].owners.append(u_id)
 
     return dumps({
     })
+
+def test_channel_add_owner():
+    #SETUP START
+    auth_register_dict = json.loads(auth_register("goodemail3@gmail.com", "password123456", "John3", "Smith3"))
+    token = auth_register_dict['token']
+    uid = auth_register_dict['u_id']
+
+    auth_register_dict2 = json.loads(auth_register("emad3@gmail.com", "password142256", "Emad3", "Siddiqui3"))
+    token2 = auth_register_dict2['token']
+    uid2 = auth_register_dict2['u_id']
+
+    auth_register_dict3 = json.loads(auth_register("email3@gmail.com", "password13456", "Firstname3", "Lastname3"))
+    uid3 = auth_register_dict3['u_id']
+
+    channel_dict = json.loads(channels_create(token, "tokenchannel3", False)) # create PRIVATE token's channel
+    channel_id = channel_dict['channel_id']
+    #SETUP END
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_leave(token, 00000000000) #ValueError since channel_id does not exist
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_add_owner(token, channel_id, uid) # ValueError, u_id is already an owner
+    
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_add_owner(token2, channel_id, uid3) # AccessError token2 is not an owner of slackr or channel
+    
+    channel_add_owner(token, channel_id, uid2) # make token2 an owner
+    channel_add_owner(token2, channel_id, uid3) # Exception should now not be raised
 
 def channel_remove_owner(token, channel_id, u_id):
     global data
