@@ -69,7 +69,7 @@ def channels_create(token, name, is_public):
     if max_20_characters(name) == False:
         raise ValueError('name is more than 20 characters')
     else: 
-        channel_id = int(uuid4())
+        channel_id = data['channel_count'] + 1
         data['channels'].append(Channel(name, is_public, channel_id, False))
         index = channel_index(channel_id)
         data['channels'][index].owners.append(user_from_token(token).u_id)
@@ -415,7 +415,7 @@ def channels_list(token):
     })
 
 def test_channels_list():
-    # empty data['channels'] & ['accounts'] since it will be populated from other tests
+    # empty data['channels'] & ['accounts'] since it may be populated from other tests
     data['channels'].clear
     data['accounts'].clear
 
@@ -435,7 +435,7 @@ def test_channels_list():
     channel_dict2 = json.loads(channels_create(token2, "token2channel6", True)) # token2's channel
     channel_id2 = channel_dict2['channel_id']
 
-    list_dict = channels_list(token)
+    list_dict = channels_list(token) # should work
     assert json.loads(channels_list(token))['channels'] == [{'channel_id':channel_id, 'name':"tokenchannel6"}] # displays token1's channel only
     assert json.loads(channels_list(token2))['channels'] == [{'channel_id':channel_id2, 'name':"token2channel6"}] # displays token2's channel only
 
@@ -444,11 +444,38 @@ def channels_listall(token):
 
     channel_list = []
     for channel in data['channels']:
-        channel_list.append(channel.name)
+        list_dict = {'channel_id': channel.channel_id, 'name': channel.name}
+        channel_list.append(list_dict)
 
     return dumps({
         'channels': channel_list
     })
+
+def test_channels_listall():
+    # empty data['channels'] & ['accounts'] since it may be populated from other tests
+    data['channels'].clear
+    data['accounts'].clear
+
+    #SETUP START
+    auth_register_dict = json.loads(auth_register("goodemail7@gmail.com", "password123456", "John7", "Smith7"))
+    token = auth_register_dict['token']
+    uid = auth_register_dict['u_id']
+
+    auth_register_dict2 = json.loads(auth_register("emad7@gmail.com", "password142256", "Emad7", "Siddiqui7"))
+    token2 = auth_register_dict2['token']
+    uid2 = auth_register_dict2['u_id']
+    #SETUP END
+    channel_dict = json.loads(channels_create(token, "tokenchannel7", True)) # token1's channel
+    channel_id = channel_dict['channel_id']
+
+    #assert json.loads(channels_listall(token))['channels'] == [{'channel_id':channel_id, 'name':"tokenchannel6"}] # displays token1's channel only
+
+    channel_dict2 = json.loads(channels_create(token2, "token2channel", True)) # token1's channel
+    channel_id = channel_dict2['channel_id']
+
+
+
+
 
 def channel_messages():
     global data
