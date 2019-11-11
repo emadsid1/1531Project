@@ -59,7 +59,17 @@ def route_auth_register():
 @app.route('/auth/passwordreset/request', methods = ['POST'])
 def route_reset_request():
     email = request.form.get('email')
-    return reset_request(app, email)
+    reset_request(email)
+    for acc in data['accounts']:
+        if acc.email == email:
+            resetcode = acc.reset_code
+    mail = Mail(app)
+    msg = Message("RESETCODE!",
+        sender="snakeflask3@gmail.com",
+        recipients=[email])
+    msg.body = "Please use this reset code to reset your password: " +'(' + resetcode  + ')'
+    mail.send(msg)
+    return dumps({})
 
 @app.route('/auth/passwordreset/reset', methods = ['POST'])
 def route_reset_reset():

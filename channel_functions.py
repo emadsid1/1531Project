@@ -20,28 +20,28 @@ app = Flask(__name__)
 def user_from_token(token):
     global data
     for acc in data['accounts']:
-        encoded = jwt.encode({'email': acc.email}, acc.password, algorithm = 'HS256')
+        #encoded = jwt.encode({'email': acc.email}, acc.password, algorithm = 'HS256')
         #print(encoded.decode('utf-8'))
         #print("acc.token: "+acc.token)
 
-        if encoded.decode('utf-8') == acc.token:
-            return acc
+        #if encoded.decode('utf-8') == acc.token:
+        #    return acc
         #    token = jwt.encode({'email': email}, password, algorithm = 'HS256')
-        decoded = jwt.decode(acc.token, acc.password, algorithm = 'HS256')
+        #decoded = jwt.decode(acc.token, acc.password, algorithm = 'HS256')
         #print(decoded)
         #print(decoded['email'])
         #print(type(acc.token))
         #print(type(token))
         #print("token: "+token)
-        #if acc.token == token:
-        #    return acc
+        if acc.token == token:
+            return acc
     raise AccessError('token does not exist for any user')
 
 # given u_id, returns acc with that u_id
 def user_from_uid(u_id):
     global data
     for acc in data['accounts']:
-        if acc.user_id == u_id:
+        if acc.u_id == u_id:
             return acc
     raise AccessError('u_id does not exist for any user')
 
@@ -72,8 +72,8 @@ def channels_create(token, name, is_public):
         channel_id = int(uuid4())
         data['channels'].append(Channel(name, is_public, channel_id, False))
         index = channel_index(channel_id)
-        data['channels'][index].owners.append(user_from_token(token))
-        data['channels'][index].members.append(user_from_token(token))
+        data['channels'][index].owners.append(user_from_token(token).u_id)
+        data['channels'][index].members.append(user_from_token(token).u_id)
 
         # add channel to user's list of channels
         acct = user_from_token(token)
@@ -98,7 +98,7 @@ def channel_invite(token, channel_id, u_id):
     acct = user_from_token(token)
     #print(acct.in_channel)
     #print(channel_id)
-    #print(acct.in_channel)
+    print(acct.in_channel)
     if (channel_id in acct.in_channel) == False:
         raise AccessError('authorised user is not in channel')
 
@@ -118,25 +118,20 @@ def test_channel_invite():
     #SETUP START
     auth_register_dict = json.loads(auth_register("goodemail@gmail.com", "password123456", "John", "Smith"))
     token = auth_register_dict['token']
-    print("token: "+token)
-    print("auth_register_dict: "+auth_register_dict['token'])
 
+    auth_register_dict2 = json.loads(auth_register("emad@gmail.com", "password142256", "Emad", "Siddiqui"))
+    token2 = auth_register_dict2['token']
 
-    auth_register_dict2 = auth_register("emad@gmail.com", "password142256", "Emad", "Siddiqui")
-    token2 = auth_register_dict2[1]
-    #print("token2: "+token2)
-    #print(auth_register_dict2)
+    auth_register_dict3 = json.loads(auth_register("email@gmail.com", "password13456", "Firstname", "Lastname"))
+    uid3 = auth_register_dict3['u_id']
 
-    auth_register_dict3 = auth_register("email@gmail.com", "password13456", "Firstname", "Lastname")
-    uid3 = auth_register_dict3[0]
-
-    #TODO: channel_register ENCODE/DECODE is making user_from_token not work
-    channel_dict = channels_create(token, "tokenchannel", True) # create token's channel
-    #print(channel_dict)
-    channel_id = channel_dict[15] #TODO: can't get channel_id number from dumps dictionary
+    channel_dict = json.loads(channels_create(token, "tokenchannel", True)) # create token's channel
+    channel_id = channel_dict['channel_id']
     #SETUP END
 
     channel_invite(token, channel_id, uid3)
+
+    print(channel_id)
 
     with pytest.raises(Exception): # Following should raise exceptions
         channel_invite(token2, channel_id, uid3) #AccessError since token2 is not authorised
@@ -171,21 +166,83 @@ def channel_join(token, channel_id):
     return dumps({
     })
 
+def test_channel_join():
+    #SETUP START
+    auth_register_dict = json.loads(auth_register("goodemail1@gmail.com", "password123456", "John1", "Smith1"))
+    token = auth_register_dict['token']
+
+    auth_register_dict2 = json.loads(auth_register("emad1@gmail.com", "password142256", "Emad1", "Siddiqui1"))
+    token2 = auth_register_dict2['token']
+
+    auth_register_dict3 = json.loads(auth_register("email1@gmail.com", "password13456", "Firstname1", "Lastname1"))
+    uid3 = auth_register_dict3['u_id']
+
+    channel_dict = json.loads(channels_create(token, "tokenchannel1", False)) # create PRIVATE token's channel
+    channel_id = channel_dict['channel_id']
+    #SETUP END
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_join(token2, channel_id) #channel is PRIVATE & token2 is not an admin
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_invite(token, 00000000000, uid3) #ValueError since channel_id does not exist
+
 def channel_leave(token, channel_id):
     global data
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
-
     acct = user_from_token(token)
-    data['channels'][index].members.pop(acct)
 
-    if acct in data['channels'][index].owners:
-        data['channels'][index].owners.pop(acct)
-    if acct in data['channels'][index].admins:
-        data['channels'][index].admins.pop(acct)
+    # raise AccessError if authorised user not in channel
+    if (channel_id in acct.in_channel) == False:
+        raise AccessError('authorised user is not in channel')
+
+    for j in data['channels'][index].members:
+        if j == acct.u_id:
+            data['channels'][index].members.remove(j) #DONT use .pop as it takes in the index, .remove takes in element
+
+    for j in data['channels'][index].owners:
+        if j == acct.u_id:
+            data['channels'][index].owners.remove(j)
+
+    #TODO: Add admin attribute to class in class_defines.py
+    #for j in data['channels'][index].admins:
+    #    if j == acct.u_id:
+    #        data['channels'][index].admins.remove(j)
 
     return dumps({
     })
+
+def test_channel_leave():
+    #SETUP START
+    auth_register_dict = json.loads(auth_register("goodemail2@gmail.com", "password123456", "John2", "Smith2"))
+    token = auth_register_dict['token']
+    uid = auth_register_dict['u_id']
+
+    auth_register_dict2 = json.loads(auth_register("emad2@gmail.com", "password142256", "Emad2", "Siddiqui2"))
+    token2 = auth_register_dict2['token']
+    uid2 = auth_register_dict2['u_id']
+
+    auth_register_dict3 = json.loads(auth_register("email2@gmail.com", "password13456", "Firstname2", "Lastname2"))
+    uid3 = auth_register_dict3['u_id']
+
+    channel_dict = json.loads(channels_create(token, "tokenchannel2", False)) # create PRIVATE token's channel
+    channel_id = channel_dict['channel_id']
+    #SETUP END
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_leave(token, 00000000000) #ValueError since channel_id does not exist
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_leave(token2, channel_id) # token2 is not a part of channel_id, AccessError
+
+    channel_invite(token, channel_id, uid2) # add token2 to channel
+    # assert that uid2 has been added
+    assert json.loads(channel_details(token, channel_id))['members'] == [uid, uid2]
+
+    channel_leave(token2, channel_id) # should work as now token2 is part of channel
+    # assert that uid2 has been deleted
+    assert json.loads(channel_details(token, channel_id))['members'] == [uid]
 
 def channel_add_owner(token, channel_id, u_id):
     global data
@@ -194,18 +251,48 @@ def channel_add_owner(token, channel_id, u_id):
     index = channel_index(channel_id)
 
     # check if user with u_id is already owner
-    if user_from_uid(u_id) in data['channels'][index].owners:
+    if user_from_uid(u_id).u_id in data['channels'][index].owners:
         raise ValueError('User with u_id is already an owner')
 
     # check if authorised user is an owner of this channel
-    if user_from_token(token) not in data['channels'][index].owners:
+    if user_from_token(token).u_id not in data['channels'][index].owners:
         raise AccessError('Authorised user not an owner of this channel')
 
-    acct = user_from_uid(u_id)
-    data['channels'][index].owners.append(acct)
+    data['channels'][index].owners.append(u_id)
 
     return dumps({
     })
+
+def test_channel_add_owner():
+    #SETUP START
+    auth_register_dict = json.loads(auth_register("goodemail3@gmail.com", "password123456", "John3", "Smith3"))
+    token = auth_register_dict['token']
+    uid = auth_register_dict['u_id']
+
+    auth_register_dict2 = json.loads(auth_register("emad3@gmail.com", "password142256", "Emad3", "Siddiqui3"))
+    token2 = auth_register_dict2['token']
+    uid2 = auth_register_dict2['u_id']
+
+    auth_register_dict3 = json.loads(auth_register("email3@gmail.com", "password13456", "Firstname3", "Lastname3"))
+    uid3 = auth_register_dict3['u_id']
+
+    channel_dict = json.loads(channels_create(token, "tokenchannel3", False)) # create PRIVATE token's channel
+    channel_id = channel_dict['channel_id']
+    #SETUP END
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_add_owner(token, 00000000000, uid2) #ValueError since channel_id does not exist
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_add_owner(token, channel_id, uid) # ValueError, u_id is already an owner
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_add_owner(token2, channel_id, uid3) # AccessError token2 is not an owner of slackr or channel
+
+    channel_add_owner(token, channel_id, uid2) # make token2 an owner
+    assert json.loads(channel_details(token, channel_id))['owners'] == [uid, uid2]
+    channel_add_owner(token2, channel_id, uid3) # Exception should now not be raised
+    assert json.loads(channel_details(token, channel_id))['owners'] == [uid, uid2, uid3]
 
 def channel_remove_owner(token, channel_id, u_id):
     global data
@@ -214,18 +301,49 @@ def channel_remove_owner(token, channel_id, u_id):
     index = channel_index(channel_id)
 
     # raise ValueError if u_id is not an owner
-    if user_from_uid(u_id) not in data['channels'][index].owners:
+    if u_id not in data['channels'][index].owners:
         raise ValueError('u_id is not an owner of the channel')
 
     # raise AccessError if token is not an owner of this channel
-    if user_from_token(token) not in data['channels'][index].owners:
+    if user_from_token(token).u_id not in data['channels'][index].owners:
         raise AccessError('authorised user is not an owner of this channel')
 
-    acct = user_from_uid(u_id)
-    data['channels'][index].owners.pop(acct)
+    data['channels'][index].owners.remove(u_id)
 
     return dumps({
     })
+
+def test_channel_remove_owner():
+    #SETUP START
+    auth_register_dict = json.loads(auth_register("goodemail4@gmail.com", "password123456", "John4", "Smith4"))
+    token = auth_register_dict['token']
+    uid = auth_register_dict['u_id']
+
+    auth_register_dict2 = json.loads(auth_register("emad4@gmail.com", "password142256", "Emad4", "Siddiqui4"))
+    token2 = auth_register_dict2['token']
+    uid2 = auth_register_dict2['u_id']
+
+    auth_register_dict3 = json.loads(auth_register("email4@gmail.com", "password13456", "Firstname4", "Lastname4"))
+    uid3 = auth_register_dict3['u_id']
+
+    channel_dict = json.loads(channels_create(token, "tokenchannel4", True))
+    channel_id = channel_dict['channel_id']
+    #SETUP END
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_remove_owner(token, 00000000000, uid2) # ValueError since channel_id does not exist
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_remove_owner(token2, channel_id, uid3) # AccessError since token2 is not an owner of slackr or channel
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_remove_owner(token, channel_id, uid2) # ValueError since uid2 is not an owner
+
+    channel_add_owner(token, channel_id, uid2) # make uid2 an owner
+    assert json.loads(channel_details(token, channel_id))['owners'] == [uid, uid2]
+    channel_remove_owner(token, channel_id, uid2) # Exception should now not be raised
+    assert json.loads(channel_details(token, channel_id))['owners'] == [uid]
+
 
 def channel_details(token, channel_id):
     global data
@@ -244,16 +362,39 @@ def channel_details(token, channel_id):
     members_uid = []
 
     for i in data['channels'][index].owners:
-        owners_uid.append(i.u_id)
+        owners_uid.append(i)
 
     for i in data['channels'][index].members:
-       members_uid.append(i.u_id)
+       members_uid.append(i)
 
     return dumps({
         'name': channel_name,
         'owners': owners_uid,
         'members': members_uid
     })
+
+def test_channel_details():
+    #SETUP START
+    auth_register_dict = json.loads(auth_register("goodemail5@gmail.com", "password123456", "John5", "Smith5"))
+    token = auth_register_dict['token']
+    uid = auth_register_dict['u_id']
+
+    auth_register_dict2 = json.loads(auth_register("emad5@gmail.com", "password142256", "Emad5", "Siddiqui5"))
+    token2 = auth_register_dict2['token']
+    uid2 = auth_register_dict2['u_id']
+
+    channel_dict = json.loads(channels_create(token, "tokenchannel5", True))
+    channel_id = channel_dict['channel_id']
+    #SETUP END
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_details(token, 000000) # ValueError since channel_id does not exist
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_details(token2, channel_id) # AccessError since token2 is not in channel
+
+    # channel_details has been further tested in the asserts of other test functions,
+    # such as assert json.loads(channel_details(token, channel_id))['owners'] == [uid, uid2]
 
 def channels_list(token):
     global data
@@ -264,13 +405,39 @@ def channels_list(token):
 
     channel_list = []
     for channel in data['channels']:
-        for acct in channel.members:
-            if acct.token == token:
-                channel_list.append(channel.name)
-
+        for u_id in channel.members:
+            if u_id == user_from_token(token).u_id:
+                list_dict = {'channel_id':channel.channel_id, 'name':channel.name}
+                channel_list.append(list_dict)
+    print(channel_list)
     return dumps({
         'channels': channel_list
     })
+
+def test_channels_list():
+    # empty data['channels'] & ['accounts'] since it will be populated from other tests
+    data['channels'].clear
+    data['accounts'].clear
+
+    #SETUP START
+    auth_register_dict = json.loads(auth_register("goodemail6@gmail.com", "password123456", "John6", "Smith6"))
+    token = auth_register_dict['token']
+    uid = auth_register_dict['u_id']
+
+    auth_register_dict2 = json.loads(auth_register("emad6@gmail.com", "password142256", "Emad6", "Siddiqui6"))
+    token2 = auth_register_dict2['token']
+    uid2 = auth_register_dict2['u_id']
+    #SETUP END
+
+    channel_dict = json.loads(channels_create(token, "tokenchannel6", True)) # token1's channel
+    channel_id = channel_dict['channel_id']
+
+    channel_dict2 = json.loads(channels_create(token2, "token2channel6", True)) # token2's channel
+    channel_id2 = channel_dict2['channel_id']
+
+    list_dict = channels_list(token)
+    assert json.loads(channels_list(token))['channels'] == [{'channel_id':channel_id, 'name':"tokenchannel6"}] # displays token1's channel only
+    assert json.loads(channels_list(token2))['channels'] == [{'channel_id':channel_id2, 'name':"token2channel6"}] # displays token2's channel only
 
 def channels_listall(token):
     global data

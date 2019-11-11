@@ -195,14 +195,14 @@ def admin_userpermission_change(token, u_id, p_id):
         if acc.token == token:
             if not(acc.perm_id >= p_id):    # does not have permission to change p_id
                 raise AccessError('The authorised user is not an admin or owner')
-    # CHECK how users stored in channels
     for acc in data['accounts']:
         if acc.user_id == u_id:
             acc.perm_id = p_id
             if p_id == perm_member:
                 for chan in data['channels']:
                     if u_id in chan.owners:
-                        chan.owners.remove(u_id)
+                        if len(channel.owners) != 1:
+                            chan.owners.remove(u_id)
                     if not(u_id in chan.members):
                         chan.members.append(u_id)
             else:
