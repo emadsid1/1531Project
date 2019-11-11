@@ -6,7 +6,6 @@ from exception import ValueError, AccessError
 from datetime import datetime, timezone
 from time import time
 from threading import Timer
-from uuid import uuid4
 from class_defines import data, User, Channel, Mesg, Reacts
 from helper_functions import find_channel, find_msg, check_admin, check_owner, check_member, user_from_token, user_from_uid
     
@@ -18,9 +17,6 @@ def send_later(token, msg, chan_id, sent_stamp):
     # create a new thread apart from the main thread, while other function calls are still allowed
     send = Timer(later_period, msg_send, (token, msg, chan_id))
     send.start()
-    return dumps({
-        'wait for(seconds)': later_period,
-    })
 
 def msg_send(token, msg, chan_id):
     global data
@@ -30,13 +26,12 @@ def msg_send(token, msg, chan_id):
     else:
         sender = user_from_token(token)
         current_channel = find_channel(chan_id)
-        # generate a globally unique id
-        msg_id = int(uuid4())
+        # generate an unique id
+        data['message_count'] += 1
+        msg_id = data['message_count']
         # no exceptions raised, then add(send) the message to the current channel
         current_channel.messages.append(Mesg(sender, sending_time, msg, msg_id, chan_id, False))
-    return dumps({
-        'message_id': msg_id,
-    })
+    return {'message_id': msg_id}
 
 def msg_remove(token, msg_id):  # TODO no channel id???????
     global data
@@ -50,9 +45,6 @@ def msg_remove(token, msg_id):  # TODO no channel id???????
         raise AccessError('You do not have the permission as you are not the owner or admin of this channel!')
     # no exception raised, then remove the message
     msg_channel.messages.remove(found_msg)
-    return dumps({
-
-    })
 
 def msg_edit(token, msg_id, new_msg):
     global data
@@ -70,9 +62,6 @@ def msg_edit(token, msg_id, new_msg):
         raise AccessError('You do not have the permission as you are not the owner or admin of this channel!')
     # edit the message if no exceptions raiseds
     found_msg.message = new_msg
-    return dumps({
-        
-    })
     
 def msg_react(token, msg_id, react_id):
     global data
@@ -84,9 +73,6 @@ def msg_react(token, msg_id, react_id):
         raise ValueError('This message already contains an active React!')
     # give the message a reaction if no exceptions raised
     found_msg.reaction = Reacts(reacter, react_id)
-    return dumps({
-
-    })
 
 def msg_unreact(token, message_id, react_id):
     global data
@@ -97,9 +83,6 @@ def msg_unreact(token, message_id, react_id):
         raise ValueError('This message does not contain an active React!')
     # unreact the message if no exceptions raised
     found_msg.reaction = None
-    return dumps({
-
-    })
 
 def msg_pin(token, msg_id):
     global data
@@ -114,9 +97,6 @@ def msg_pin(token, msg_id):
         raise AccessError('You can not pin the message as you are not a member of the channel')
     # pin the message if no exceptions raised
     found_msg.is_pinned = True
-    return dumps({
-        
-    })
     
 def msg_unpin(token, msg_id):
     global data
@@ -131,6 +111,3 @@ def msg_unpin(token, msg_id):
         raise AccessError('You can not unpin the message as you are not a member of the channel')
     # unpin the message if no exceptions raised
     found_msg.is_pinned = False
-    return dumps({
-        
-    })
