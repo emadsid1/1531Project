@@ -473,18 +473,14 @@ def test_channels_listall():
     channel_dict2 = json.loads(channels_create(token2, "token2channel", True)) # token1's channel
     channel_id = channel_dict2['channel_id']
 
-
-
-
-
-def channel_messages():
+def channel_messages(token, channel_id, start):
     global data
 
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
 
     # raise AccessError if authorised user isn't in channel
-    if user_from_token(token) not in data['channels'][index].members or user_from_token(token) not in data['channels'][index].owners or user_from_token(token) not in data['channels'][index].admins:
+    if user_from_token(token).u_id not in data['channels'][index].members:
         raise AccessError('authorised user is not in channel')
 
     # raise ValueError if start is greater than no. of total messages
@@ -492,9 +488,11 @@ def channel_messages():
     if start > no_total_messages:
         raise ValueError('start is greater than no. of total messages')
     
+    # { message_id, u_id, message, time_created, reacts, is_pinned,  }
+    
     messages = []
     i = start
-    for i in data['channels'][index].messages[i]:
+    for item in data['channels'][index].messages[i:]:
         message = {}
         message['message_id'] = data['channels'][index].messages[i].message_id
         message['u_id'] = data['channels'][index].messages[i].sender
@@ -504,11 +502,11 @@ def channel_messages():
         message['is_pinned'] = data['channels'][index].messages[i].is_pinned
 
         messages.append(message)
-        if i == (start + 50):
-            end = i
-            break
         if i == no_total_messages:
             end = -1
+            break
+        if i == (start + 50):
+            end = i
             break
     
     return dumps({
