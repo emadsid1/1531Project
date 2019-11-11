@@ -21,11 +21,13 @@ def send_later(token, msg, chan_id, sent_stamp):
 def msg_send(token, msg, chan_id):
     global data
     sending_time = datetime.now()
+    sender = user_from_token(token)
+    current_channel = find_channel(chan_id)
     if len(msg) > 1000:
         raise ValueError(description='Message is more than 1000 words!')
+    elif check_member(current_channel, sender.u_id) == False:
+        raise AccessError(description='You have not joined this channel yet, please join first!')
     else:
-        sender = user_from_token(token)
-        current_channel = find_channel(chan_id)
         # generate an unique id
         data['message_count'] += 1
         msg_id = data['message_count']
@@ -33,7 +35,7 @@ def msg_send(token, msg, chan_id):
         current_channel.messages.append(Mesg(sender, sending_time, msg, msg_id, chan_id, False))
     return {'message_id': msg_id}
 
-def msg_remove(token, msg_id):  # TODO no channel id???????
+def msg_remove(token, msg_id):
     global data
     remover = user_from_token(token)
     found_msg = find_msg(msg_id)
