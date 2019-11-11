@@ -13,7 +13,7 @@ def send_later(token, msg, chan_id, sent_stamp):
     # get the number of second of the waiting interval for sending the msg later
     later_period = sent_stamp - datetime.now().replace(tzinfo=timezone.utc).timestamp()
     if later_period < 0:
-        raise ValueError('Time sent is a value in the past!')
+        raise ValueError(description='Time sent is a value in the past!')
     # create a new thread apart from the main thread, while other function calls are still allowed
     send = Timer(later_period, msg_send, (token, msg, chan_id))
     send.start()
@@ -22,7 +22,7 @@ def msg_send(token, msg, chan_id):
     global data
     sending_time = datetime.now()
     if len(msg) > 1000:
-        raise ValueError('Message is more than 1000 words!')
+        raise ValueError(description='Message is more than 1000 words!')
     else:
         sender = user_from_token(token)
         current_channel = find_channel(chan_id)
@@ -40,9 +40,9 @@ def msg_remove(token, msg_id):  # TODO no channel id???????
     # find the channel where the message belongs to
     msg_channel = find_channel(found_msg.in_channel)
     if found_msg.sender != remover:
-        raise AccessError('You do not have the permission to delete this message as you are not the sender!')
+        raise AccessError(description='You do not have the permission to delete this message as you are not the sender!')
     elif (check_owner(msg_channel, remover.u_id) == False) or (check_admin(msg_channel, remover.u_id) == False):
-        raise AccessError('You do not have the permission as you are not the owner or admin of this channel!')
+        raise AccessError(description='You do not have the permission as you are not the owner or admin of this channel!')
     # no exception raised, then remove the message
     msg_channel.messages.remove(found_msg)
 
@@ -55,11 +55,11 @@ def msg_edit(token, msg_id, new_msg):
     if new_msg == '':
         msg_remove(token, msg_id)
     elif len(new_msg) > 1000:
-        raise ValueError('Message is more than 1000 words!')
+        raise ValueError(description='Message is more than 1000 words!')
     elif found_msg.sender != editor:
-        raise AccessError('You do not have the permission to edit this message as you are not the sender!')
+        raise AccessError(description='You do not have the permission to edit this message as you are not the sender!')
     elif (check_owner(msg_channel, editor.u_id) == False) or (check_admin(msg_channel, editor.u_id) == False):
-        raise AccessError('You do not have the permission as you are not the owner or admin of this channel!')
+        raise AccessError(description='You do not have the permission as you are not the owner or admin of this channel!')
     # edit the message if no exceptions raiseds
     found_msg.message = new_msg
     
@@ -68,9 +68,9 @@ def msg_react(token, msg_id, react_id):
     reacter = user_from_token(token)
     found_msg = find_msg(msg_id)
     if react_id != 1:
-        raise ValueError('Invalid React ID!')
+        raise ValueError(description='Invalid React ID!')
     elif found_msg.reaction != None:
-        raise ValueError('This message already contains an active React!')
+        raise ValueError(description='This message already contains an active React!')
     # give the message a reaction if no exceptions raised
     found_msg.reaction = Reacts(reacter, react_id)
 
@@ -78,9 +78,9 @@ def msg_unreact(token, message_id, react_id):
     global data
     found_msg = find_msg(msg_id)
     if react_id != 1:
-        raise ValueError('Invalid React ID!')
+        raise ValueError(description='Invalid React ID!')
     elif found_msg.reaction == None:
-        raise ValueError('This message does not contain an active React!')
+        raise ValueError(description='This message does not contain an active React!')
     # unreact the message if no exceptions raised
     found_msg.reaction = None
 
@@ -90,11 +90,11 @@ def msg_pin(token, msg_id):
     found_msg = find_msg(msg_id)
     msg_channel = find_channel(found_msg.in_channel)
     if check_admin(msg_channel, pinner.u_id) == False:
-        raise ValueError('You can not pin the message as you are not an Admin of the channel')
+        raise ValueError(description='You can not pin the message as you are not an Admin of the channel')
     elif found_msg.is_pinned == True:
-        raise ValueError('The message is already pinned!')
+        raise ValueError(description='The message is already pinned!')
     elif check_member(msg_channel, pinner.u_id) == False:
-        raise AccessError('You can not pin the message as you are not a member of the channel')
+        raise AccessError(description='You can not pin the message as you are not a member of the channel')
     # pin the message if no exceptions raised
     found_msg.is_pinned = True
     
@@ -104,10 +104,10 @@ def msg_unpin(token, msg_id):
     found_msg = find_msg(msg_id)
     msg_channel = find_channel(found_msg.in_channel)
     if check_admin(msg_channel, unpinner.u_id) == False:
-        raise ValueError('You can not unpin the message as you are not an Admin of the channel')
+        raise ValueError(description='You can not unpin the message as you are not an Admin of the channel')
     elif found_msg.is_pinned == False:
-        raise ValueError('The message is already unpinned!')
+        raise ValueError(description='The message is already unpinned!')
     elif check_member(msg_channel, unpinner.u_id) == False:
-        raise AccessError('You can not unpin the message as you are not a member of the channel')
+        raise AccessError(description='You can not unpin the message as you are not a member of the channel')
     # unpin the message if no exceptions raised
     found_msg.is_pinned = False
