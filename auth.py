@@ -1,7 +1,7 @@
 import jwt
-from json import dumps
+from json import dumps #TODO get rid of
 from uuid import uuid4
-from flask_mail import Mail, Message
+from exception import ValueError, AccessError
 from class_defines import data, User
 from helper_functions import check_email, user_from_uid
 
@@ -36,7 +36,7 @@ def auth_register(email, password, first, last): # TODO FIRST USER IS OWNER?
     check_email(email)
 
     if (len(password) <= 6): # if password is too short
-        raise ValueError('password is too short (min length of 6)')
+        raise ValueError(description = 'Password too short') # TODO KENNY YA CUNT LOOK AT THIS
 
     if (not(1 <= len(first) and len(first) <= 50)): # if name is not between 1 and 50 characters long
         raise ValueError('first name must be between 1 and 50 characters long')

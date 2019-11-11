@@ -1,5 +1,5 @@
 '''
-This is tests for message functions
+Tests for message functions
 '''
 import pytest
 from auth import auth_login, auth_logout, auth_register, reset_request, reset_reset
@@ -9,6 +9,7 @@ from profile import user_profile, user_profile_setname, user_profile_email, user
 from helper_functions import check_email, user_from_token, user_from_uid, max_20_characters, channel_index, find_channel, find_msg, check_owner, check_admin, check_member, check_in_channel
 from Error import AccessError
 from datetime import datetime, timedelta
+from class_defines import User, Channel, Mesg, Reacts, data
     
 def message_sendlater_test():
     # setup
@@ -21,12 +22,20 @@ def message_sendlater_test():
     data['channels'][0].members.append(user1.u_id)
     data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
     # setup end
+    # testing
+
+    # testing end
 
 def message_send_test():
     # setup
-    data['accounts'].append(user('email', 'password', 'first', 'last', 'handle', 'token', 12345))
-    data['channels'].append(channel('kenny channel', True, 123456, 15))
+    data['accounts'].append(User('email', 'password', 'first', 'last', 'handle', 'token', 12345))
+    data['channels'].append(Channel('kenny channel', True, 123456, 15))
     # setup end
+    # testing
+    assert msg_send('token', 'hello', 1)
+
+
+    # testing end
 
 def message_remove_test():
     # setup
@@ -39,6 +48,9 @@ def message_remove_test():
     data['channels'][0].members.append(user1.u_id)
     data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
     # setup end
+    # testing
+    
+    # testing end
     
 def message_edit_test():
     # setup
@@ -51,6 +63,9 @@ def message_edit_test():
     data['channels'][0].members.append(user1.u_id)
     data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
     # setup end
+    # testing
+    
+    # testing end
 
 def message_react_test():
     # setup
@@ -63,6 +78,9 @@ def message_react_test():
     data['channels'][0].members.append(user1.u_id)
     data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
     # setup end
+    # testing
+    
+    # testing end
 
 def message_unreact_test():
     # setup
@@ -75,6 +93,9 @@ def message_unreact_test():
     data['channels'][0].members.append(user1.u_id)
     data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
     # setup end
+    # testing
+    
+    # testing end
 
 def message_pin_test():
     # setup
@@ -87,6 +108,9 @@ def message_pin_test():
     data['channels'][0].members.append(user1.u_id)
     data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
     # setup end
+    # testing
+    
+    # testing end
 
 def message_unpin_test():
     # setup
@@ -99,4 +123,7 @@ def message_unpin_test():
     data['channels'][0].members.append(user1.u_id)
     data['channels'][0].messages.append(mesg(user1, datetime.now(), 'hello world', 54321, 123456, False))
     # setup end
+    # testing
+    
+    # testing end
 

@@ -2,16 +2,17 @@ from flask import Flask, request, flash
 from datetime import datetime
 from json import dumps
 from class_defines import data, Channel, User
-from Error import AccessError
+#from Error import AccessError
 #from helper_functions import check_in_channel
 from uuid import uuid4
 from auth import auth_register
 import jwt
 import json
+from message import msg_send
 
 #TESTING:
 import pytest
-from Error import AccessError
+#from Error import AccessError
 
 app = Flask(__name__)
 
@@ -69,7 +70,7 @@ def channels_create(token, name, is_public):
     if max_20_characters(name) == False:
         raise ValueError('name is more than 20 characters')
     else:
-        channel_id = int(uuid4())
+        channel_id = data['channel_count'] + 1
         data['channels'].append(Channel(name, is_public, channel_id, False))
         index = channel_index(channel_id)
         data['channels'][index].owners.append(user_from_token(token).u_id)
@@ -415,7 +416,7 @@ def channels_list(token):
     })
 
 def test_channels_list():
-    # empty data['channels'] & ['accounts'] since it will be populated from other tests
+    # empty data['channels'] & ['accounts'] since it may be populated from other tests
     data['channels'].clear
     data['accounts'].clear
 
@@ -435,7 +436,7 @@ def test_channels_list():
     channel_dict2 = json.loads(channels_create(token2, "token2channel6", True)) # token2's channel
     channel_id2 = channel_dict2['channel_id']
 
-    list_dict = channels_list(token)
+    list_dict = channels_list(token) # should work
     assert json.loads(channels_list(token))['channels'] == [{'channel_id':channel_id, 'name':"tokenchannel6"}] # displays token1's channel only
     assert json.loads(channels_list(token2))['channels'] == [{'channel_id':channel_id2, 'name':"token2channel6"}] # displays token2's channel only
 
@@ -444,20 +445,43 @@ def channels_listall(token):
 
     channel_list = []
     for channel in data['channels']:
-        channel_list.append(channel.name)
+        list_dict = {'channel_id': channel.channel_id, 'name': channel.name}
+        channel_list.append(list_dict)
 
     return dumps({
         'channels': channel_list
     })
 
-def channel_messages():
+def test_channels_listall():
+    # empty data['channels'] & ['accounts'] since it may be populated from other tests
+    data['channels'].clear
+    data['accounts'].clear
+
+    #SETUP START
+    auth_register_dict = json.loads(auth_register("goodemail7@gmail.com", "password123456", "John7", "Smith7"))
+    token = auth_register_dict['token']
+    uid = auth_register_dict['u_id']
+
+    auth_register_dict2 = json.loads(auth_register("emad7@gmail.com", "password142256", "Emad7", "Siddiqui7"))
+    token2 = auth_register_dict2['token']
+    uid2 = auth_register_dict2['u_id']
+    #SETUP END
+    channel_dict = json.loads(channels_create(token, "tokenchannel7", True)) # token1's channel
+    channel_id = channel_dict['channel_id']
+
+    #assert json.loads(channels_listall(token))['channels'] == [{'channel_id':channel_id, 'name':"tokenchannel6"}] # displays token1's channel only
+
+    channel_dict2 = json.loads(channels_create(token2, "token2channel", True)) # token1's channel
+    channel_id = channel_dict2['channel_id']
+
+def channel_messages(token, channel_id, start):
     global data
 
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
 
     # raise AccessError if authorised user isn't in channel
-    if user_from_token(token) not in data['channels'][index].members or user_from_token(token) not in data['channels'][index].owners or user_from_token(token) not in data['channels'][index].admins:
+    if user_from_token(token).u_id not in data['channels'][index].members:
         raise AccessError('authorised user is not in channel')
 
     # raise ValueError if start is greater than no. of total messages
@@ -465,9 +489,11 @@ def channel_messages():
     if start > no_total_messages:
         raise ValueError('start is greater than no. of total messages')
 
+    # { message_id, u_id, message, time_created, reacts, is_pinned,  }
+    end = -1
     messages = []
     i = start
-    for i in data['channels'][index].messages[i]:
+    for item in data['channels'][index].messages[i:]:
         message = {}
         message['message_id'] = data['channels'][index].messages[i].message_id
         message['u_id'] = data['channels'][index].messages[i].sender
@@ -477,11 +503,11 @@ def channel_messages():
         message['is_pinned'] = data['channels'][index].messages[i].is_pinned
 
         messages.append(message)
-        if i == (start + 50):
-            end = i
-            break
         if i == no_total_messages:
             end = -1
+            break
+        if i == (start + 50):
+            end = i
             break
 
     return dumps({

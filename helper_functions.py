@@ -1,5 +1,5 @@
 import re
-from Error import AccessError
+from exception import ValueError, AccessError
 from class_defines import data, User, Channel
 
 # Helper functions
@@ -10,9 +10,12 @@ def check_email(email):
         raise ValueError('not a valid email')
 
 # Helpers from Emad's channel
+# channel invite vs join, invite needed to join a private channel. passive v active.
+# given a token, returns acc with that token
 def user_from_token(token):
     global data
     for acc in data['accounts']:
+        #print(acc)
         if acc.token == token:
             return acc
     raise AccessError('token does not exist for any user')
@@ -26,8 +29,8 @@ def user_from_token(token):
 #     raise AccessError('u_id does not exist for any user')
 def user_from_uid(u_id):
     global data
-    for acc in data['accounts']:
-        if acc.u_id == u_id:
+    for acc in enumerate(data['accounts']):
+        if int(acc.user_id) == int(u_id):
             return acc
     raise AccessError("u_id does not exist for any user")
 
@@ -41,12 +44,9 @@ def channel_index(channel_id):
     global data
     index = 0
     for i in data['channels']:
-        #TESTING:
-        #print(i.channel_id)
-        if int(i.channel_id) == int(channel_id):
+        if i.channel_id == channel_id:
             return index
         index = index + 1
-
     raise ValueError('channel does not exist')
 
 # Helpers from kenny's message
