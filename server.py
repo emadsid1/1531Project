@@ -4,15 +4,28 @@ from json import dumps
 from uuid import uuid4
 from flask_mail import Mail, Message
 from flask_cors import CORS
-from flask import Flask, request
-from Error import AccessError
+from flask import Flask, request, jsonify
+from werkzeug.exceptions import HTTPException
+from exception import ValueError, AccessError
 from class_defines import data, User, Channel, Mesg, Reacts
 from auth import auth_login, auth_logout, auth_register, reset_request, reset_reset
 from message import send_later, msg_send, msg_remove, msg_edit, msg_pin, msg_unpin, msg_react, msg_unreact
 from channel_functions import channels_create, channel_invite, channel_join, channel_leave, channel_add_owner, channel_remove_owner, channel_details, channels_list, channels_listall, channel_messages
 from helper_functions import * # TODO CHANGE LATER, KEEP FOR NOW
 
+def defaultHandler(err):
+    response = err.get_response()
+    response.data = dumps({
+        "code": err.code,
+        "name": "System Error",
+        "message": err.description,
+    })
+    response.content_type = 'application/json'
+    return response 
+
 app = Flask(__name__)
+app.config['TRAP_HTTP_EXCEPTIONS'] = True
+app.register_error_handler(Exception, defaultHandler)
 CORS(app)
 app.config.update(
     MAIL_SERVER ='smtp.gmail.com',
@@ -159,9 +172,7 @@ def route_msg_remove():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     msg_remove(token, msg_id)
-    return dumps({
-
-    })
+    return dumps({})
 
 @app.route('/message/edit', methods=['PUT'])
 def route_msg_edit():
@@ -169,9 +180,7 @@ def route_msg_edit():
     msg_id = int(request.form.get('message_id'))
     new_message = request.form.get('message')
     msg_edit(token, msg_id, new_message)
-    return dumps({
-
-    })
+    return dumps({})
 
 @app.route('/message/react', methods=['POST'])
 def route_msg_react():
@@ -179,9 +188,7 @@ def route_msg_react():
     msg_id = int(request.form.get('message_id'))
     react_id = int(request.form.get('react_id'))
     msg_react(token, msg_id, react_id)
-    return dumps({
-
-    })
+    return dumps({})
 
 @app.route('/message/unreact', methods=['POST'])
 def route_msg_unreact():
@@ -189,27 +196,21 @@ def route_msg_unreact():
     msg_id = int(request.form.get('message_id'))
     react_id = int(request.form.get('react_id'))
     msg_unreact(toekn, msg_id, react_id)
-    return dumps({
-
-    })
+    return dumps({})
 
 @app.route('/message/pin', methods=['POST'])
 def route_msg_pin():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     msg_pin(token, msg_id)
-    return dumps({
-
-    })
+    return dumps({})
 
 @app.route('/message/unpin', methods=['POST'])
 def route_msg_unpin():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     msg_unpin(token, msg_id)
-    return dumps({
-        
-    })
+    return dumps({})
 
 @app.route('/user/profile', methods=['GET'])
 def route_user_profile():

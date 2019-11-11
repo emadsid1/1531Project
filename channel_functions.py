@@ -2,7 +2,7 @@ from flask import Flask, request, flash
 from datetime import datetime
 from json import dumps
 from class_defines import data, Channel, User
-from Error import AccessError
+from exception import ValueError, AccessError
 #from helper_functions import check_in_channel
 from uuid import uuid4
 from auth import auth_register
@@ -11,7 +11,6 @@ import json
 
 #TESTING:
 import pytest
-from Error import AccessError
 
 app = Flask(__name__)
 
