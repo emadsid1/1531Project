@@ -47,9 +47,8 @@ class Reacts():
     def __init__(self, reacter, react_id):
         self.reacter = reacter          # type user
         self.react_id = react_id        # react id of the reaction (for iteration 2 this is 1)
-
 data = {
     'accounts': [], #User('chiefjief5@gmail.com', '123456', 'Jeffrey', 'Oh', 'JeffreyOh', '1234', 0), User('kennyhan9831@gmail.com', '1234567', 'Jun', 'Han', 'JunHan', '12345', 1)
-    'channels': [Channel('Mychannel', True, 787, False)],
+    'channels': [], #[Channel('Mychannel', True, 787, False)],
     'account_count': 0
 }

@@ -19,19 +19,19 @@ from helper_functions import check_email, find_channel, find_msg, check_admin, c
 def user_profile(token, user_id):
     global data
     # print(user_id)
-    # user = user_from_uid(user_id) # raises AccessError if u_id invalid
-    user = user_from_token(token) # raises AccessError if invalid token
-    # if user != data["accounts"][user_num]:
-    #     raise ValueError("Token does not match u_id!")
-    return dumps({
-        "email": user.email,
-        "name_first": user.name_first,
-        "name_last": user.name_last,
-        "handle_str": user.handle,
-        "profile_img_url": user.prof_pic,
+    user_uid = user_from_uid(user_id) # raises AccessError if u_id invalid
+    user_token = user_from_token(token) # raises AccessError if invalid token
+    if user_uid != user_token:
+        raise ValueError("Token does not match u_id!")
+    return {
+        "email": user_token.email,
+        "name_first": user_token.name_first,
+        "name_last": user_token.name_last,
+        "handle_str": user_token.handle,
+        "profile_img_url": user_token.prof_pic,
         # "token": token,
         # "u_id": user_id
-    })
+    }
 
 def user_profile_setname(token, name_first, name_last):
     global data
@@ -42,8 +42,7 @@ def user_profile_setname(token, name_first, name_last):
     user = user_from_token(token) # raises AccessError if invalid token
     user.name_first = name_first
     user.name_last = name_last
-    return dumps({})
-
+    # no return statement
 
 def user_profile_email(token, email):
     global data
@@ -61,7 +60,7 @@ def user_profile_email(token, email):
         data["accounts"][counter].email = email
     else:
         raise Exception("AccessError") # token is invalid
-    return dumps({})
+    # no return statement
 
 def user_profile_sethandle(token, handle):
     global data
@@ -80,7 +79,7 @@ def user_profile_sethandle(token, handle):
         data["accounts"][counter].handle = handle
     else:
         raise Exception("AccessError") #token is invalid
-    return dumps({})
+    # no return statement
 
 # DOES NOT NEED TO BE COMPLETED UNTIL ITERATION 3
 def user_profile_uploadphoto():
@@ -90,7 +89,7 @@ def user_profile_uploadphoto():
         raise Exception("ValueError")
     url = request.form.get("img_url")
     # how to get image size?
-    return dumps({})
+    # no return statement
 
 def users_all(token):
     global data
@@ -109,9 +108,9 @@ def users_all(token):
             valid = True
     if valid == False:
         raise Exception("AccessError") # token is invalid
-    return dumps({
+    return {
         "users": user_list
-    })
+    }
 
 def standup_start(token, channel, length):
     global data
@@ -130,26 +129,26 @@ def standup_start(token, channel, length):
     t = Timer(length, standup_active, (token, channel))
     t.start()
 
-    return dumps({
+    return {
         "time_finish": standup_finish
-    })
+    }
 
 def standup_active(token, channel):
     global data
-    ch_num = find_channel(channel) # raises AccessError if channel does not exist
-    check_in_channel(token, ch_num) # raises AccessError if user is not in channel
-    if data["channels"][ch_num].is_standup == False:
+    chan = find_channel(channel) # raises AccessError if channel does not exist
+    #check_in_channel(token, ch_num) # raises AccessError if user is not in channel
+    if chan.is_standup == False:
         finish = None
     else:
-        if data["channels"][ch_num].standup_time < datetime.now():
-            data["channels"][ch_num].is_standup = False
+        if chan.standup_time < datetime.now():
+            chan.is_standup = False
             standup_end(token, ch_num) # TODO: write this function
         else:
-            finish = data["channels"][ch_num].standup_time
-    return dumps({
-        "is_active": data["channels"][ch_num].is_standup,
+            finish = chan.standup_time
+    return {
+        "is_active": chan.is_standup,
         "time_finish": finish
-    })
+    }
 
 def standup_send(token, channel, message):
     global data
@@ -165,7 +164,7 @@ def standup_send(token, channel, message):
     user_index = user_from_token(token)
     user = data["accounts"][user_index].handle
     data["channels"][ch_num].standup_messages.append([user, message])
-    return dumps({})
+    # no return statement
 
 def search(token, query_str):
     global data
@@ -184,8 +183,7 @@ def search(token, query_str):
                     "reacts": msg.reaction,
                     "is_pinned": msg.pin
                 })
-
-    return dumps({messages})
+    return {messages}
 
 def admin_userpermission_change(token, u_id, p_id):
     global data
@@ -211,7 +209,7 @@ def admin_userpermission_change(token, u_id, p_id):
                         chan.members.remove(u_id)
                     if not(u_id in chan.owners):
                         chan.owners.append(u_id)
-            return dumps({})
+            return 0 # TODO: fix this
     raise ValueError('u_id does not refer to a valid user')
     # for ch in data["channels"]:
     #     for own in ch.owners:
