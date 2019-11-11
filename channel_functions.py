@@ -191,25 +191,24 @@ def channel_leave(token, channel_id):
     global data
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
-
     acct = user_from_token(token)
-    #print(data['channels'][index].members)
-    print(acct.u_id)
-    #data['channels'][index].members.pop(acct.u_id)
+    
+    # raise AccessError if authorised user not in channel
+    if (channel_id in acct.in_channel) == False:
+        raise AccessError('authorised user is not in channel')
 
-    for j in enumerate(data['channels'][index].members):
+    for j in data['channels'][index].members:
         if j == acct.u_id:
-            #print(data['channels'][index].members[j])
-            data['channels'][index].members.pop(j)
+            data['channels'][index].members.remove(j) #DONT use .pop as it takes in the index, .remove takes in element
+    
+    for j in data['channels'][index].owners:
+        if j == acct.u_id:
+            data['channels'][index].owners.remove(j)
 
-
-    #if acct.u_id in data['channels'][index].members:
-    #    data['channels'][index].owners.pop(acct.u_id)
-
-    #if acct.u_id in data['channels'][index].owners:
-    #    data['channels'][index].owners.pop(acct.u_id)
-    #if acct.u_id in data['channels'][index].admins:
-    #    data['channels'][index].admins.pop(acct.u_id)
+    #TODO: Add admin attribute to class in class_defines.py
+    #for j in data['channels'][index].admins:
+    #    if j == acct.u_id:
+    #        data['channels'][index].admins.remove(j)
 
     return dumps({
     })
@@ -218,6 +217,7 @@ def test_channel_leave():
     #SETUP START
     auth_register_dict = json.loads(auth_register("goodemail2@gmail.com", "password123456", "John2", "Smith2"))
     token = auth_register_dict['token']
+    uid = auth_register_dict['u_id']
 
     auth_register_dict2 = json.loads(auth_register("emad2@gmail.com", "password142256", "Emad2", "Siddiqui2"))
     token2 = auth_register_dict2['token']
@@ -233,13 +233,16 @@ def test_channel_leave():
     with pytest.raises(Exception): # Following should raise exceptions
         channel_leave(token, 00000000000) #ValueError since channel_id does not exist
 
-    #with pytest.raises(Exception): # Following should raise exceptions
-    #    channel_leave(token2, channel_id) # token2 is not a part of channel_id, AccessError
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_leave(token2, channel_id) # token2 is not a part of channel_id, AccessError
 
     channel_invite(token, channel_id, uid2) # add token2 to channel
+    # assert that uid2 has been added
+    assert json.loads(channel_details(token, channel_id))['members'] == [uid, uid2]
+
     channel_leave(token2, channel_id) # should work as now token2 is part of channel
-    
-    #TODO: ASSERT THAT data['channels'] member list only has u_id of token and not u_id of token2 
+    # assert that uid2 has been deleted
+    assert json.loads(channel_details(token, channel_id))['members'] == [uid] 
 
 def channel_add_owner(token, channel_id, u_id):
     global data
@@ -298,10 +301,10 @@ def channel_details(token, channel_id):
     members_uid = []
 
     for i in data['channels'][index].owners:
-        owners_uid.append(i.u_id)
+        owners_uid.append(i)
     
     for i in data['channels'][index].members:
-       members_uid.append(i.u_id)
+       members_uid.append(i)
     
     return dumps({
         'name': channel_name,
