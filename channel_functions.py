@@ -393,7 +393,7 @@ def test_channel_details():
     with pytest.raises(Exception): # Following should raise exceptions
         channel_details(token2, channel_id) # AccessError since token2 is not in channel
     
-    # channel_details has been further tested indirectly in the asserts of other test functions, 
+    # channel_details has been further tested in the asserts of other test functions, 
     # such as assert json.loads(channel_details(token, channel_id))['owners'] == [uid, uid2]
 
 def channels_list(token):
@@ -405,13 +405,37 @@ def channels_list(token):
 
     channel_list = []
     for channel in data['channels']:
-        for acct in channel.members:
-            if acct.token == token:
+        for u_id in channel.members:
+            if u_id == user_from_token(token).u_id:
                 channel_list.append(channel.name)
 
     return dumps({
         'channels': channel_list
     })
+
+def test_channels_list():
+    # empty data['channels'] since it will be populated from other tests
+    data['channels'].clear
+
+    #SETUP START
+    auth_register_dict = json.loads(auth_register("goodemail6@gmail.com", "password123456", "John6", "Smith6"))
+    token = auth_register_dict['token']
+    uid = auth_register_dict['u_id']
+
+    auth_register_dict2 = json.loads(auth_register("emad6@gmail.com", "password142256", "Emad6", "Siddiqui6"))
+    token2 = auth_register_dict2['token']
+    uid2 = auth_register_dict2['u_id']
+    #SETUP END
+
+    channel_dict = json.loads(channels_create(token, "tokenchannel6", True)) # token1's channel
+    channel_id = channel_dict['channel_id']
+    
+    channel_dict2 = json.loads(channels_create(token2, "token2channel6", True)) # token2's channel
+    channel_id2 = channel_dict2['channel_id']
+
+    assert json.loads(channels_list(token))['channels'] == ["tokenchannel6"] # displays token1's channel only
+    assert json.loads(channels_list(token2))['channels'] == ["token2channel6"] # displays token2's channel only
+    
 
 def channels_listall(token):
     global data
