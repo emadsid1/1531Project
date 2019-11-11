@@ -2,15 +2,17 @@ from flask import Flask, request, flash
 from datetime import datetime
 from json import dumps
 from class_defines import data, Channel, User
-from exception import ValueError, AccessError
+#from Error import AccessError
 #from helper_functions import check_in_channel
 from uuid import uuid4
 from auth import auth_register
 import jwt
 import json
+from message import msg_send
 
 #TESTING:
 import pytest
+#from Error import AccessError
 
 app = Flask(__name__)
 
@@ -488,7 +490,7 @@ def channel_messages(token, channel_id, start):
         raise ValueError('start is greater than no. of total messages')
     
     # { message_id, u_id, message, time_created, reacts, is_pinned,  }
-    
+    end = -1
     messages = []
     i = start
     for item in data['channels'][index].messages[i:]:
