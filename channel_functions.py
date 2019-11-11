@@ -407,15 +407,17 @@ def channels_list(token):
     for channel in data['channels']:
         for u_id in channel.members:
             if u_id == user_from_token(token).u_id:
-                channel_list.append(channel.name)
-
+                list_dict = {'channel_id':channel.channel_id, 'name':channel.name}
+                channel_list.append(list_dict)
+    print(channel_list)
     return dumps({
         'channels': channel_list
     })
 
 def test_channels_list():
-    # empty data['channels'] since it will be populated from other tests
+    # empty data['channels'] & ['accounts'] since it will be populated from other tests
     data['channels'].clear
+    data['accounts'].clear
 
     #SETUP START
     auth_register_dict = json.loads(auth_register("goodemail6@gmail.com", "password123456", "John6", "Smith6"))
@@ -433,9 +435,9 @@ def test_channels_list():
     channel_dict2 = json.loads(channels_create(token2, "token2channel6", True)) # token2's channel
     channel_id2 = channel_dict2['channel_id']
 
-    assert json.loads(channels_list(token))['channels'] == ["tokenchannel6"] # displays token1's channel only
-    assert json.loads(channels_list(token2))['channels'] == ["token2channel6"] # displays token2's channel only
-    
+    list_dict = channels_list(token)
+    assert json.loads(channels_list(token))['channels'] == [{'channel_id':channel_id, 'name':"tokenchannel6"}] # displays token1's channel only
+    assert json.loads(channels_list(token2))['channels'] == [{'channel_id':channel_id2, 'name':"token2channel6"}] # displays token2's channel only
 
 def channels_listall(token):
     global data
