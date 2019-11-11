@@ -373,6 +373,29 @@ def channel_details(token, channel_id):
         'members': members_uid
     })
 
+def test_channel_details():
+    #SETUP START
+    auth_register_dict = json.loads(auth_register("goodemail5@gmail.com", "password123456", "John5", "Smith5"))
+    token = auth_register_dict['token']
+    uid = auth_register_dict['u_id']
+
+    auth_register_dict2 = json.loads(auth_register("emad5@gmail.com", "password142256", "Emad5", "Siddiqui5"))
+    token2 = auth_register_dict2['token']
+    uid2 = auth_register_dict2['u_id']
+
+    channel_dict = json.loads(channels_create(token, "tokenchannel5", True))
+    channel_id = channel_dict['channel_id']
+    #SETUP END
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_details(token, 000000) # ValueError since channel_id does not exist
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_details(token2, channel_id) # AccessError since token2 is not in channel
+    
+    # channel_details has been further tested indirectly in the asserts of other test functions, 
+    # such as assert json.loads(channel_details(token, channel_id))['owners'] == [uid, uid2]
+
 def channels_list(token):
     global data
 
