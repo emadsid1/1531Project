@@ -3,7 +3,7 @@ from json import dumps
 from uuid import uuid4
 from flask_mail import Mail, Message
 from class_defines import data, User
-from helper_functions import check_email
+from helper_functions import check_email, user_from_uid
 
 def auth_login(email, password):
     global data
@@ -21,6 +21,7 @@ def auth_login(email, password):
     return dumps({'u_id': data['accounts'][i].u_id, 'token': token.decode('utf-8')})
 
 def auth_logout(token):
+    global data
     if token == '':
         return dumps({'is_success': False})
     for acc in data['accounts']:
@@ -70,20 +71,16 @@ def auth_register(email, password, first, last): # TODO FIRST USER IS OWNER?
     data['accounts'].append(User(email, password, first, last, handle, token.decode('utf-8'), user_id))
     return dumps({'u_id': user_id,'token': token.decode('utf-8')})
 
-def reset_request(app, email):
+def reset_request(email):
+    global data
     for acc in data['accounts']:
         if acc.email == email:
-            mail = Mail(app)
             resetcode = str(uuid4())
-            msg = Message("RESETCODE!",
-                sender="snakeflask3@gmail.com",
-                recipients=[email])
-            msg.body = "Please use this reset code to reset your password: " +'(' + resetcode + ')'
-            mail.send(msg)
             acc.reset_code = resetcode
     return dumps({})
 
 def reset_reset(code, password):
+    global data
     for acc in data['accounts']:
         if code == acc.reset_code:
             if len(password) >= 6:

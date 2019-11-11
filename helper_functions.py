@@ -23,8 +23,8 @@ def user_from_token(token):
 # given u_id, returns acc with that u_id
 def user_from_uid(u_id):
     global data
-    for acc in enumerate(data['accounts']):
-        if int(acc.user_id) == int(u_id):
+    for acc in data['accounts']:
+        if acc.u_id == u_id:
             return acc
     raise AccessError('u_id does not exist for any user')
 
