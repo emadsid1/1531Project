@@ -4,15 +4,28 @@ from json import dumps
 from uuid import uuid4
 from flask_mail import Mail, Message
 from flask_cors import CORS
-from flask import Flask, request
-from Error import AccessError
+from flask import Flask, request, jsonify
+from werkzeug.exceptions import HTTPException
+from exception import ValueError, AccessError
 from class_defines import data, User, Channel, Mesg, Reacts
 from auth import auth_login, auth_logout, auth_register, reset_request, reset_reset
 from message import send_later, msg_send, msg_remove, msg_edit, msg_pin, msg_unpin, msg_react, msg_unreact
 from channel_functions import channels_create, channel_invite, channel_join, channel_leave, channel_add_owner, channel_remove_owner, channel_details, channels_list, channels_listall, channel_messages
 from helper_functions import * # TODO CHANGE LATER, KEEP FOR NOW
 
+def defaultHandler(err):
+    response = err.get_response()
+    response.data = dumps({
+        "code": err.code,
+        "name": "System Error",
+        "message": err.description,
+    })
+    response.content_type = 'application/json'
+    return response 
+
 app = Flask(__name__)
+app.config['TRAP_HTTP_EXCEPTIONS'] = True
+app.register_error_handler(Exception, defaultHandler)
 CORS(app)
 app.config.update(
     MAIL_SERVER ='smtp.gmail.com',

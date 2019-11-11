@@ -2,7 +2,7 @@
 Message functions by Kenny Han z5206270 (just to make pylint happy XD) <- TODO LMAO
 '''
 from json import dumps
-from Error import AccessError
+from exception import ValueError, AccessError
 from datetime import datetime, timezone
 from time import time
 from threading import Timer
