@@ -281,7 +281,7 @@ def test_channel_add_owner():
     #SETUP END
 
     with pytest.raises(Exception): # Following should raise exceptions
-        channel_leave(token, 00000000000) #ValueError since channel_id does not exist
+        channel_add_owner(token, 00000000000, uid2) #ValueError since channel_id does not exist
 
     with pytest.raises(Exception): # Following should raise exceptions
         channel_add_owner(token, channel_id, uid) # ValueError, u_id is already an owner
@@ -290,7 +290,9 @@ def test_channel_add_owner():
         channel_add_owner(token2, channel_id, uid3) # AccessError token2 is not an owner of slackr or channel
     
     channel_add_owner(token, channel_id, uid2) # make token2 an owner
+    assert json.loads(channel_details(token, channel_id))['owners'] == [uid, uid2]
     channel_add_owner(token2, channel_id, uid3) # Exception should now not be raised
+    assert json.loads(channel_details(token, channel_id))['owners'] == [uid, uid2, uid3]
 
 def channel_remove_owner(token, channel_id, u_id):
     global data
@@ -299,18 +301,49 @@ def channel_remove_owner(token, channel_id, u_id):
     index = channel_index(channel_id)
 
     # raise ValueError if u_id is not an owner
-    if user_from_uid(u_id) not in data['channels'][index].owners:
+    if u_id not in data['channels'][index].owners:
         raise ValueError('u_id is not an owner of the channel')
 
     # raise AccessError if token is not an owner of this channel
-    if user_from_token(token) not in data['channels'][index].owners:
+    if user_from_token(token).u_id not in data['channels'][index].owners:
         raise AccessError('authorised user is not an owner of this channel')
     
-    acct = user_from_uid(u_id)
-    data['channels'][index].owners.pop(acct)
+    data['channels'][index].owners.remove(u_id)
 
     return dumps({
     })
+
+def test_channel_remove_owner():
+    #SETUP START
+    auth_register_dict = json.loads(auth_register("goodemail4@gmail.com", "password123456", "John4", "Smith4"))
+    token = auth_register_dict['token']
+    uid = auth_register_dict['u_id']
+
+    auth_register_dict2 = json.loads(auth_register("emad4@gmail.com", "password142256", "Emad4", "Siddiqui4"))
+    token2 = auth_register_dict2['token']
+    uid2 = auth_register_dict2['u_id']
+
+    auth_register_dict3 = json.loads(auth_register("email4@gmail.com", "password13456", "Firstname4", "Lastname4"))
+    uid3 = auth_register_dict3['u_id']
+
+    channel_dict = json.loads(channels_create(token, "tokenchannel4", True))
+    channel_id = channel_dict['channel_id']
+    #SETUP END
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_remove_owner(token, 00000000000, uid2) # ValueError since channel_id does not exist
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_remove_owner(token2, channel_id, uid3) # AccessError since token2 is not an owner of slackr or channel
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_remove_owner(token, channel_id, uid2) # ValueError since uid2 is not an owner
+    
+    channel_add_owner(token, channel_id, uid2) # make uid2 an owner
+    assert json.loads(channel_details(token, channel_id))['owners'] == [uid, uid2]
+    channel_remove_owner(token, channel_id, uid2) # Exception should now not be raised
+    assert json.loads(channel_details(token, channel_id))['owners'] == [uid]
+
 
 def channel_details(token, channel_id):
     global data
