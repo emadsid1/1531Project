@@ -41,6 +41,7 @@ def echo2():
 def route_auth_login():
     email = request.form.get('email')
     password = request.form.get('password')
+    print(request.host)
     return auth_login(email, password)
 
 @app.route('/auth/logout', methods = ['POST'])
@@ -228,7 +229,13 @@ def route_user_profile_sethandle():
 @app.route('/user/profiles/uploadphoto', methods=['POST'])
 # DOES NOT NEED TO BE COMPLETED UNTIL ITERATION 3
 def route_user_profile_uploadphoto():
-    user_profile_uploadphoto()
+    token = request.form.get("token")
+    img_url = request.form.get("img_url")
+    x_start = int(request.form.get("x_start"))
+    y_start = int(request.form.get("y_start"))
+    x_end = int(request.form.get("x_end"))
+    y_end = int(request.form.get("y_end"))
+    user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end)
     return dumps({})
 
 @app.route('/users/all', methods=['GET'])

@@ -82,13 +82,15 @@ def user_profile_sethandle(token, handle):
     # no return statement
 
 # DOES NOT NEED TO BE COMPLETED UNTIL ITERATION 3
-def user_profile_uploadphoto():
+def user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end):
     global data
-    request = request.get("img_url")
-    if request != 200:
-        raise Exception("ValueError")
-    url = request.form.get("img_url")
     # how to get image size?
+    # TODO: use week 8 slides from lecture
+    # imgDown.py
+    # crop.py
+    # convert the url into something unique (perhaps u_id)
+    # static.py
+    # [request.host]/static/filename.png
     # no return statement
 
 def users_all(token):
