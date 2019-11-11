@@ -72,8 +72,8 @@ def channels_create(token, name, is_public):
         channel_id = int(uuid4())
         data['channels'].append(Channel(name, is_public, channel_id, False))
         index = channel_index(channel_id)
-        data['channels'][index].owners.append(user_from_token(token))
-        data['channels'][index].members.append(user_from_token(token))
+        data['channels'][index].owners.append(user_from_token(token).u_id)
+        data['channels'][index].members.append(user_from_token(token).u_id)
 
         # add channel to user's list of channels 
         acct = user_from_token(token)
@@ -177,7 +177,7 @@ def test_channel_join():
     auth_register_dict3 = json.loads(auth_register("email1@gmail.com", "password13456", "Firstname1", "Lastname1"))
     uid3 = auth_register_dict3['u_id']
 
-    channel_dict = json.loads(channels_create(token, "tokenchannel", False)) # create PRIVATE token's channel
+    channel_dict = json.loads(channels_create(token, "tokenchannel1", False)) # create PRIVATE token's channel
     channel_id = channel_dict['channel_id']
     #SETUP END
 
@@ -193,15 +193,53 @@ def channel_leave(token, channel_id):
     index = channel_index(channel_id)
 
     acct = user_from_token(token)
-    data['channels'][index].members.pop(acct)
+    #print(data['channels'][index].members)
+    print(acct.u_id)
+    #data['channels'][index].members.pop(acct.u_id)
 
-    if acct in data['channels'][index].owners:
-        data['channels'][index].owners.pop(acct)
-    if acct in data['channels'][index].admins:
-        data['channels'][index].admins.pop(acct)
+    for j in enumerate(data['channels'][index].members):
+        if j == acct.u_id:
+            #print(data['channels'][index].members[j])
+            data['channels'][index].members.pop(j)
+
+
+    #if acct.u_id in data['channels'][index].members:
+    #    data['channels'][index].owners.pop(acct.u_id)
+
+    #if acct.u_id in data['channels'][index].owners:
+    #    data['channels'][index].owners.pop(acct.u_id)
+    #if acct.u_id in data['channels'][index].admins:
+    #    data['channels'][index].admins.pop(acct.u_id)
 
     return dumps({
     })
+
+def test_channel_leave():
+    #SETUP START
+    auth_register_dict = json.loads(auth_register("goodemail2@gmail.com", "password123456", "John2", "Smith2"))
+    token = auth_register_dict['token']
+
+    auth_register_dict2 = json.loads(auth_register("emad2@gmail.com", "password142256", "Emad2", "Siddiqui2"))
+    token2 = auth_register_dict2['token']
+    uid2 = auth_register_dict2['u_id']
+
+    auth_register_dict3 = json.loads(auth_register("email2@gmail.com", "password13456", "Firstname2", "Lastname2"))
+    uid3 = auth_register_dict3['u_id']
+
+    channel_dict = json.loads(channels_create(token, "tokenchannel2", False)) # create PRIVATE token's channel
+    channel_id = channel_dict['channel_id']
+    #SETUP END
+
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_leave(token, 00000000000) #ValueError since channel_id does not exist
+
+    #with pytest.raises(Exception): # Following should raise exceptions
+    #    channel_leave(token2, channel_id) # token2 is not a part of channel_id, AccessError
+
+    channel_invite(token, channel_id, uid2) # add token2 to channel
+    channel_leave(token2, channel_id) # should work as now token2 is part of channel
+    
+    #TODO: ASSERT THAT data['channels'] member list only has u_id of token and not u_id of token2 
 
 def channel_add_owner(token, channel_id, u_id):
     global data
