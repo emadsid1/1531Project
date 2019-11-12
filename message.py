@@ -20,7 +20,7 @@ def send_later(token, msg, chan_id, sent_stamp):
 
 def msg_send(token, msg, chan_id):
     global data
-    sending_time = datetime.now()
+    sending_time = datetime.now().replace(tzinfo=timezone.utc).timestamp()
     print(sending_time)
     sender = user_from_token(token)
     current_channel = find_channel(chan_id)
