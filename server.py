@@ -94,63 +94,63 @@ def route_channels_create():
     token = request.form.get('token')
     name = request.form.get('name')
     is_public = request.form.get('is_public')
-    return channels_create(token, name, is_public)
+    return dumps(channels_create(token, name, is_public))
 
 @app.route('/channel/invite', methods = ['POST'])
 def route_channel_invite():
     token = request.form.get('token')
     channel_id = int(request.form.get('channel_id'))
     u_id = int(request.form.get('u_id'))
-    return channel_invite(token, channel_id, u_id)
+    return dumps(channel_invite(token, channel_id, u_id))
 
 @app.route('/channel/join', methods = ['POST'])
 def route_channel_join():
     token = request.form.get('token')
     channel_id = int(request.form.get('channel_id'))
-    return channel_join(token, channel_id)
+    return dumps(channel_join(token, channel_id))
 
 @app.route('/channel/leave', methods = ['POST'])
 def route_channel_leave():
     token = request.form.get('token')
     channel_id = int(request.form.get('channel_id'))
-    return channel_leave(token, channel_id)
+    return dumps(channel_leave(token, channel_id))
 
 @app.route('/channel/addowner', methods = ['POST'])
 def route_channel_add_owner():
     token = request.form.get('token')
     channel_id = int(request.form.get('channel_id'))
     u_id = int(request.form.get('u_id'))
-    return channel_add_owner(token, channel_id, u_id)
+    return dumps(channel_add_owner(token, channel_id, u_id))
 
 @app.route('/channel/removeowner', methods = ['POST'])
 def route_channel_remove_owner():
     token = request.form.get('token')
     channel_id = int(request.form.get('channel_id'))
     u_id = int(request.form.get('u_id'))
-    return channel_remove_owner(token, channel_id, u_id)
+    return dumps(channel_remove_owner(token, channel_id, u_id))
 
 @app.route('/channel/details', methods = ['GET'])
 def route_channel_details():
     token = request.args.get('token')
     channel_id = request.args.get('channel_id') # supposed to be an int
-    return channel_details(token, channel_id)
+    return dumps(channel_details(token, channel_id))
 
 @app.route('/channels/list', methods = ['GET'])
 def route_channels_list():
     token = request.args.get('token')
-    return channels_list(token)
+    return dumps(channels_list(token))
 
 @app.route('/channels/listall', methods = ['GET'])
 def route_channels_listall():
     token = request.args.get('token')
-    return channels_listall(token)
+    return dumps(channels_listall(token))
 
 @app.route('/channel/messages', methods = ['GET'])
 def route_channel_messages():
     token = request.args.get('token')
     channel_id = int(request.args.get('channel_id'))
     start = int(request.args.get('start'))
-    return channel_messages(token, channel_id, start)
+    return dumps(channel_messages(token, channel_id, start))
 
 @app.route('/message/sendlater', methods=['POST'])
 def route_send_later():
@@ -171,46 +171,40 @@ def route_msg_send():
 def route_msg_remove():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
-    msg_remove(token, msg_id)
-    return dumps({})
+    return dumps(msg_remove(token, msg_id))
 
 @app.route('/message/edit', methods=['PUT'])
 def route_msg_edit():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     new_message = request.form.get('message')
-    msg_edit(token, msg_id, new_message)
-    return dumps({})
+    return dumps(msg_edit(token, msg_id, new_message))
 
 @app.route('/message/react', methods=['POST'])
 def route_msg_react():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     react_id = int(request.form.get('react_id'))
-    msg_react(token, msg_id, react_id)
-    return dumps({})
+    return dumps(msg_react(token, msg_id, react_id))
 
 @app.route('/message/unreact', methods=['POST'])
 def route_msg_unreact():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     react_id = int(request.form.get('react_id'))
-    msg_unreact(toekn, msg_id, react_id)
-    return dumps({})
+    return dumps(msg_unreact(toekn, msg_id, react_id))
 
 @app.route('/message/pin', methods=['POST'])
 def route_msg_pin():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
-    msg_pin(token, msg_id)
-    return dumps({})
+    return dumps(msg_pin(token, msg_id))
 
 @app.route('/message/unpin', methods=['POST'])
 def route_msg_unpin():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
-    msg_unpin(token, msg_id)
-    return dumps({})
+    return dumps(msg_unpin(token, msg_id))
 
 @app.route('/user/profile', methods=['GET'])
 def route_user_profile():
