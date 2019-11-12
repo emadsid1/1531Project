@@ -20,7 +20,7 @@ class User():
         self.perm_id = perm_member # For slackr permissions
 
 class Channel():
-    def __init__(self, name, is_public, channel_id, standup_time):
+    def __init__(self, name, is_public, channel_id):
         # TODO may need to change permission structure
         self.owners = []                    # list of users
         self.members = []                   # list of users
@@ -29,7 +29,7 @@ class Channel():
         self.is_public = is_public          # public status
         self.channel_id = channel_id        # unique channel id
         self.is_standup = False             # standup flag
-        self.standup_time = standup_time    # standup_time start - any variable can be passed in as long as is_standup is False
+        self.standup_time = False    # standup_time start - any variable can be passed in as long as is_standup is False
         self.standup_messages = []          # list of standup messages - cleared after every standup
 
 class Mesg:
@@ -55,7 +55,7 @@ class Reacts():
 #         self.time = time                # either standup_end time or message_send time
 
 data = {
-    'accounts': [], #User('chiefjief5@gmail.com', '123456', 'Jeffrey', 'Oh', 'JeffreyOh', '1234', 0), User('kennyhan9831@gmail.com', '1234567', 'Jun', 'Han', 'JunHan', '12345', 1)
+    'accounts': [],
     'channels': [],
     'account_count': 0,
     'channel_count': 0,

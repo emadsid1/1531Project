@@ -13,22 +13,22 @@ from helper_functions import * # TODO: change this *
 #     "channels": [chan1]
 # }
 
-def user_profile(token):
+def user_profile(token, user_id):
     global data
     valid = False
     user = {}
     for acc in data["accounts"]:
         if token == acc.token: # note: assumes token is valid
             valid = True
-            if int(request.args.get("u_id")) == acc.u_id:
+            if int(user_id) == int(acc.u_id):
                 user["email"] = acc.email
                 user["name_first"] = acc.name_first
                 user["name_last"] = acc.name_last
                 user["handle_str"] = acc.handle
             else:
-                raise Exception("ValueError") # wrong u_id
+                raise ValueError(description = f"wrong u_id") # wrong u_id
     if valid == False:
-        raise Exception("AccessError") # invalid token
+        raise AccessError(description = "invalid token") # invalid token
     return dumps({
     "email": user["email"],
     "name_first": user["name_first"],
@@ -39,17 +39,17 @@ def user_profile(token):
 def user_profile_setname(token, name_first, name_last):
     global data
     if not(len(name_first) >= 1 and len(name_first) <= 50):
-        raise Exception("ValueError")
+        raise ValueError(description = "ValueError")
     if not(len(name_last) >= 1 and len(name_last) <= 50):
-        raise Exception("ValueError")
+        raise ValueError(description = "ValueError")
 
     for acc in data["accounts"]:
         if token == acc.token:
             acc.name_first = name_first
             acc.name_last = name_last
         else:
-            raise Exception("AccessError") # invalid token
-    return dumps({})
+            raise ValueError(description = "invalid token") # invalid token
+    return {}
 
 
 def user_profile_email(token, email):
@@ -61,32 +61,32 @@ def user_profile_email(token, email):
         if token == acc.token:
             found = True
         if email == acc.email:
-            raise Exception("ValueError") # email already being used
+            raise ValueError(description = "email already being used") # email already being used
         if found is False:
             counter += 1
     if found is not False:
         data["accounts"][counter].email = email
     else:
-        raise Exception("AccessError") # token is invalid
+        raise AccessError(description = "token is invalid") # token is invalid
     return dumps({})
 
 def user_profile_sethandle(token, handle):
     global data
     if len(handle) < 3 or len(handle) > 20:
-        raise Exception("ValueError") # handle has incorrect number of chars
+        raise ValueError(description = "handle has incorrect number of chars") # handle has incorrect number of chars
     counter = 0
     found = False
     for acc in data["accounts"]:
         if token == acc.token:
             found = True
         if handle == acc.handle:
-            raise Exception("ValueError") # handle already being used
+            raise ValueError(description = "handle already being used") # handle already being used
         if found is False:
             counter += 1
     if found is not False:
         data["accounts"][counter].handle = handle
     else:
-        raise Exception("AccessError") #token is invalid
+        raise AccessError(description = "token is invalid") #token is invalid
     return dumps({})
 
 # DOES NOT NEED TO BE COMPLETED UNTIL ITERATION 3
@@ -94,7 +94,7 @@ def user_profile_uploadphoto():
     global data
     request = request.get("img_url")
     if request != 200:
-        raise Exception("ValueError")
+        raise ValueError(description = "ValueError")
     url = request.form.get("img_url")
     # how to get image size?
     return dumps({})
@@ -104,20 +104,20 @@ def users_all(token):
     user_list = []
     valid = False
     for acc in data["accounts"]:
-        user_list.append(acc)
+        user_list.append(acc.u_id)
         if token == acc.token:
             valid = True
     if valid == False:
-        raise Exception("AccessError") # token is invalid
-    return dumps(user_list)
+        raise AccessError(description = "token is invalid") # token is invalid
+    return dumps({'users': user_list})
 
 def standup_start(token, channel, length):
     global data
     ch_num = find_channel(channel) # raises ValueError if channel does not exist
     if data["channels"][ch_num].is_standup == True:
-        raise Exception("AccessError") # standup is already in progress
+        raise AccessError(description = "AccessError") # standup is already in progress
     if length <= 0:
-        raise Exception("ValueError") # standup length needs to be greater than 0
+        raise ValueError(description = "ValueError") # standup length needs to be greater than 0
     check_in_channel(token, ch_num) # raises AccessError if user is not in channel
 
     # starts standup
@@ -153,9 +153,9 @@ def standup_send(token, channel, message):
     global data
     ch_num = find_channel(channel) # raises AccessError if channel does not exist
     if data["channels"][ch_num].is_standup == False:
-        raise Exception("ValueError") # standup is not happening atm
+        raise ValueError(description = "ValueError") # standup is not happening atm
     if len(message) > 1000:
-        raise Exception("ValueError") # message too long
+        raise ValueError(description = "ValueError") # message too long
     check_in_channel(token, ch_num) # raises AccessError if user is not in channel
 
     # TODO: how to check if standup has finished?
@@ -209,5 +209,5 @@ def admin_userpermission_change(token, u_id, p_id):
             return {}
     raise ValueError('u_id does not refer to a valid user')
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     app.run(debug=True)

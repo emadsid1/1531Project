@@ -1,7 +1,6 @@
 """Flask server"""
 import sys
 from json import dumps
-from uuid import uuid4
 from flask_mail import Mail, Message
 from flask_cors import CORS
 from flask import Flask, request, jsonify
@@ -10,7 +9,8 @@ from exception import ValueError, AccessError
 from class_defines import data, User, Channel, Mesg, Reacts
 from auth import auth_login, auth_logout, auth_register, reset_request, reset_reset
 from message import send_later, msg_send, msg_remove, msg_edit, msg_pin, msg_unpin, msg_react, msg_unreact
-from channel_functions import channels_create, channel_invite, channel_join, channel_leave, channel_add_owner, channel_remove_owner, channel_details, channels_list, channels_listall, channel_messages
+from profile import user_profile, user_profile_setname, user_profile_email, user_profile_sethandle, user_profile_uploadphoto, users_all, standup_start, standup_active, standup_send, search, admin_userpermission_change
+from channel import channels_create, channel_invite, channel_join, channel_leave, channel_add_owner, channel_remove_owner, channel_details, channels_list, channels_listall, channel_messages
 from helper_functions import * # TODO CHANGE LATER, KEEP FOR NOW
 
 def defaultHandler(err):
@@ -210,7 +210,7 @@ def route_msg_unpin():
 def route_user_profile():
     global data
     token = request.args.get("token")
-    user_id = user_from_token(token)
+    user_id = request.args.get('u_id')
     return user_profile(token, user_id)
 
 @app.route('/user/profile/setname', methods=['PUT'])
@@ -219,7 +219,7 @@ def route_user_profile_setname():
     token = request.form.get("token")
     name_first = request.form.get("name_first")
     name_last = request.form.get("name_last")
-    return user_profile_setname(token, name_first, name_last)
+    return dumps(user_profile_setname(token, name_first, name_last))
 
 @app.route('/user/profile/setemail', methods=['PUT'])
 def route_user_profile_email():
@@ -240,7 +240,7 @@ def route_user_profile_uploadphoto():
 
 @app.route('/users/all', methods=['GET'])
 def route_users_all():
-    token = request.form.get("token")
+    token = request.args.get("token")
     return users_all(token)
 
 @app.route('/standup/start', methods=['POST'])
@@ -252,8 +252,8 @@ def route_standup_start():
 
 @app.route('/standup/active', methods=['GET'])
 def route_standup_active():
-    token = request.form.get("token")
-    channel = request.form.get("channel_id")
+    token = request.args.get("token")
+    channel = request.args.get("channel_id")
     return standup_active(token, channel)
 
 @app.route('/standup/send', methods=['POST'])

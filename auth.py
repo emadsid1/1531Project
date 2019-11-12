@@ -1,23 +1,25 @@
 import jwt
 from uuid import uuid4
 from exception import ValueError, AccessError
-from class_defines import data, User
+from class_defines import data, User, perm_owner
 from helper_functions import check_email
 
 def auth_login(email, password):
     global data
     valid = False
     i = 0
+    user_id = 0
     check_email(email)
     for counter, acc in enumerate(data['accounts']):
         if acc.email == email and acc.password == password:
                 i = counter
+                user_id = acc.u_id
                 valid = True
     if (not(valid)):
         raise ValueError(description = 'email and/or password does not match any account')
     token = jwt.encode({'email': email}, password, algorithm = 'HS256')
-    data['accounts'][i].token = token.decode('utf-8')
-    return {'u_id': data['accounts'][i].u_id, 'token': token.decode('utf-8')}
+    data['accounts'][i].token = token
+    return {'u_id': user_id, 'token': token.decode('utf-8')}
 
 def auth_logout(token):
     global data
@@ -68,6 +70,8 @@ def auth_register(email, password, first, last): # TODO FIRST USER IS OWNER?
     handle.lower()
     token = jwt.encode({'email': email}, password, algorithm = 'HS256')
     data['accounts'].append(User(email, password, first, last, handle, token.decode('utf-8'), user_id))
+    if data['account_count'] == 1:
+        data['accounts'][0].perm_id == perm_owner
     return {'u_id': user_id,'token': token.decode('utf-8')}
 
 def reset_request(email):

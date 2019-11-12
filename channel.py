@@ -1,15 +1,10 @@
 from flask import Flask, request, flash
-from datetime import datetime
-from json import dumps
-from class_defines import data, Channel, User
-#from Error import AccessError
-# from exception import ValueError, AccessError
-#from helper_functions import check_in_channel
-from uuid import uuid4
+from class_defines import data, Channel, User, Mesg
+from exception import ValueError, AccessError
 from auth import auth_register
-import jwt
 import json
 from message import msg_send
+from helper_functions import user_from_uid, max_20_characters, user_from_token, channel_index
 
 #TESTING:
 import pytest
@@ -17,69 +12,21 @@ import pytest
 
 app = Flask(__name__)
 
-# given a token, returns acc with that token
-#TODO: Incorporate JWT decrypt to get it working with auth
-def user_from_token(token):
-    global data
-    for acc in data['accounts']:
-        #encoded = jwt.encode({'email': acc.email}, acc.password, algorithm = 'HS256')
-        #print(encoded.decode('utf-8'))
-        #print("acc.token: "+acc.token)
-
-        #if encoded.decode('utf-8') == acc.token:
-        #    return acc
-        #    token = jwt.encode({'email': email}, password, algorithm = 'HS256')   
-        #decoded = jwt.decode(acc.token, acc.password, algorithm = 'HS256')
-        #print(decoded)
-        #print(decoded['email'])
-        #print(type(acc.token))
-        #print(type(token))
-        #print("token: "+token)
-        if acc.token == token:
-            return acc
-    raise AccessError('token does not exist for any user')
-
-# given u_id, returns acc with that u_id
-def user_from_uid(u_id):
-    global data
-    for acc in data['accounts']:
-        if acc.u_id == u_id:
-            return acc
-    raise AccessError('u_id does not exist for any user')
-
-def max_20_characters(name):
-    if len(name) <= 20:
-        return True 
-    else:
-        return False
-
-def channel_index(channel_id):
-    global data
-    index = 0
-    for i in data['channels']:
-        #TESTING:
-        #print(i.channel_id)
-        if int(i.channel_id) == int(channel_id):
-            return index
-        index = index + 1
-    
-    raise ValueError('channel does not exist')
-
 def channels_create(token, name, is_public):
     global data
 
     if max_20_characters(name) == False:
-        raise ValueError('name is more than 20 characters')
-    else: 
-        channel_id = data['channel_count'] + 1
-        data['channels'].append(Channel(name, is_public, channel_id, False))
-        index = channel_index(channel_id)
-        data['channels'][index].owners.append(user_from_token(token).u_id)
-        data['channels'][index].members.append(user_from_token(token).u_id)
+        raise ValueError(description = 'name is more than 20 characters')
+    channel_id = data['channel_count']
+    data['channel_count'] += 1
+    data['channels'].append(Channel(name, is_public, channel_id))
+    index = channel_index(channel_id)
+    data['channels'][index].owners.append(user_from_token(token).u_id)
+    data['channels'][index].members.append(user_from_token(token).u_id)
 
-        # add channel to user's list of channels 
-        acct = user_from_token(token)
-        acct.in_channel.append(channel_id)
+    # add channel to user's list of channels 
+    acct = user_from_token(token)
+    acct.in_channel.append(channel_id)
     
     return {
         'channel_id': channel_id
@@ -102,7 +49,7 @@ def channel_invite(token, channel_id, u_id):
     #print(channel_id)
     print(acct.in_channel)
     if (channel_id in acct.in_channel) == False:
-        raise AccessError('authorised user is not in channel')
+        raise AccessError(description = 'authorised user is not in channel')
 
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
@@ -156,7 +103,7 @@ def channel_join(token, channel_id):
             if admin_acc.token == token:
                 valid = 1
         if valid == 0:
-            raise AccessError('authorised user is not an admin of private channel')
+            raise AccessError(description = 'authorised user is not an admin of private channel')
 
     acct = user_from_token(token)
     data['channels'][index].members.append(acct)
@@ -252,11 +199,11 @@ def channel_add_owner(token, channel_id, u_id):
 
     # check if user with u_id is already owner 
     if user_from_uid(u_id).u_id in data['channels'][index].owners:
-        raise ValueError('User with u_id is already an owner')
+        raise ValueError(description = 'User with u_id is already an owner')
 
     # check if authorised user is an owner of this channel
     if user_from_token(token).u_id not in data['channels'][index].owners:
-        raise AccessError('Authorised user not an owner of this channel')
+        raise AccessError(description = 'Authorised user not an owner of this channel')
     
     data['channels'][index].owners.append(u_id)
 
@@ -302,11 +249,11 @@ def channel_remove_owner(token, channel_id, u_id):
 
     # raise ValueError if u_id is not an owner
     if u_id not in data['channels'][index].owners:
-        raise ValueError('u_id is not an owner of the channel')
+        raise ValueError(description = 'u_id is not an owner of the channel')
 
     # raise AccessError if token is not an owner of this channel
     if user_from_token(token).u_id not in data['channels'][index].owners:
-        raise AccessError('authorised user is not an owner of this channel')
+        raise AccessError(description = 'authorised user is not an owner of this channel')
     
     data['channels'][index].owners.remove(u_id)
 
@@ -354,7 +301,7 @@ def channel_details(token, channel_id):
     # raise AccessError('authorised user is not in channel')
     acct = user_from_token(token)
     if (channel_id in acct.in_channel) == False:
-        raise AccessError('authorised user is not in channel')
+        raise AccessError(description = 'authorised user is not in channel')
 
     channel_name = data['channels'][index].name
 
@@ -481,12 +428,12 @@ def channel_messages(token, channel_id, start):
 
     # raise AccessError if authorised user isn't in channel
     if user_from_token(token).u_id not in data['channels'][index].members:
-        raise AccessError('authorised user is not in channel')
+        raise AccessError(description = 'authorised user is not in channel')
 
     # raise ValueError if start is greater than no. of total messages
     no_total_messages = len(data['channels'][index].messages)
     if start > no_total_messages:
-        raise ValueError('start is greater than no. of total messages')
+        raise ValueError(description = 'start is greater than no. of total messages')
     
     # { message_id, u_id, message, time_created, reacts, is_pinned,  }
     end = -1

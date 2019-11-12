@@ -13,13 +13,26 @@ def check_email(email):
 # Helpers from Emad's channel
 # channel invite vs join, invite needed to join a private channel. passive v active.
 # given a token, returns acc with that token
+#TODO: Incorporate JWT decrypt to get it working with auth
 def user_from_token(token):
     global data
     for acc in data['accounts']:
-        #print(acc)
+        #encoded = jwt.encode({'email': acc.email}, acc.password, algorithm = 'HS256')
+        #print(encoded.decode('utf-8'))
+        #print("acc.token: "+acc.token)
+
+        #if encoded.decode('utf-8') == acc.token:
+        #    return acc
+        #    token = jwt.encode({'email': email}, password, algorithm = 'HS256')   
+        #decoded = jwt.decode(acc.token, acc.password, algorithm = 'HS256')
+        #print(decoded)
+        #print(decoded['email'])
+        #print(type(acc.token))
+        #print(type(token))
+        #print("token: "+token)
         if acc.token == token:
             return acc
-    raise AccessError('token does not exist for any user')
+    raise AccessError(description = 'token does not exist for any user')
 
 # given u_id, returns acc with that u_id
 def user_from_uid(u_id):
@@ -27,11 +40,11 @@ def user_from_uid(u_id):
     for acc in data['accounts']:
         if acc.u_id == u_id:
             return acc
-    raise AccessError('u_id does not exist for any user')
+    raise AccessError(description = 'u_id does not exist for any user')
 
 def max_20_characters(name):
     if len(name) <= 20:
-        return True
+        return True 
     else:
         return False
 
@@ -39,10 +52,11 @@ def channel_index(channel_id):
     global data
     index = 0
     for i in data['channels']:
-        if i.channel_id == channel_id:
+        if int(i.channel_id) == int(channel_id):
             return index
         index = index + 1
-    raise ValueError('channel does not exist')
+    
+    raise ValueError(description = 'channel does not exist')
 
 # Helpers from kenny's message
 # find the correct channel base on the channel_id
