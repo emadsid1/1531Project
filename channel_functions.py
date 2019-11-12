@@ -80,9 +80,9 @@ def channels_create(token, name, is_public):
         acct = user_from_token(token)
         acct.in_channel.append(channel_id)
     
-    return dumps({
+    return {
         'channel_id': channel_id
-    })
+    }
 
 def test_channels_create():
     with pytest.raises(Exception): # Following should raise exceptions
@@ -112,8 +112,8 @@ def channel_invite(token, channel_id, u_id):
     acct.in_channel.append(channel_id)
 
     #print(data['channels'][index].members)
-    return dumps({
-    })
+    return {
+    }
 
 def test_channel_invite():
     #SETUP START
@@ -164,8 +164,8 @@ def channel_join(token, channel_id):
 
     #print(data['channels'][index].members[1].token) #returns token of 2nd member (1st member is one who created channel)
 
-    return dumps({
-    })
+    return {
+    }
 
 def test_channel_join():
     #SETUP START
@@ -211,8 +211,8 @@ def channel_leave(token, channel_id):
     #    if j == acct.u_id:
     #        data['channels'][index].admins.remove(j)
 
-    return dumps({
-    })
+    return {
+    }
 
 def test_channel_leave():
     #SETUP START
@@ -261,8 +261,8 @@ def channel_add_owner(token, channel_id, u_id):
     
     data['channels'][index].owners.append(u_id)
 
-    return dumps({
-    })
+    return {
+    }
 
 def test_channel_add_owner():
     #SETUP START
@@ -311,8 +311,8 @@ def channel_remove_owner(token, channel_id, u_id):
     
     data['channels'][index].owners.remove(u_id)
 
-    return dumps({
-    })
+    return {
+    }
 
 def test_channel_remove_owner():
     #SETUP START
@@ -368,11 +368,11 @@ def channel_details(token, channel_id):
     for i in data['channels'][index].members:
        members_uid.append(i)
     
-    return dumps({
+    return {
         'name': channel_name,
         'owners': owners_uid,
         'members': members_uid
-    })
+    }
 
 def test_channel_details():
     #SETUP START
@@ -411,9 +411,9 @@ def channels_list(token):
                 list_dict = {'channel_id':channel.channel_id, 'name':channel.name}
                 channel_list.append(list_dict)
     print(channel_list)
-    return dumps({
+    return {
         'channels': channel_list
-    })
+    }
 
 def test_channels_list():
     # empty data['channels'] & ['accounts'] since it may be populated from other tests
@@ -448,9 +448,9 @@ def channels_listall(token):
         list_dict = {'channel_id': channel.channel_id, 'name': channel.name}
         channel_list.append(list_dict)
 
-    return dumps({
+    return {
         'channels': channel_list
-    })
+    }
 
 def test_channels_listall():
     # empty data['channels'] & ['accounts'] since it may be populated from other tests
@@ -510,11 +510,11 @@ def channel_messages(token, channel_id, start):
             end = i
             break
     
-    return dumps({
+    return {
         'messages': messages,
         'start': start,
         'end': end
-    })
+    }
 
 if __name__ == '__main__':
     app.run(port = 5022, debug=True)
