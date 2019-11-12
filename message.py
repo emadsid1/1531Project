@@ -47,6 +47,7 @@ def msg_remove(token, msg_id):
         raise AccessError(description='You do not have the permission as you are not the owner or admin of this channel!')
     # no exception raised, then remove the message
     msg_channel.messages.remove(found_msg)
+    return {}
 
 def msg_edit(token, msg_id, new_msg):
     global data
@@ -64,6 +65,7 @@ def msg_edit(token, msg_id, new_msg):
         raise AccessError(description='You do not have the permission as you are not the owner or admin of this channel!')
     # edit the message if no exceptions raiseds
     found_msg.message = new_msg
+    return {}
     
 def msg_react(token, msg_id, react_id):
     global data
@@ -75,6 +77,7 @@ def msg_react(token, msg_id, react_id):
         raise ValueError(description='This message already contains an active React!')
     # give the message a reaction if no exceptions raised
     found_msg.reaction = Reacts(reacter, react_id)
+    return {}
 
 def msg_unreact(token, message_id, react_id):
     global data
@@ -85,6 +88,7 @@ def msg_unreact(token, message_id, react_id):
         raise ValueError(description='This message does not contain an active React!')
     # unreact the message if no exceptions raised
     found_msg.reaction = None
+    return {}
 
 def msg_pin(token, msg_id):
     global data
@@ -99,6 +103,7 @@ def msg_pin(token, msg_id):
         raise AccessError(description='You can not pin the message as you are not a member of the channel')
     # pin the message if no exceptions raised
     found_msg.is_pinned = True
+    return {}
     
 def msg_unpin(token, msg_id):
     global data
@@ -113,3 +118,4 @@ def msg_unpin(token, msg_id):
         raise AccessError(description='You can not unpin the message as you are not a member of the channel')
     # unpin the message if no exceptions raised
     found_msg.is_pinned = False
+    return {}
