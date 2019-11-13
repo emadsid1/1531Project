@@ -42,9 +42,9 @@ def msg_remove(token, msg_id):
     found_msg = find_msg(msg_id)
     # find the channel where the message belongs to
     msg_channel = find_channel(found_msg.in_channel)
-    if found_msg.sender != remover:
+    if found_msg.sender != remover.u_id:
         raise AccessError(description='You do not have the permission to delete this message as you are not the sender!')
-    elif (check_owner(msg_channel, remover.u_id) == False) or (check_admin(msg_channel, remover.u_id) == False):
+    elif (check_owner(msg_channel, remover.u_id) == False):     # TODO  or (check_admin(msg_channel, remover.u_id) == False)
         raise AccessError(description='You do not have the permission as you are not the owner or admin of this channel!')
     # no exception raised, then remove the message
     msg_channel.messages.remove(found_msg)
@@ -60,9 +60,9 @@ def msg_edit(token, msg_id, new_msg):
         msg_remove(token, msg_id)
     elif len(new_msg) > 1000:
         raise ValueError(description='Message is more than 1000 words!')
-    elif found_msg.sender != editor:
+    elif found_msg.sender != editor.u_id:
         raise AccessError(description='You do not have the permission to edit this message as you are not the sender!')
-    elif (check_owner(msg_channel, editor.u_id) == False) or (check_admin(msg_channel, editor.u_id) == False):
+    elif (check_owner(msg_channel, editor.u_id) == False):      # TODO  or (check_admin(msg_channel, editor.u_id) == False)
         raise AccessError(description='You do not have the permission as you are not the owner or admin of this channel!')
     # edit the message if no exceptions raiseds
     found_msg.message = new_msg
@@ -96,7 +96,7 @@ def msg_pin(token, msg_id):
     pinner = user_from_token(token)
     found_msg = find_msg(msg_id)
     msg_channel = find_channel(found_msg.in_channel)
-    if check_admin(msg_channel, pinner.u_id) == False:
+    if check_admin(msg_channel, pinner.u_id) == False:      # TODO check this admin 
         raise ValueError(description='You can not pin the message as you are not an Admin of the channel')
     elif found_msg.is_pinned == True:
         raise ValueError(description='The message is already pinned!')
@@ -111,7 +111,7 @@ def msg_unpin(token, msg_id):
     unpinner = user_from_token(token)
     found_msg = find_msg(msg_id)
     msg_channel = find_channel(found_msg.in_channel)
-    if check_admin(msg_channel, unpinner.u_id) == False:
+    if check_admin(msg_channel, unpinner.u_id) == False:        # TODO check this admin
         raise ValueError(description='You can not unpin the message as you are not an Admin of the channel')
     elif found_msg.is_pinned == False:
         raise ValueError(description='The message is already unpinned!')
