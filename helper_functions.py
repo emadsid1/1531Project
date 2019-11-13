@@ -111,9 +111,9 @@ def check_member(channel, u_id):
     return False
 
 # Helper from Ben's profile and standup
-def check_in_channel(token, channel_index):
+def check_in_channel(token, channel):
     in_channel = False
-    for acc in data["channels"][channel_index].owners: # search owners list
+    for acc in channel.owners: # search owners list
         if token == acc.token:
             in_channel = True
     # if in_channel == False:
@@ -121,7 +121,7 @@ def check_in_channel(token, channel_index):
     #         if token == acc.token:
     #             in_channel = True
     if in_channel == False:
-        for acc in data["channels"][channel_index].members: # search members list
+        for acc in channel.members: # search members list
             if token == acc.token:
                 in_channel = True
     if in_channel == False: # if the user is not in the channel, raise an error

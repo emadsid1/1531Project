@@ -119,7 +119,7 @@ def standup_start(token, channel, length):
         raise Exception("AccessError") # standup is already in progress
     if length <= 0:
         raise ValueError(description = "ValueError") # standup length needs to be greater than 0
-    check_in_channel(token, ch_num) # raises AccessError if user is not in channel
+    check_in_channel(token, chan) # raises AccessError if user is not in channel
 
     # starts standup
     chan.is_standup = True
@@ -152,18 +152,17 @@ def standup_active(token, channel):
 
 def standup_send(token, channel, message):
     global data
-    ch_num = find_channel(channel) # raises AccessError if channel does not exist
-    if data["channels"][ch_num].is_standup == False:
+    chan = find_channel(channel) # raises AccessError if channel does not exist
+    if chan.is_standup == False:
         raise ValueError(description = "ValueError") # standup is not happening atm
     if len(message) > 1000:
         raise ValueError(description = "ValueError") # message too long
-    check_in_channel(token, ch_num) # raises AccessError if user is not in channel
+    check_in_channel(token, chan) # raises AccessError if user is not in channel
 
     # TODO: how to check if standup has finished?
     msg_send(token, message, channel)
-    user_index = user_from_token(token)
-    user = data["accounts"][user_index].handle
-    data["channels"][ch_num].standup_messages.append([user, message])
+    user = user_from_token(token)
+    chan.standup_messages.append([user.handle, message])
     # no return statement
 
 def search(token, query_str):
