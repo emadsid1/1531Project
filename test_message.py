@@ -102,11 +102,52 @@ def test_sendlater_timeinpast():
     with pytest.raises(ValueError):
         send_later(token1, 'later message', chan_id1, old_stamp)
 
-def message_react_test():
-    pass
+def test_successful_react():
+    # successful thumb up
+    msg_id4 = data['channels'][0].messages[3].message_id
+    assert msg_react(token1, msg_id4, 1) == {}
+    assert data['channels'][0].messages[3].reaction.react_id == 1
+    assert data['channels'][0].messages[3].reaction.reacter == user_from_token(token1).u_id
 
-def message_unreact_test():
-    pass
+def test_reacted():
+    # when the message is already reacted
+    msg_id4 = data['channels'][0].messages[3].message_id
+    with pytest.raises(ValueError):
+        msg_react(token1, msg_id4, 1)
+
+def test_reactid_notvalid():
+    # when not passing in 1 as react id
+    msg_id3 = data['channels'][0].messages[2].message_id
+    with pytest.raises(ValueError):
+        msg_react(token1, msg_id3, 2)
+
+def test_react_msgid_notvalid():
+    # when the message_id is not valid
+    with pytest.raises(ValueError):
+        msg_react(token1, 6666, 1)
+
+def test_unreactid_notvalid():
+    # when not passing in 1 as (un)react id
+    msg_id4 = data['channels'][0].messages[3].message_id
+    with pytest.raises(ValueError):
+        msg_unreact(token1, msg_id4, 2)
+
+def test_unreact_msgid_notvalid():
+    # when the unreact message_id is not valid
+    with pytest.raises(ValueError):
+        msg_unreact(token1, 6666, 1)
+
+def test_successful_unreact():
+    # successful unreact a message that is reacted before
+    msg_id4 = data['channels'][0].messages[3].message_id
+    assert msg_unreact(token1, msg_id4, 1) == {}
+    assert data['channels'][0].messages[3].reaction == None
+
+def test_unreacted():
+    # when the message is already unreacted
+    msg_id4 = data['channels'][0].messages[3].message_id
+    with pytest.raises(ValueError):
+        msg_unreact(token1, msg_id4, 1)
 
 def message_pin_test():
     pass

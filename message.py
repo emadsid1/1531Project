@@ -77,10 +77,11 @@ def msg_react(token, msg_id, react_id):
     elif found_msg.reaction != None:
         raise ValueError(description='This message already contains an active React!')
     # give the message a reaction if no exceptions raised
-    found_msg.reaction = Reacts(reacter, react_id)
+    found_msg.reaction = Reacts(reacter.u_id, react_id)
+    found_msg.reacted_user.append(reacter.u_id)
     return {}
 
-def msg_unreact(token, message_id, react_id):
+def msg_unreact(token, msg_id, react_id):
     global data
     found_msg = find_msg(msg_id)
     if react_id != 1:
