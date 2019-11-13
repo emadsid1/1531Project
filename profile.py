@@ -1,10 +1,8 @@
 from json import dumps
 from class_defines import User, Mesg, Channel, data
 from datetime import datetime, timedelta, timezone
-from uuid import uuid4
-#from Error import AccessError
-from message import msg_send
-from helper_functions import check_email, find_channel, find_msg, check_admin, check_owner, check_member, user_from_token, user_from_uid
+from exception import ValueError, AccessError
+from helper_functions import * # TODO: change this *
 
 # nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
 # ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
@@ -36,7 +34,7 @@ def user_profile(token, user_id):
 def user_profile_setname(token, name_first, name_last):
     global data
     if not(len(name_first) >= 1 and len(name_first) <= 50):
-        raise Exception("ValueError")
+        raise ValueError(description = "ValueError")
     if not(len(name_last) >= 1 and len(name_last) <= 50):
         raise Exception("ValueError")
     user = user_from_token(token) # raises AccessError if invalid token
@@ -53,7 +51,7 @@ def user_profile_email(token, email):
         if token == acc.token:
             found = True
         if email == acc.email:
-            raise Exception("ValueError") # email already being used
+            raise ValueError(description = "email already being used") # email already being used
         if found is False:
             counter += 1
     if found is not False:
@@ -65,14 +63,14 @@ def user_profile_email(token, email):
 def user_profile_sethandle(token, handle):
     global data
     if len(handle) < 3 or len(handle) > 20:
-        raise Exception("ValueError") # handle has incorrect number of chars
+        raise ValueError(description = "handle has incorrect number of chars") # handle has incorrect number of chars
     counter = 0
     found = False
     for acc in data["accounts"]:
         if token == acc.token:
             found = True
         if handle == acc.handle:
-            raise Exception("ValueError") # handle already being used
+            raise ValueError(description = "handle already being used") # handle already being used
         if found is False:
             counter += 1
     if found is not False:
@@ -120,7 +118,7 @@ def standup_start(token, channel, length):
     if chan.is_standup == True:
         raise Exception("AccessError") # standup is already in progress
     if length <= 0:
-        raise Exception("ValueError") # standup length needs to be greater than 0
+        raise ValueError(description = "ValueError") # standup length needs to be greater than 0
     check_in_channel(token, ch_num) # raises AccessError if user is not in channel
 
     # starts standup
@@ -156,9 +154,9 @@ def standup_send(token, channel, message):
     global data
     ch_num = find_channel(channel) # raises AccessError if channel does not exist
     if data["channels"][ch_num].is_standup == False:
-        raise Exception("ValueError") # standup is not happening atm
+        raise ValueError(description = "ValueError") # standup is not happening atm
     if len(message) > 1000:
-        raise Exception("ValueError") # message too long
+        raise ValueError(description = "ValueError") # message too long
     check_in_channel(token, ch_num) # raises AccessError if user is not in channel
 
     # TODO: how to check if standup has finished?
@@ -190,11 +188,11 @@ def search(token, query_str):
 def admin_userpermission_change(token, u_id, p_id):
     global data
     if not(perm_owner < p_id or p_id < perm_member):
-        raise ValueError('permission_id does not refer to a value permission') # invalid perm_id
+        raise ValueError(description = 'permission_id does not refer to a value permission') # invalid perm_id
     for acc in data['accounts']:
         if acc.token == token:
             if not(acc.perm_id >= p_id):    # does not have permission to change p_id
-                raise AccessError('The authorised user is not an admin or owner')
+                raise AccessError(description = 'The authorised user is not an admin or owner')
     for acc in data['accounts']:
         if acc.user_id == u_id:
             acc.perm_id = p_id

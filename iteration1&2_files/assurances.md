@@ -41,11 +41,11 @@ The standup was tested in that created channel by first calling it, and then by 
 * As a member of a channel of Slack, I would like to be able to begin a “stand up”, so that I can perform Agile stand-up method better in a group meeting, which means everyone in the group can get together talk for 15 minutes and make sure everyone knows what’s been done since the last meeting and what’s everyone’s plan before the next meeting.
 
 ## Epic 4 Assurances
+
 These aspects were tested using both manual testing, trying all different aspects and trying to break the code ensuring for appropriate exceptions to be raised and by also considered branch coverage and linting. We attempted to change handles, match other peoples handles and tried to customise our details trying to match the edge cases and conditions defined on the specs. We also created a second profile to observe it from a different account and tried to have similar info across to see if any data was assigned incorrectly.
-* As a valid member of Slackr, I should be able to customise my personal handle, so that I can freely switch my “nickname” whenever I want and to
+* As a valid member of Slackr, I should be able to customise my personal handle, so that I can freely switch my “nickname” whenever I want and to 
 whatever I want so that the account is more personal and more friendly to other members.
-* As a valid member of Slackr, I should be able to customise my personal details, so that if I changed, for example, names or email addresses, I
+* As a valid member of Slackr, I should be able to customise my personal details, so that if I changed, for example, names or email addresses, I 
 would be able to update as soon as possible on Slackr as well.
-* As a valid member of Slackr, I should be able to check out other people's profiles as well, so that I can make sure if a person is actually the
+* As a valid member of Slackr, I should be able to check out other people's profiles as well, so that I can make sure if a person is actually the 
 person I know by checking his or her profiles.
-Overall, these aspects were tested by using a mixture of Postman API and the test functions that we wrote for iteration 1. We ensured that every branch was covered in our testing, and that appropriate exceptions were raised when we tried to break our functions. Pylint was also used to ensure that all code was written in a good style.

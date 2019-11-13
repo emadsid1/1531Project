@@ -1,34 +1,35 @@
 import jwt
-from json import dumps #TODO get rid of
 from uuid import uuid4
 from exception import ValueError, AccessError
-from class_defines import data, User
-from helper_functions import check_email, user_from_uid
+from class_defines import data, User, perm_owner
+from helper_functions import check_email
 
 def auth_login(email, password):
     global data
     valid = False
     i = 0
+    user_id = 0
     check_email(email)
     for counter, acc in enumerate(data['accounts']):
         if acc.email == email and acc.password == password:
                 i = counter
+                user_id = acc.u_id
                 valid = True
     if (not(valid)):
-        raise ValueError('email and/or password does not match any account')
+        raise ValueError(description = 'email and/or password does not match any account')
     token = jwt.encode({'email': email}, password, algorithm = 'HS256')
-    data['accounts'][i].token = token.decode('utf-8')
-    return dumps({'u_id': data['accounts'][i].u_id, 'token': token.decode('utf-8')})
+    data['accounts'][i].token = token
+    return {'u_id': user_id, 'token': token.decode('utf-8')}
 
 def auth_logout(token):
     global data
     if token == '':
-        return dumps({'is_success': False})
+        return {'is_success': False}
     for acc in data['accounts']:
         if token == acc.token:
             acc.token = ''
-            return dumps({'is_success': True})
-    return dumps({'is_success': False})
+            return {'is_success': True}
+    return {'is_success': False}
 
 def auth_register(email, password, first, last): # TODO FIRST USER IS OWNER?
     global data
@@ -39,10 +40,10 @@ def auth_register(email, password, first, last): # TODO FIRST USER IS OWNER?
         raise ValueError(description = 'Password too short') # TODO KENNY YA CUNT LOOK AT THIS
 
     if (not(1 <= len(first) and len(first) <= 50)): # if name is not between 1 and 50 characters long
-        raise ValueError('first name must be between 1 and 50 characters long')
+        raise ValueError(description = 'first name must be between 1 and 50 characters long')
 
     if (not(1 <= len(last) and len(last) <= 50)):   # if name is not between 1 and 50 characters long
-        raise ValueError('last name must be between 1 and 50 characters long')
+        raise ValueError(description = 'last name must be between 1 and 50 characters long')
 
     handle = first + last
     if len(handle) > 20:
@@ -51,7 +52,7 @@ def auth_register(email, password, first, last): # TODO FIRST USER IS OWNER?
     new = 0
     for acc in data['accounts']:
         if acc.email == email:  # if email is already registered
-            raise ValueError('email already matches an existing account')
+            raise ValueError(description = 'email already matches an existing account')
         if acc.handle.startswith(first + last): # Checking exact name repetitions
             if handle == first + last:  # If handle is base concantate case
                 handle += '0'   # Add zero on end
@@ -69,7 +70,9 @@ def auth_register(email, password, first, last): # TODO FIRST USER IS OWNER?
     handle.lower()
     token = jwt.encode({'email': email}, password, algorithm = 'HS256')
     data['accounts'].append(User(email, password, first, last, handle, token.decode('utf-8'), user_id))
-    return dumps({'u_id': user_id,'token': token.decode('utf-8')})
+    if data['account_count'] == 1:
+        data['accounts'][0].perm_id == perm_owner
+    return {'u_id': user_id,'token': token.decode('utf-8')}
 
 def reset_request(email):
     global data
@@ -77,7 +80,7 @@ def reset_request(email):
         if acc.email == email:
             resetcode = str(uuid4())
             acc.reset_code = resetcode
-    return dumps({})
+    return {}
 
 def reset_reset(code, password):
     global data
@@ -87,7 +90,7 @@ def reset_reset(code, password):
                 acc.password = password
                 acc.reset_code = ''
                 acc.token = ''
-                return dumps({})
+                return {}
             else:
-                raise ValueError('password is too short (min length of 6)')
-    raise ValueError('reset code is not valid')
+                raise ValueError(description = 'password is too short (min length of 6)')
+    raise ValueError(description = 'reset code is not valid')

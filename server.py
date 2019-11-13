@@ -1,7 +1,6 @@
 """Flask server"""
 import sys
 from json import dumps
-from uuid import uuid4
 from flask_mail import Mail, Message
 from flask_cors import CORS
 from flask import Flask, request, jsonify
@@ -10,8 +9,8 @@ from exception import ValueError, AccessError
 from class_defines import data, User, Channel, Mesg, Reacts
 from auth import auth_login, auth_logout, auth_register, reset_request, reset_reset
 from message import send_later, msg_send, msg_remove, msg_edit, msg_pin, msg_unpin, msg_react, msg_unreact
-from profile import user_profile, user_profile_setname, user_profile_email, user_profile_sethandle, user_profile_uploadphoto, users_all, standup_start, standup_active, standup_send, search, admin_userpermission_change, standup_end
-from channel_functions import channels_create, channel_invite, channel_join, channel_leave, channel_add_owner, channel_remove_owner, channel_details, channels_list, channels_listall, channel_messages
+from profile import user_profile, user_profile_setname, user_profile_email, user_profile_sethandle, user_profile_uploadphoto, users_all, standup_start, standup_active, standup_send, search, admin_userpermission_change
+from channel import channels_create, channel_invite, channel_join, channel_leave, channel_add_owner, channel_remove_owner, channel_details, channels_list, channels_listall, channel_messages
 from helper_functions import * # TODO CHANGE LATER, KEEP FOR NOW
 
 def defaultHandler(err):
@@ -22,7 +21,7 @@ def defaultHandler(err):
         "message": err.description,
     })
     response.content_type = 'application/json'
-    return response 
+    return response
 
 app = Flask(__name__)
 app.config['TRAP_HTTP_EXCEPTIONS'] = True
@@ -54,13 +53,12 @@ def echo2():
 def route_auth_login():
     email = request.form.get('email')
     password = request.form.get('password')
-    print(request.host)
-    return auth_login(email, password)
+    return dumps(auth_login(email, password))
 
 @app.route('/auth/logout', methods = ['POST'])
 def route_auth_logout():
     token = request.form.get('token')
-    return auth_logout(token)
+    return dumps(auth_logout(token))
 
 @app.route('/auth/register', methods = ['POST'])
 def route_auth_register():
@@ -68,7 +66,7 @@ def route_auth_register():
     password = request.form.get('password')
     first = request.form.get('name_first')
     last = request.form.get('name_last')
-    return auth_register(email, password, first, last)
+    return dumps(auth_register(email, password, first, last))
 
 @app.route('/auth/passwordreset/request', methods = ['POST'])
 def route_reset_request():
@@ -89,70 +87,70 @@ def route_reset_request():
 def route_reset_reset():
     code = request.form.get('reset_code')
     new_password = request.form.get('new_password')
-    return reset_reset(code, new_password)
+    return dumps(reset_reset(code, new_password))
 
 @app.route('/channels/create', methods = ['POST'])
 def route_channels_create():
     token = request.form.get('token')
     name = request.form.get('name')
     is_public = request.form.get('is_public')
-    return channels_create(token, name, is_public)
+    return dumps(channels_create(token, name, is_public))
 
 @app.route('/channel/invite', methods = ['POST'])
 def route_channel_invite():
     token = request.form.get('token')
     channel_id = int(request.form.get('channel_id'))
     u_id = int(request.form.get('u_id'))
-    return channel_invite(token, channel_id, u_id)
+    return dumps(channel_invite(token, channel_id, u_id))
 
 @app.route('/channel/join', methods = ['POST'])
 def route_channel_join():
     token = request.form.get('token')
     channel_id = int(request.form.get('channel_id'))
-    return channel_join(token, channel_id)
+    return dumps(channel_join(token, channel_id))
 
 @app.route('/channel/leave', methods = ['POST'])
 def route_channel_leave():
     token = request.form.get('token')
     channel_id = int(request.form.get('channel_id'))
-    return channel_leave(token, channel_id)
+    return dumps(channel_leave(token, channel_id))
 
 @app.route('/channel/addowner', methods = ['POST'])
 def route_channel_add_owner():
     token = request.form.get('token')
     channel_id = int(request.form.get('channel_id'))
     u_id = int(request.form.get('u_id'))
-    return channel_add_owner(token, channel_id, u_id)
+    return dumps(channel_add_owner(token, channel_id, u_id))
 
 @app.route('/channel/removeowner', methods = ['POST'])
 def route_channel_remove_owner():
     token = request.form.get('token')
     channel_id = int(request.form.get('channel_id'))
     u_id = int(request.form.get('u_id'))
-    return channel_remove_owner(token, channel_id, u_id)
+    return dumps(channel_remove_owner(token, channel_id, u_id))
 
 @app.route('/channel/details', methods = ['GET'])
 def route_channel_details():
     token = request.args.get('token')
     channel_id = request.args.get('channel_id') # supposed to be an int
-    return channel_details(token, channel_id)
+    return dumps(channel_details(token, channel_id))
 
 @app.route('/channels/list', methods = ['GET'])
 def route_channels_list():
     token = request.args.get('token')
-    return channels_list(token)
+    return dumps(channels_list(token))
 
 @app.route('/channels/listall', methods = ['GET'])
 def route_channels_listall():
     token = request.args.get('token')
-    return channels_listall(token)
+    return dumps(channels_listall(token))
 
 @app.route('/channel/messages', methods = ['GET'])
 def route_channel_messages():
     token = request.args.get('token')
     channel_id = int(request.args.get('channel_id'))
     start = int(request.args.get('start'))
-    return channel_messages(token, channel_id, start)
+    return dumps(channel_messages(token, channel_id, start))
 
 @app.route('/message/sendlater', methods=['POST'])
 def route_send_later():
@@ -173,46 +171,40 @@ def route_msg_send():
 def route_msg_remove():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
-    msg_remove(token, msg_id)
-    return dumps({})
+    return dumps(msg_remove(token, msg_id))
 
 @app.route('/message/edit', methods=['PUT'])
 def route_msg_edit():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     new_message = request.form.get('message')
-    msg_edit(token, msg_id, new_message)
-    return dumps({})
+    return dumps(msg_edit(token, msg_id, new_message))
 
 @app.route('/message/react', methods=['POST'])
 def route_msg_react():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     react_id = int(request.form.get('react_id'))
-    msg_react(token, msg_id, react_id)
-    return dumps({})
+    return dumps(msg_react(token, msg_id, react_id))
 
 @app.route('/message/unreact', methods=['POST'])
 def route_msg_unreact():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     react_id = int(request.form.get('react_id'))
-    msg_unreact(toekn, msg_id, react_id)
-    return dumps({})
+    return dumps(msg_unreact(toekn, msg_id, react_id))
 
 @app.route('/message/pin', methods=['POST'])
 def route_msg_pin():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
-    msg_pin(token, msg_id)
-    return dumps({})
+    return dumps(msg_pin(token, msg_id))
 
 @app.route('/message/unpin', methods=['POST'])
 def route_msg_unpin():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
-    msg_unpin(token, msg_id)
-    return dumps({})
+    return dumps(msg_unpin(token, msg_id))
 
 @app.route('/user/profile', methods=['GET'])
 def route_user_profile():
