@@ -2,7 +2,7 @@ from json import dumps
 from class_defines import User, Mesg, Channel, data
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
-from Error import AccessError
+#from Error import AccessError
 from message import msg_send
 from helper_functions import check_email, find_channel, find_msg, check_admin, check_owner, check_member, user_from_token, user_from_uid
 
@@ -116,17 +116,17 @@ def users_all(token):
 
 def standup_start(token, channel, length):
     global data
-    ch_num = find_channel(channel) # raises ValueError if channel does not exist
-    if data["channels"][ch_num].is_standup == True:
+    chan = find_channel(channel) # raises ValueError if channel does not exist
+    if chan.is_standup == True:
         raise Exception("AccessError") # standup is already in progress
     if length <= 0:
         raise Exception("ValueError") # standup length needs to be greater than 0
     check_in_channel(token, ch_num) # raises AccessError if user is not in channel
 
     # starts standup
-    data["channels"][ch_num].is_standup = True
+    chan.is_standup = True
     finish = datetime.now() + timedelta(seconds=length)
-    data["channels"][ch_num].standup_time = finish
+    chan.standup_time = finish
     standup_finish = finish.replace(tzinfo=timezone.utc).timestamp()
     t = Timer(length, standup_active, (token, channel))
     t.start()
