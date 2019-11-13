@@ -7,7 +7,7 @@ from channel import channels_create, channel_invite, channel_join, channel_leave
 from message import send_later, msg_send, msg_remove, msg_edit, msg_react, msg_unreact, msg_pin, msg_unpin
 from helper_functions import check_email, user_from_token, user_from_uid, max_20_characters, channel_index, find_channel, find_msg, check_owner, check_admin, check_member, check_in_channel
 from exception import ValueError, AccessError
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from class_defines import User, Channel, Mesg, Reacts, data
     
 # setup
@@ -33,10 +33,10 @@ invalid_msg = 'a' * 1001
 
 def test_successful_msg_send():
     # a normal msg
-    msg_send(token1, '1st msg', chan_id1)
+    assert msg_send(token1, '1st msg', chan_id1) == {'message_id': 1}
     assert data['channels'][0].messages[0].message_id == 1
     # a msg with 1000 characters
-    msg_send(token3, long_msg, chan_id1)
+    assert msg_send(token3, long_msg, chan_id1) == {'message_id': 2}
     assert data['channels'][0].messages[1].message_id == 2
     assert len(data['channels'][0].messages) == 2
 
@@ -49,9 +49,6 @@ def test_sender_notjoined():
     # raise AccessError when a user does not belong to the channel and tring to send
     with pytest.raises(AccessError):
         msg_send(token2, 'hello', chan_id1)
-
-def message_sendlater_test():
-    pass
 
 def test_successful_remove():
     # normal remove
@@ -98,6 +95,12 @@ def test_editor_notsender():
     # when editor is not the actual sender of the message
     with pytest.raises(AccessError):
         msg_edit(token1, data['channels'][0].messages[0].message_id, 'new msg')
+
+def test_sendlater_timeinpast():
+    # when the time trying to send is in the past
+    old_stamp = (datetime.now() - timedelta(days=1)).replace(tzinfo=timezone.utc).timestamp()
+    with pytest.raises(ValueError):
+        send_later(token1, 'later message', chan_id1, old_stamp)
 
 def message_react_test():
     pass
