@@ -20,7 +20,7 @@ def user_profile(token, user_id):
     user_uid = user_from_uid(user_id) # raises AccessError if u_id invalid
     user_token = user_from_token(token) # raises AccessError if invalid token
     if user_uid != user_token:
-        raise ValueError("Token does not match u_id!")
+        raise ValueError(description = "Token does not match u_id!")
     return {
         "email": user_token.email,
         "name_first": user_token.name_first,
@@ -34,9 +34,7 @@ def user_profile(token, user_id):
 def user_profile_setname(token, name_first, name_last):
     global data
     if not(len(name_first) >= 1 and len(name_first) <= 50):
-        raise ValueError(description = "ValueError")
-    if not(len(name_last) >= 1 and len(name_last) <= 50):
-        raise Exception("ValueError")
+        raise ValueError(description = "Name needs to be between 1 and 50 characters long.")
     user = user_from_token(token) # raises AccessError if invalid token
     user.name_first = name_first
     user.name_last = name_last
@@ -51,32 +49,32 @@ def user_profile_email(token, email):
         if token == acc.token:
             found = True
         if email == acc.email:
-            raise ValueError(description = "email already being used") # email already being used
+            raise ValueError(description = "Email already being used!") # email already being used
         if found is False:
             counter += 1
     if found is not False:
         data["accounts"][counter].email = email
     else:
-        raise Exception("AccessError") # token is invalid
+        raise AccessError(description = "token does not exist for any user") # token is invalid
     # no return statement
 
 def user_profile_sethandle(token, handle):
     global data
     if len(handle) < 3 or len(handle) > 20:
-        raise ValueError(description = "handle has incorrect number of chars") # handle has incorrect number of chars
+        raise ValueError(description = "Handle needs to be between 3 and 20 characters.") # handle has incorrect number of chars
     counter = 0
     found = False
     for acc in data["accounts"]:
         if token == acc.token:
             found = True
         if handle == acc.handle:
-            raise ValueError(description = "handle already being used") # handle already being used
+            raise ValueError(description = "Handle is already in use.") # handle already being used
         if found is False:
             counter += 1
     if found is not False:
         data["accounts"][counter].handle = handle
     else:
-        raise Exception("AccessError") #token is invalid
+        raise AccessError(description = "token does not exist for any user") #token is invalid
     # no return statement
 
 # DOES NOT NEED TO BE COMPLETED UNTIL ITERATION 3
@@ -107,7 +105,7 @@ def users_all(token):
         if token == acc.token:
             valid = True
     if valid == False:
-        raise Exception("AccessError") # token is invalid
+        raise AccessError(description = "token does not exist for any user") # token is invalid
     return {
         "users": user_list
     }
@@ -116,9 +114,9 @@ def standup_start(token, channel, length):
     global data
     chan = find_channel(channel) # raises ValueError if channel does not exist
     if chan.is_standup == True:
-        raise Exception("AccessError") # standup is already in progress
+        raise AccessError(description = "Standup is already in progress!") # standup is already in progress
     if length <= 0:
-        raise ValueError(description = "ValueError") # standup length needs to be greater than 0
+        raise ValueError(description = "The standup length needs to be a positive number!") # standup length needs to be greater than 0
     check_in_channel(token, chan) # raises AccessError if user is not in channel
 
     # starts standup
@@ -154,9 +152,9 @@ def standup_send(token, channel, message):
     global data
     chan = find_channel(channel) # raises AccessError if channel does not exist
     if chan.is_standup == False:
-        raise ValueError(description = "ValueError") # standup is not happening atm
+        raise ValueError(description = "There is no standup currently happening.") # standup is not happening atm
     if len(message) > 1000:
-        raise ValueError(description = "ValueError") # message too long
+        raise ValueError(description = "Your message is too long.") # message too long
     check_in_channel(token, chan) # raises AccessError if user is not in channel
 
     # TODO: how to check if standup has finished?
@@ -182,7 +180,9 @@ def search(token, query_str):
                     "reacts": msg.reaction,
                     "is_pinned": msg.pin
                 })
-    return {messages}
+    return {
+        "messages": messages
+    }
 
 def admin_userpermission_change(token, u_id, p_id):
     global data
@@ -209,7 +209,7 @@ def admin_userpermission_change(token, u_id, p_id):
                     if not(u_id in chan.owners):
                         chan.owners.append(u_id)
             return 0 # TODO: fix this
-    raise ValueError('u_id does not refer to a valid user')
+    raise ValueError(description = 'u_id does not refer to a valid user')
     # for ch in data["channels"]:
     #     for own in ch.owners:
     #         if token == own.token:
