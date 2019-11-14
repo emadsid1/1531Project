@@ -106,7 +106,7 @@ def channel_join(token, channel_id):
             raise AccessError(description = 'authorised user is not an admin of private channel')
 
     acct = user_from_token(token)
-    data['channels'][index].members.append(acct)
+    data['channels'][index].members.append(acct.u_id)
 
     #print(data['channels'][index].members[1].token) #returns token of 2nd member (1st member is one who created channel)
 
