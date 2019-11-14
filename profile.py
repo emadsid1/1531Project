@@ -1,9 +1,9 @@
-from json import dumps
+from flask import send_from_directory
 from class_defines import User, Mesg, Channel, data
 from datetime import datetime, timedelta, timezone
 from exception import ValueError, AccessError
 from helper_functions import find_channel, find_msg, check_admin, check_owner, check_member, user_from_token, user_from_uid
-from PIL import image
+from PIL import Image
 import urllib.request
 
 
@@ -81,7 +81,7 @@ def user_profile_sethandle(token, handle):
     # no return statement
 
 # DOES NOT NEED TO BE COMPLETED UNTIL ITERATION 3
-def user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end):
+def user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end, host):
     global data
     # how to get image size?
     # TODO: use week 8 slides from lecture
@@ -91,12 +91,12 @@ def user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end):
     # static.py
     # [request.host]/static/filename.png
     user = user_from_token(token)
-    urrllib.request.urlretrieve(img_url, user.prof_pic)
-    imageObject = Image.open(user.prof_pic)
-    cropped = imageObject.crop(x_start, y_start, x_end, y_end)
-    cropped.save(user.prof_pic)
-    directory = request.host()
-    return send_from_directory(directory, user.prof_pic)
+    img_loc = "static/" + str(user.u_id) + ".jpg" #location should be "localhost:port/images/user_id"
+    urllib.request.urlretrieve(img_url, img_loc)
+    imageObject = Image.open(img_loc)
+    cropped = imageObject.crop((x_start, y_start, x_end, y_end))
+    cropped.save(img_loc)
+    user.prof_pic = host + img_loc
     # no return statement
 
 def users_all(token):

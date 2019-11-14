@@ -246,7 +246,8 @@ def route_user_profile_uploadphoto():
     y_start = int(request.form.get("y_start"))
     x_end = int(request.form.get("x_end"))
     y_end = int(request.form.get("y_end"))
-    user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end)
+    host = request.host_url
+    user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end, host)
     return dumps({})
 
 @app.route('/users/all', methods=['GET'])
@@ -295,3 +296,6 @@ def route_admin_userpermission_change():
 
 if __name__ == '__main__':
     app.run(port=(sys.argv[1] if len(sys.argv) > 1 else 5000))
+
+# def get_host_url():
+#     return request.host_url
