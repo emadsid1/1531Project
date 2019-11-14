@@ -2,7 +2,10 @@ from json import dumps
 from class_defines import User, Mesg, Channel, data
 from datetime import datetime, timedelta, timezone
 from exception import ValueError, AccessError
-from helper_functions import * # TODO: change this *
+from helper_functions import find_channel, find_msg, check_admin, check_owner, check_member, user_from_token, user_from_uid
+from PIL import image
+import urllib.request
+
 
 # nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
 # ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
@@ -87,6 +90,13 @@ def user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end):
     # convert the url into something unique (perhaps u_id)
     # static.py
     # [request.host]/static/filename.png
+    user = user_from_token(token)
+    urrllib.request.urlretrieve(img_url, user.prof_pic)
+    imageObject = Image.open(user.prof_pic)
+    cropped = imageObject.crop(x_start, y_start, x_end, y_end)
+    cropped.save(user.prof_pic)
+    directory = request.host()
+    return send_from_directory(directory, user.prof_pic)
     # no return statement
 
 def users_all(token):
