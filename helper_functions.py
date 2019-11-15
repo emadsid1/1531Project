@@ -17,20 +17,7 @@ def check_email(email):
 def user_from_token(token):
     global data
     for acc in data['accounts']:
-        #encoded = jwt.encode({'email': acc.email}, acc.password, algorithm = 'HS256')
-        #print(encoded.decode('utf-8'))
-        #print("acc.token: "+acc.token)
-
-        #if encoded.decode('utf-8') == acc.token:
-        #    return acc
-        #    token = jwt.encode({'email': email}, password, algorithm = 'HS256')
-        #decoded = jwt.decode(acc.token, acc.password, algorithm = 'HS256')
-        #print(decoded)
-        #print(decoded['email'])
-        #print(type(acc.token))
-        #print(type(token))
-        #print("token: "+token)
-        if acc.token == token:
+        if str(acc.token) == str(token):
             return acc
     raise AccessError(description = 'token does not exist for any user')
 
