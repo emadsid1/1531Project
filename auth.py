@@ -82,7 +82,7 @@ def reset_request(email):
             acc.reset_code = resetcode
     return {}
 
-def reset_reset(code, password):
+def reset_reset(code, password):    # TODO TOKEN IS INVALID AFTER RESETTING
     global data
     for acc in data['accounts']:
         if code == acc.reset_code:

@@ -36,7 +36,7 @@ def user_from_token(token):
         #print("token: "+token)
         if acc.token == token:
             return acc
-    raise AccessError('token does not exist for any user')
+    raise AccessError('token does not exist for any user') # TODO
 
 # given u_id, returns acc with that u_id
 def user_from_uid(u_id):

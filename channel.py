@@ -94,18 +94,18 @@ def channel_join(token, channel_id):
 
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
-
+    acct = user_from_token(token)
     # raise AccessError if channel is Private & authorised user is not an admin
     if data['channels'][index].is_public == False:
         # check if authorised user is an admin
         valid = 0
-        for admin_acc in data['channels'][index].admins: 
-            if admin_acc.token == token:
-                valid = 1
+        # TODO FIX THIS AS IT RAISES AND ISSUE ON PERM ID
+        if acct.perm_id < perm_member:
+            valid = 1
+            data['channels'][index].owners.append(acct.u_id)
         if valid == 0:
             raise AccessError(description = 'authorised user is not an admin of private channel')
 
-    acct = user_from_token(token)
     data['channels'][index].members.append(acct.u_id)
 
     #print(data['channels'][index].members[1].token) #returns token of 2nd member (1st member is one who created channel)
@@ -313,7 +313,7 @@ def channel_details(token, channel_id):
     
     for i in data['channels'][index].members:
        members_uid.append(i)
-    
+    # TODO CHeck output based on specs
     return {
         'name': channel_name,
         'owners': owners_uid,
