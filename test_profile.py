@@ -1,20 +1,39 @@
 import pytest
+import jwt
 from auth import auth_login, auth_logout, auth_register, reset_request, reset_reset
-from channel_functions import channel_create, channel_invite, channel_join, channel_leave, channel_add_owner, channel_remove_owner, channel_details, channel_list, channel_listall, channel_messages
+from channel_functions import channels_create, channel_invite, channel_join, channel_leave, channel_add_owner, channel_remove_owner, channel_details, channels_list, channels_listall, channel_messages
 from message import send_later, msg_send, msg_remove, msg_edit, msg_react, msg_unreact, msg_pin, msg_unpin
 from profile import user_profile, user_profile_setname, user_profile_email, user_profile_sethandle, user_profile_uploadphoto, users_all, standup_start, standup_active, standup_send, search, admin_userpermission_change
 from helper_functions import check_email, user_from_token, user_from_uid, max_20_characters, channel_index, find_channel, find_msg, check_owner, check_admin, check_member, check_in_channel
+from class_defines import User, Channel, Mesg, Reacts, data
 from Error import AccessError
 from datetime import datetime, timedelta
+
+# nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
+# ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
+# chan1 = Channel("chatime", True, 1, 5)
+#
+# data = {
+#     "accounts": [nom, ben],
+#     "channels": [chan1]
+# }
+
+# user = auth_register("ben@gmail.com", "password", "ben", "kah")
+# user_2 = auth_login('chiefjief5@gmail.com', '123456')
+# print(user)
+# print(user_2)
+# user_3 = user_from_uid("267925653265221847378815592933319945304")
+# print(user_3)
+
 
 def test_user_profile():
     # set up
     # user1(admin)
-    registerDict1 = auth_register("kenny@gmail.com", "123456", "kenny", "han")
+    registerDict1 = auth_register("kenny@gmail.com", "password", "kenny", "han")
     userID1 = registerDict1['u_id']
     token1 = registerDict1['token']
     # user2
-    registerDict2 = auth_register("ken@gmail.com", "654321", "ken", "han")
+    registerDict2 = auth_register("ken@gmail.com", "password2", "ken", "han")
     userID2 = registerDict2['u_id']
     token2 = registerDict2['token']
     # end of set up
@@ -49,7 +68,7 @@ def test_user_profile_setemail():
     #user_profile_setemail(token, email), no return value
     #SETUP TESTS BEGIN
     #create token:
-    authRegDict = auth_register("benjamin.kah@student.unsw.edu.au", "password", "Ben", "Kah")
+    authRegDict = auth_register("benjamin.kah1@student.unsw.edu.au", "password", "Ben", "Kah")
     userId = authRegDict["u_id"]
     token = authRegDict["token"]
     #create second person's email:
@@ -68,7 +87,7 @@ def test_user_profile_sethandle():
     #user_profile_sethandle(token, handle_str), no return value
     #SETUP TESTS BEGIN
     #create token:
-    authRegDict = auth_register("benjamin.kah@student.unsw.edu.au", "password", "Ben", "Kah")
+    authRegDict = auth_register("benjamin.kah2@student.unsw.edu.au", "password", "Ben", "Kah")
     userId = authRegDict["u_id"]
     token = authRegDict["token"]
     #SETUP TESTS END
@@ -82,7 +101,7 @@ def test_user_profiles_uploadphoto():
     #user_profiles_uploadphoto(token, img_url, x_start, y_start, x_end, y_end), no return value
     #SETUP TESTS BEGIN
     #create token:
-    authRegDict = auth_register("benjamin.kah@student.unsw.edu.au", "password", "Ben", "Kah")
+    authRegDict = auth_register("benjamin.kah3@student.unsw.edu.au", "password", "Ben", "Kah")
     token = authRegDict["token"]
     #SETUP TESTS END
     assert user_profiles_uploadphoto(token, "http://test_url.com/example.html", 0, 0, 1024, 1024)
@@ -96,9 +115,9 @@ def test_standup_start():
     #standup_start(token, channel_id), returns time_finish
     #SETUP TESTS BEGIN
     #create new users:
-    authRegDict = auth_register("benjamin.kah@student.unsw.edu.au", "password", "Ben", "Kah")
+    authRegDict = auth_register("benjamin.kah4@student.unsw.edu.au", "password", "Ben", "Kah")
     token = authRegDict["token"]
-    authRegDict2 = auth_register("jeffrey.oh@student.unsw.edu.au", "password", "Jeffrey", "Oh")
+    authRegDict2 = auth_register("jeffrey.oh1@student.unsw.edu.au", "password", "Jeffrey", "Oh")
     token2 = authRegDict2["token"]
     #create channel
     chanCreateDict = channels_create(token, "test channel", True)
@@ -114,9 +133,9 @@ def test_standup_send():
     #standup_send(token, channel_id, message), no return value
     #SETUP TESTS BEGIN
     #create new users:
-    authRegDict = auth_register("benjamin.kah@student.unsw.edu.au", "password", "Ben", "Kah")
+    authRegDict = auth_register("benjamin.kah5@student.unsw.edu.au", "password", "Ben", "Kah")
     token = authRegDict["token"]
-    authRegDict2 = auth_register("jeffrey.oh@student.unsw.edu.au", "password", "Jeffrey", "Oh")
+    authRegDict2 = auth_register("jeffrey.oh2@student.unsw.edu.au", "password", "Jeffrey", "Oh")
     token2 = authRegDict2["token"]
     #create channels:
     chanCreateDict = channels_create(token, "test channel", True)
@@ -148,7 +167,7 @@ def test_search():
     #search(token, query_str), returns messages
     #SETUP TESTS BEGIN
     #create new users:
-    authRegDict = auth_register("benjamin.kah@student.unsw.edu.au", "password", "Ben", "Kah")
+    authRegDict = auth_register("benjamin.kah6@student.unsw.edu.au", "password", "Ben", "Kah")
     token = authRegDict["token"]
     #create channel
     chanCreateDict = channels_create(token, "test channel", True)
@@ -169,11 +188,11 @@ def test_admin_userpermission_change():
     #admin_userpermission_change(token, u_id, permission_id), no return value
     #SETUP TESTS BEGIN
     #create new admin:
-    authRegDict = auth_register("benjamin.kah@student.unsw.edu.au", "password", "Ben", "Kah")
+    authRegDict = auth_register("benjamin.kah7@student.unsw.edu.au", "password", "Ben", "Kah")
     token = authRegDict["token"]
     userId = authRegDict["u_id"]
     #create regular user:
-    authRegDict2 = auth_register("jeffrey.oh@student.unsw.edu.au", "password", "Jeffrey", "Oh")
+    authRegDict2 = auth_register("jeffrey.oh3@student.unsw.edu.au", "password", "Jeffrey", "Oh")
     token2 = authRegDict2["token"]
     userId2 = authRegDict2["u_id"]
     #create channel from admin:
@@ -197,7 +216,8 @@ def test_admin_userpermission_change():
     chanCreateDict2 = channels_create(token, "test channel 2", True)
     chanId2 = chanCreateDict2["channel_id"]
     #add regular user to second channel:
-    channel_invite(token, chanId, userId2) #owner of channel 1 should not be owner of this channel
+    channel_invite(token, chanId, userId2)
+    #owner of channel 1 should not be owner of this channel
     with pytest.raises(AccessError):
         assert channel_removeowner(token2, chanId2, userId) #regular user should not have permission to do this
 

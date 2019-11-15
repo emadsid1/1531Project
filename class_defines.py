@@ -1,5 +1,5 @@
 '''
-defination of different slackr classes
+definition of different slackr classes
 '''
 perm_owner = 1
 perm_admin = 2
@@ -39,7 +39,7 @@ class Mesg:
         self.sender = sender            # type sender
         self.create_time = create_time  # date_time (depends on is_later)
         self.in_channel = channel_id    # channel id of which the message is blong to
-        self.reaction = None            # active reaction
+        self.reactions = []             # active reaction
         self.reacted_user = []          # list of user ids that has reacted to this message
         self.is_pinned = False          # pin flag
         self.is_later = is_later        # when to send message
@@ -55,7 +55,7 @@ class Reacts():
 #         self.time = time                # either standup_end time or message_send time
 
 data = {
-    'accounts': [],
+    'accounts': [User('chiefjief5@gmail.com', 'password', 'Jeffrey', 'Oh', 'JeffreyOh', '', 0), User('kennyhan@gmail.com', 'password', 'Kenny', 'Han', 'KennyHan','',1)],
     'channels': [],
     'account_count': 0,
     'channel_count': 0,

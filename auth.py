@@ -18,7 +18,7 @@ def auth_login(email, password):
     if (not(valid)):
         raise ValueError(description = 'email and/or password does not match any account')
     token = jwt.encode({'email': email}, password, algorithm = 'HS256')
-    data['accounts'][i].token = token
+    data['accounts'][i].token = token.decode('utf-8')
     return {'u_id': user_id, 'token': token.decode('utf-8')}
 
 def auth_logout(token):
@@ -82,7 +82,7 @@ def reset_request(email):
             acc.reset_code = resetcode
     return {}
 
-def reset_reset(code, password):
+def reset_reset(code, password):    # TODO TOKEN IS INVALID AFTER RESETTING
     global data
     for acc in data['accounts']:
         if code == acc.reset_code:

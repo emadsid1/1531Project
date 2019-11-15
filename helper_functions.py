@@ -17,24 +17,17 @@ def check_email(email):
 def user_from_token(token):
     global data
     for acc in data['accounts']:
-        #encoded = jwt.encode({'email': acc.email}, acc.password, algorithm = 'HS256')
-        #print(encoded.decode('utf-8'))
-        #print("acc.token: "+acc.token)
-
-        #if encoded.decode('utf-8') == acc.token:
-        #    return acc
-        #    token = jwt.encode({'email': email}, password, algorithm = 'HS256')   
-        #decoded = jwt.decode(acc.token, acc.password, algorithm = 'HS256')
-        #print(decoded)
-        #print(decoded['email'])
-        #print(type(acc.token))
-        #print(type(token))
-        #print("token: "+token)
         if acc.token == token:
             return acc
     raise AccessError(description = 'token does not exist for any user')
 
-# given u_id, returns acc with that u_id
+#given u_id, returns acc with that u_id
+# def user_from_uid(u_id):
+#     global data
+#     for counter, acc in enumerate(data['accounts']):
+#         if str(acc.u_id) == str(u_id):
+#             return acc
+#     raise AccessError('u_id does not exist for any user')
 def user_from_uid(u_id):
     global data
     for acc in data['accounts']:
@@ -44,18 +37,15 @@ def user_from_uid(u_id):
 
 def max_20_characters(name):
     if len(name) <= 20:
-        return True 
+        return True
     else:
         return False
 
 def channel_index(channel_id):
     global data
-    index = 0
-    for i in data['channels']:
-        if int(i.channel_id) == int(channel_id):
-            return index
-        index = index + 1
-    
+    for i, chan in enumerate(data['channels']):
+        if int(chan.channel_id) == int(channel_id):
+            return i
     raise ValueError(description = 'channel does not exist')
 
 # Helpers from kenny's message
@@ -105,17 +95,17 @@ def check_member(channel, u_id):
     return False
 
 # Helper from Ben's profile and standup
-def check_in_channel(token, channel_index):
+def check_in_channel(token, channel):
     in_channel = False
-    for acc in data["channels"][channel_index].owners: # search owners list
+    for acc in channel.owners: # search owners list
         if token == acc.token:
             in_channel = True
+    # if in_channel == False:
+    #     for acc in data["channels"][channel_index].admins: # search admins list
+    #         if token == acc.token:
+    #             in_channel = True
     if in_channel == False:
-        for acc in data["channels"][channel_index].admins: # search admins list
-            if token == acc.token:
-                in_channel = True
-    if in_channel == False:
-        for acc in data["channels"][channel_index].members: # search members list
+        for acc in channel.members: # search members list
             if token == acc.token:
                 in_channel = True
     if in_channel == False: # if the user is not in the channel, raise an error
