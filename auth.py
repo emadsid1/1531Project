@@ -8,7 +8,6 @@ def auth_login(email, password):
     global data
     valid = False
     i = 0
-    user_id = 0
     check_email(email)
     for counter, acc in enumerate(data['accounts']):
         if acc.email == email and acc.password == password:
@@ -61,7 +60,7 @@ def auth_register(email, password, first, last): # TODO FIRST USER IS OWNER?
                 if curr <= new: # If new number is larger replace
                     handle = first + last + str(new)
                     curr = new
-        elif handle == (first + last)[:20]: # If name is truncate case and is already 20 characters
+        elif acc.handle == (first + last)[:20]: # If name is truncate case and is already 20 characters
             handle += '0'
     if len(handle) > 20:    # If handle is too long make handle the hexadecimal number of account_count
         handle = hex(data['account_count'])
@@ -69,10 +68,11 @@ def auth_register(email, password, first, last): # TODO FIRST USER IS OWNER?
     data['account_count'] += 1
     handle.lower()
     token = jwt.encode({'email': email}, password, algorithm = 'HS256')
-    data['accounts'].append(User(email, password, first, last, handle, token.decode('utf-8'), user_id))
+    token = token.decode('utf-8')
+    data['accounts'].append(User(email, password, first, last, handle, token, user_id))
     if data['account_count'] == 1:
         data['accounts'][0].perm_id == perm_owner
-    return {'u_id': user_id,'token': token.decode('utf-8')}
+    return {'u_id': user_id,'token': token}
 
 def reset_request(email):
     global data
