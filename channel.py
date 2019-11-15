@@ -1,5 +1,5 @@
 from flask import Flask, request, flash
-from class_defines import data, Channel, User, Mesg
+from class_defines import data, Channel, User, Mesg, perm_admin, perm_member, perm_owner
 from exception import ValueError, AccessError
 from auth import auth_register
 import json
@@ -105,7 +105,8 @@ def channel_join(token, channel_id):
             data['channels'][index].owners.append(acct.u_id)
         if valid == 0:
             raise AccessError(description = 'authorised user is not an admin of private channel')
-
+    
+    acct.in_channel.append(channel_id)
     data['channels'][index].members.append(acct.u_id)
 
     #print(data['channels'][index].members[1].token) #returns token of 2nd member (1st member is one who created channel)
