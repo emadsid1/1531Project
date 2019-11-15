@@ -301,24 +301,26 @@ def channel_details(token, channel_id):
 
     # raise AccessError('authorised user is not in channel')
     acct = user_from_token(token)
-    if (channel_id in acct.in_channel) == False:
+    if (channel_id in acct.in_channel) == True:
         raise AccessError(description = 'authorised user is not in channel')
 
     channel_name = data['channels'][index].name
 
-    owners_uid = []
-    members_uid = []
+    owners_dict = []
+    members_dict = []
 
     for i in data['channels'][index].owners:
-        owners_uid.append(i)
+        owner_member = user_from_uid(i)
+        owners_dict.append({'u_id': i, 'name_first': owner_member.name_first, 'name_last': owner_member.name_last, 'profile_img_url': 'https://www.google.com/search?q=google&rlz=1C1CHBF_enAU866AU866&sxsrf=ACYBGNQd0ogpVTR2M1cRzxpOGtcGko6oBg:1573777720661&source=lnms&tbm=isch&sa=X&ved=0ahUKEwiz_vrv-urlAhWQ73MBHZ88DkUQ_AUIEygC&biw=1536&bih=722&dpr=1.25#imgrc=5wK_L1umstSwXM:'})
     
     for i in data['channels'][index].members:
-       members_uid.append(i)
+        member = user_from_uid(i)
+        members_dict.append({'u_id': i, 'name_first': member.name_first, 'name_last': member.name_last, 'profile_img_url': 'https://www.google.com/search?q=google&rlz=1C1CHBF_enAU866AU866&sxsrf=ACYBGNQd0ogpVTR2M1cRzxpOGtcGko6oBg:1573777720661&source=lnms&tbm=isch&sa=X&ved=0ahUKEwiz_vrv-urlAhWQ73MBHZ88DkUQ_AUIEygC&biw=1536&bih=722&dpr=1.25#imgrc=5wK_L1umstSwXM:'})
     # TODO CHeck output based on specs
     return {
         'name': channel_name,
-        'owners': owners_uid,
-        'members': members_uid
+        'owners': owners_dict,
+        'members': members_dict
     }
 
 # def test_channel_details():
@@ -451,8 +453,10 @@ def channel_messages(token, channel_id, start):
         message['u_id'] = item.sender
         message['message'] = item.message
         message['time_created'] = item.create_time
-        message['reacts'] = item.reaction
         message['is_pinned'] = item.is_pinned
+        message['reacts'] = []
+        for react in item.reactions:
+            message['reacts'].append({'react_id': react.react_id, 'u_id': react.reacter, 'is_this_user_reacted': True})
 
         i = i + 1
         list_messages.append(message)
