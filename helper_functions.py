@@ -17,7 +17,7 @@ def check_email(email):
 def user_from_token(token):
     global data
     for acc in data['accounts']:
-        if str(acc.token) == str(token):
+        if acc.token == token:
             return acc
     raise AccessError(description = 'token does not exist for any user')
 
@@ -43,12 +43,9 @@ def max_20_characters(name):
 
 def channel_index(channel_id):
     global data
-    index = 0
-    for i in data['channels']:
-        if int(i.channel_id) == int(channel_id):
-            return index
-        index = index + 1
-
+    for i, chan in enumerate(data['channels']):
+        if int(chan.channel_id) == int(channel_id):
+            return i
     raise ValueError(description = 'channel does not exist')
 
 # Helpers from kenny's message

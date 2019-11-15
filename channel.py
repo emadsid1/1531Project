@@ -20,12 +20,13 @@ def channels_create(token, name, is_public):
     channel_id = data['channel_count']
     data['channel_count'] += 1
     data['channels'].append(Channel(name, is_public, channel_id))
-    index = channel_index(channel_id)
-    data['channels'][index].owners.append(user_from_token(token).u_id)
-    data['channels'][index].members.append(user_from_token(token).u_id)
-
-    # add channel to user's list of channels 
+    index = channel_index(channel_id) 
     acct = user_from_token(token)
+    acct = data['accounts'][0]
+    data['channels'][index].owners.append(acct.u_id)
+    data['channels'][index].members.append(acct.u_id)
+
+    # add channel to user's list of channels
     acct.in_channel.append(channel_id)
     
     return {
@@ -99,7 +100,6 @@ def channel_join(token, channel_id):
     if data['channels'][index].is_public == False:
         # check if authorised user is an admin
         valid = 0
-        # TODO FIX THIS AS IT RAISES AND ISSUE ON PERM ID
         if acct.perm_id < perm_member:
             valid = 1
             data['channels'][index].owners.append(acct.u_id)
@@ -108,9 +108,6 @@ def channel_join(token, channel_id):
     
     acct.in_channel.append(channel_id)
     data['channels'][index].members.append(acct.u_id)
-
-    #print(data['channels'][index].members[1].token) #returns token of 2nd member (1st member is one who created channel)
-
     return {
     }
 
@@ -301,11 +298,13 @@ def channel_details(token, channel_id):
 
     # raise AccessError('authorised user is not in channel')
     acct = user_from_token(token)
-    if (channel_id in acct.in_channel) == False:
-        raise AccessError(description = 'authorised user is not in channel')
+    # TODO CHECK IF THIS EVER HAPPENS acct.in_channel.append(channel_id)
+    if not(channel_id in acct.in_channel): # TODO RETURNING WRONG LOGIC
+        raise AccessError(description = 'joemamaauthorised user is not in channel')
 
     channel_name = data['channels'][index].name
 
+    # TODO CHeck output based on specs
     owners_uid = []
     members_uid = []
 
@@ -314,7 +313,6 @@ def channel_details(token, channel_id):
     
     for i in data['channels'][index].members:
        members_uid.append(i)
-    # TODO CHeck output based on specs
     return {
         'name': channel_name,
         'owners': owners_uid,
@@ -353,11 +351,10 @@ def channels_list(token):
 
     channel_list = []
     for channel in data['channels']:
-        for u_id in channel.members:
-            if u_id == user_from_token(token).u_id:
+        for user_id in channel.members:
+            if user_id == user_from_token(token).u_id:
                 list_dict = {'channel_id':channel.channel_id, 'name':channel.name}
                 channel_list.append(list_dict)
-    print(channel_list)
     return {
         'channels': channel_list
     }
@@ -394,7 +391,6 @@ def channels_listall(token):
     for channel in data['channels']:
         list_dict = {'channel_id': channel.channel_id, 'name': channel.name}
         channel_list.append(list_dict)
-
     return {
         'channels': channel_list
     }
