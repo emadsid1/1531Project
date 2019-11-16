@@ -1,13 +1,12 @@
-Rigidity- Incorporated more components to classes such that we edit classes and not add random things
-Fragility- ???
-Immobility- Changed to have a route handler isolated and then functions in different files, makes it easier to extract functions for us to use in different projects
-Opacity- Convetion in variable names, and better variable names, comments and helper functions
-Needless complexity- Removed a few for loops
+# Software Engineering Principles
+With our new knowledge of software engineering principles such as Dont Repeat Yourself (DRY), Keep It Simple Stupid (KISS) and more, when we were required to refactor and add to our code, we made some extra changes to adhere to these to practice better software engineering methods. By practicing these methods we made our code 'smell less' meaning it was more rigid, less fragile, more mobile, and removed lots of needless complexity. For example, when we incorporated some more useful components to our class, such as permission flags or a list of channels the user is in, which made the code easier to change, as we did not need to read through all the code and change a few lines here and there. We also attempted to have uniform convention of variable names, function names and comments in order to increase readability, which was a major issue for us in iteration 2. However, the most significant change we made was the separation of our functions from our route handler, which was from what we saw assumed in iteration 2, but we had missed. This made our code mcuh easier to read but more importantly test and use the code in different projects in the future. Overall the principles were adhered via the following ways:
 
-DRY Implemented more helper functions and improved them in the separate helper_functiosn file
-Found that when someone else needed a certain function, if we checked there more often than not someone else already wrote it
-KISS Changed to have a route handler isolated and then functions in different files, makes it easier to extract functions for us to use in different projects
-Also removed a few global variables, such as list of admins, owners etc, instead used flags
+## Dont Repeat Yourself (DRY)
+By implementing more helper functions to have each function only have one purpose, and improving the current ones by removing some repetition (such as using our new flags in the user class), we minimised repetition and therefore had the code be more succinct. By doing this we also found that when another teamr member needed a certain helper function, if we checked the helper_functiosn.py file more often than not someone else had already wrote it, allowing us to reuse that code and lower the time taken to complete the project.
 
-YAGNI at no point did we start building lower level functions until we fully understood the purpose and began writing the higher level function
-    Minimised waste of time
+## Keep It Simple Stupid (KISS)
+NOT SURE HERE
+
+## You Arent Gonna Need It (YAGNI)
+Fortunately, this was one of the design principles that we as a group were adhering to without explictly knowing so. At no point did we start building lower level functions until we fully understood the specifications and the purpose of each function. We also always began writing the higher level function first. This not only lead to minimising waste of time (as we didnt write any code we didnt need) but also minimised frustration as by doing so, we never ran into an issue where once we began writing we realised too late the code was not meetings the requirements anymore.
+
