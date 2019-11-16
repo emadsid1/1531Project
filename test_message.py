@@ -154,7 +154,7 @@ def test_successful_pin():                  # TODO check this at the end
     # user1 = user_from_token(token1)
     # user3 = user_from_token(token3)
     # print(user1.u_id)
-    # print(user1.perm_id)
+    print(data['accounts'][0].perm_id)
     # print(user3.u_id)
     # print(user3.perm_id)
     msg_id1 = data['channels'][0].messages[0].message_id
