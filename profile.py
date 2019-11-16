@@ -1,8 +1,10 @@
 from flask import send_from_directory
+from threading import Timer
 from class_defines import User, Mesg, Channel, data, perm_member, perm_admin, perm_owner
 from datetime import datetime, timedelta, timezone
 from exception import ValueError, AccessError
-from helper_functions import find_channel, find_msg, user_from_token, user_from_uid
+from helper_functions import find_channel, find_msg, user_from_token, user_from_uid, check_in_channel, get_reacts
+from message import msg_send
 from PIL import Image
 import urllib.request
 
@@ -22,7 +24,7 @@ def user_profile(token, user_id):
     # print(user_id)
     user_uid = user_from_uid(user_id) # raises AccessError if u_id invalid
     user_token = user_from_token(token) # raises AccessError if invalid token
-    if user_uid.token != user_token:
+    if user_uid != user_token:
         raise ValueError(description = "Token does not match u_id!")
     return {
         "email": user_token.email,
@@ -130,8 +132,9 @@ def standup_start(token, channel, length):
     # starts standup
     chan.is_standup = True
     finish = datetime.now() + timedelta(seconds=length)
-    chan.standup_time = finish
     standup_finish = finish.replace(tzinfo=timezone.utc).timestamp()
+    chan.standup_time = standup_finish
+    # chan.standup_time = finish.replace(tzinfo=timezone.utc).timestamp()
     t = Timer(length, standup_active, (token, channel))
     t.start()
 
@@ -143,12 +146,11 @@ def standup_active(token, channel):
     global data
     chan = find_channel(channel) # raises AccessError if channel does not exist
     #check_in_channel(token, ch_num) # raises AccessError if user is not in channel
-    if chan.is_standup == False:
-        finish = None
-    else:
-        if chan.standup_time < datetime.now():
+    finish = None
+    if chan.is_standup == True:
+        if chan.standup_time < datetime.now().replace(tzinfo=timezone.utc).timestamp():
             chan.is_standup = False
-            standup_end(token, ch_num) # TODO: write this function
+            standup_end(token, chan.channel_id) # TODO: write this function
         else:
             finish = chan.standup_time
     return {
@@ -163,9 +165,10 @@ def standup_send(token, channel, message):
         raise ValueError(description = "There is no standup currently happening.") # standup is not happening atm
     if len(message) > 1000:
         raise ValueError(description = "Your message is too long.") # message too long
-    check_in_channel(token, chan) # raises AccessError if user is not in channel
+    user = user_from_token(token)
+    # check_in_channel(user.u_id, chan) # raises AccessError if user is not in channel
 
-    # TODO: how to check if standup has finished?
+    # TODO: check_in_channel is disabled to test other errors
     msg_send(token, message, channel)
     user = user_from_token(token)
     chan.standup_messages.append([user.handle, message])
@@ -173,19 +176,19 @@ def standup_send(token, channel, message):
 
 def search(token, query_str):
     global data
-    for acc in data["accounts"]:
-        if token == acc.token:
-            ch_list = acc.in_channel
+    user = user_from_token(token)
     messages = []
-    for ch in ch_list: # assume in_channel object is list of channel classes
-        for msg in ch.messages:
+    for ch in user.in_channel: # in_channel is a list of channel_ids
+        chan = find_channel(ch)
+        for msg in chan.messages:
             if query_str in msg.message:
+                #get_reacts(msg)
                 messages.append({
                     "message_id": msg.message_id,
-                    "u_id": msg.sender.user_id,
+                    "u_id": msg.sender,
                     "message": msg.message,
                     "time_created": msg.create_time,
-                    "reacts": msg.reaction,
+                    "reacts": msg.reaction, # TODO: figure out what type this is
                     "is_pinned": msg.pin
                 })
     return {
@@ -227,7 +230,8 @@ def standup_end(token, channel):
     send_time = datetime.now()
     sender = user_from_token(token)
     current_channel = find_channel(channel)
-    message_id = int(uuid4())
+    data["message_count"] += 1
+    msg_id = data["message_count"]
     message_list = []
     for msg in current_channel.standup_messages:
         msg_user = " ".join(msg)
