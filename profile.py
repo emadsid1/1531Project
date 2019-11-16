@@ -6,6 +6,7 @@ from exception import ValueError, AccessError
 from helper_functions import check_email, find_channel, find_msg, user_from_token, user_from_uid, check_in_channel, get_reacts
 from message import msg_send
 from PIL import Image
+import imghdr
 import urllib.request
 
 
@@ -84,27 +85,21 @@ def user_profile_sethandle(token, handle):
         raise AccessError(description = "token does not exist for any user") #token is invalid
     return {}
 
-# DOES NOT NEED TO BE COMPLETED UNTIL ITERATION 3
 def user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end, host):
     global data
-    # how to get image size?
-    # TODO: use week 8 slides from lecture
-    # imgDown.py
-    # crop.py
-    # check if jpg, check dimensions andcheck http status
-    if x_start < 0 or y_start < 0 or x_end < 0 or y_end < 0:
-        raise ValueError(description="You cannot crop an image to negative bounds!")
-    if x_end < x_start:
-        raise ValueError(description="x_start must be less than x_end!")
-    if y_end < y_start:
-        raise ValueError(description="y_start must be less than y_end!")
     user = user_from_token(token)
-    img_loc = f'{host}imgurl/{user.u_id}.jpg' #location should be "localhost:port/images/user_id"
+    img_loc = f'./static/{user.handle}.jpg' # Location to store file
     urllib.request.urlretrieve(img_url, img_loc)
-    imageObject = Image.open(img_loc)
-    cropped = imageObject.crop((x_start, y_start, x_end, y_end))
+    if imghdr.what(img_loc) != 'jpeg':
+       raise ValueError(description = 'the file is not of type jpg')
+    prof_image = Image.open(img_loc)
+    (width, height) = prof_image.size
+    if not(0 <= x_start and x_start <= width and 0 <= y_start and y_start <= height) or not(x_start < x_end or y_start < y_end):
+            raise ValueError(description = 'the dimensions are not within the size of the image')
+    box = (x_start, y_start, x_end, y_end)
+    cropped = prof_image.crop(box)
     cropped.save(img_loc)
-    user.prof_pic = img_loc
+    user.prof_pic = f'{host}static/{user.handle}.jpg'
     return {}
 
 def users_all(token):

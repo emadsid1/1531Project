@@ -51,9 +51,9 @@ class Reacts():
         self.react_id = react_id        # react id of the reaction (for iteration 2 this is 1)
 
 data = {
-    'accounts': [User('chiefjief5@gmail.com', 'password', 'Jeffrey', 'Oh', 'JeffreyOh', '', 0)],
+    'accounts': [],
     'channels': [],
-    'account_count': 1,
+    'account_count': 0,
     'channel_count': 0,
     'message_count': 0,
 }
