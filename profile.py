@@ -3,7 +3,7 @@ from threading import Timer
 from class_defines import User, Mesg, Channel, data, perm_member, perm_admin, perm_owner
 from datetime import datetime, timedelta, timezone
 from exception import ValueError, AccessError
-from helper_functions import find_channel, find_msg, user_from_token, user_from_uid, check_in_channel, get_reacts
+from helper_functions import check_email, find_channel, find_msg, user_from_token, user_from_uid, check_in_channel, get_reacts
 from message import msg_send
 from PIL import Image
 import urllib.request
@@ -39,6 +39,8 @@ def user_profile(token, user_id):
 def user_profile_setname(token, name_first, name_last):
     global data
     if not(len(name_first) >= 1 and len(name_first) <= 50):
+        raise ValueError(description = "Name needs to be between 1 and 50 characters long.")
+    if not(len(name_last) >= 1 and len(name_last) <= 50):
         raise ValueError(description = "Name needs to be between 1 and 50 characters long.")
     user = user_from_token(token) # raises AccessError if invalid token
     user.name_first = name_first
@@ -90,6 +92,12 @@ def user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end, hos
     # imgDown.py
     # crop.py
     # check if jpg, check dimensions andcheck http status
+    if x_start < 0 or y_start < 0 or x_end < 0 or y_end < 0:
+        raise ValueError(description="You cannot crop an image to negative bounds!")
+    if x_end < x_start:
+        raise ValueError(description="x_start must be less than x_end!")
+    if y_end < y_start:
+        raise ValueError(description="y_start must be less than y_end!")
     user = user_from_token(token)
     img_loc = f'{host}imgurl/{user.u_id}.jpg' #location should be "localhost:port/images/user_id"
     urllib.request.urlretrieve(img_url, img_loc)
@@ -124,7 +132,7 @@ def standup_start(token, channel, length):
     global data
     chan = find_channel(channel) # raises ValueError if channel does not exist
     if chan.is_standup == True:
-        raise AccessError(description = "Standup is already in progress!") # standup is already in progress
+        raise ValueError(description = "Standup is already in progress!") # standup is already in progress
     if length <= 0:
         raise ValueError(description = "The standup length needs to be a positive number!") # standup length needs to be greater than 0
     # check_in_channel(token, chan) # raises AccessError if user is not in channel

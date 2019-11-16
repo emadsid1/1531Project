@@ -4,7 +4,7 @@ from auth import auth_login, auth_logout, auth_register, reset_request, reset_re
 from channel import channels_create, channel_invite, channel_join, channel_leave, channel_add_owner, channel_remove_owner, channel_details, channels_list, channels_listall, channel_messages
 from message import send_later, msg_send, msg_remove, msg_edit, msg_react, msg_unreact, msg_pin, msg_unpin
 from profile import user_profile, user_profile_setname, user_profile_email, user_profile_sethandle, user_profile_uploadphoto, users_all, standup_start, standup_active, standup_send, search, admin_userpermission_change
-from helper_functions import check_email, user_from_token, user_from_uid, max_20_characters, channel_index, find_channel, find_msg, check_owner, check_admin, check_member, check_in_channel
+from helper_functions import check_email, user_from_token, user_from_uid, max_20_characters, channel_index, find_channel, find_msg, check_channel_owner, check_channel_member, check_slackr_owner, check_slackr_admin, check_in_channel, get_reacts
 from class_defines import User, Channel, Mesg, Reacts, data
 from exception import ValueError, AccessError
 from datetime import datetime, timedelta, timezone
@@ -107,15 +107,15 @@ def test_user_profiles_uploadphoto():
     authRegDict = auth_register("benjamin.kah3@student.unsw.edu.au", "password", "Ben", "Kah")
     token = authRegDict["token"]
     #SETUP TESTS END
-    assert user_profile_uploadphoto(token, "http://test_url.com/example.html", 0, 0, 1024, 1024)
+    assert user_profile_uploadphoto(token, "http://test_url.com/example.html", 0, 0, 1024, 1024, "host")
     with pytest.raises(ValueError):
-        assert user_profile_uploadphoto(token, "http://test_url.com/negativeexample.html", -1, 0, 1024, 1024)
+        assert user_profile_uploadphoto(token, "http://test_url.com/negativeexample.html", -1, 0, 1024, 1024, "host")
     with pytest.raises(ValueError):
-        assert user_profile_uploadphoto(token, "http://test_url.com/negativeexample2.html", 0, -1, 1024, 1024)
+        assert user_profile_uploadphoto(token, "http://test_url.com/negativeexample2.html", 0, -1, 1024, 1024, "host")
     with pytest.raises(ValueError):
-        assert user_profile_uploadphoto(token, "http://test_url.com/startgreaterthanendx.html", 1000, 0, 900, 1024)
+        assert user_profile_uploadphoto(token, "http://test_url.com/startgreaterthanendx.html", 1000, 0, 900, 1024, "host")
     with pytest.raises(ValueError):
-        assert user_profile_uploadphoto(token, "http://test_url.com/startgreaterthanendy.html", 0, 1000, 1024, 900)
+        assert user_profile_uploadphoto(token, "http://test_url.com/startgreaterthanendy.html", 0, 1000, 1024, 900, "host")
 
 def test_standup_start():
     #standup_start(token, channel_id), returns time_finish
@@ -129,11 +129,19 @@ def test_standup_start():
     chanCreateDict = channels_create(token, "test channel", True)
     chanId = chanCreateDict["channel_id"]
     #SETUP TESTS END
-    assert standup_start(token, chanId, 5) == finish
+    low = datetime.now() + timedelta(seconds=4)
+    up = datetime.now() + timedelta(seconds=6)
+    finish = standup_start(token, chanId, 5)
+    standup_finish = finish["time_finish"]
+    low_bound = low.replace(tzinfo=timezone.utc).timestamp()
+    up_bound = up.replace(tzinfo=timezone.utc).timestamp()
+    assert low_bound < standup_finish
+    assert up_bound > standup_finish
+
     with pytest.raises(ValueError):
-        assert standup_start(token, 55555555)
+        assert standup_start(token, 5555, 5)    # channel_id is not a valid channel
     with pytest.raises(ValueError):
-        assert standup_start(token2, chanId)
+        assert standup_start(token2, chanId, 5) # token is invalid
     #TODO: figure out how to test the time
 
 def test_standup_send():
@@ -150,23 +158,30 @@ def test_standup_send():
     chanCreateDict2 = channels_create(token, "test channel 2", True)
     chanId2 = chanCreateDict2["channel_id"]
     #SETUP TESTS END
-    with pytest.raises(AccessError):
-        assert standup_send(toke, ChanId, "this is sent before standup_start is called")
+
+    with pytest.raises(ValueError):
+        assert standup_send(token, chanId, "this is sent before standup_start is called")
+
     #create time_finish
-    standupEnd = standup_start(token, chanId)
-    minBefStandupEnd = standupEnd - timedelta(minute = 1)
-    minAftStandupEnd = standupEnd + timedelta(minute = 1)
-    #this message should be sent, as it will be sent after the standup
-    message_sendlater(token, chanId, "this is sent after standup", minAftStandupEnd)
-    with pytest.raises(AccessError):
-        assert message_send(token, chanId, "this message can't be sent in a standup!")
-        assert message_sendlater(token, chanId, "wait until after standup", minBefStandupEnd)
-    standup_send(token, chanId, "Standup message")
+    finish = standup_start(token, chanId, 5)
+    standup_finish = finish["time_finish"]
+    # after = standup_finish + timedelta(seconds=6)
+    # after_standup = after.replace(tzinfo=timezone.utc).timestamp()
+
+    # this message should be sent, as it will be sent after the standup
+    # assert message_sendlater(token, chanId, "this is sent after standup", after_standup)
+
+    # with pytest.raises(AccessError):
+    #     assert message_send(token, chanId, "this message can't be sent in a standup!")
+    #     assert message_sendlater(token, chanId, "wait until after standup", minBefStandupEnd)
+    # channel_join(token, chanId)
+    assert standup_send(token, chanId, "Standup message")
     with pytest.raises(AccessError):
         assert standup_send(token2, chanId, "Standup message with user not a member of the channel")
     strOver1000 = "yeah bo" + "i"*1000
     with pytest.raises(ValueError):
         assert standup_send(token, chanId, strOver1000)
+    with pytest.raises(ValueError):
         assert standup_send(token, chanId2, "Standup message with wrong chanId")
     #TODO: how to represent standup time
 
@@ -180,9 +195,9 @@ def test_search():
     chanCreateDict = channels_create(token, "test channel", True)
     chanId = chanCreateDict["channel_id"]
     #create messages
-    message_send(token, chanId, "New message sent")
-    message_send(token, chanId, "Another message")
-    message_send(token, chanId, "A completely different string")
+    msg_send(token, chanId, "New message sent")
+    msg_send(token, chanId, "Another message")
+    msg_send(token, chanId, "A completely different string")
     #SETUP TESTS END
     searchResultsList = search(token, "message") #first search query
     searchResultsList2 = search(token, "nothing to find") #second search query
@@ -230,5 +245,7 @@ def test_admin_userpermission_change():
 
     with pytest.raises(ValueError):
         assert admin_userpermission_change(token, userId, 0) #invalid permission_id
+    with pytest.raises(ValueError):
         assert admin_userpermission_change(token, userId, 4)
+    with pytest.raises(ValueError)
         assert admin_userpermission_change(token, 55555, 3) #invalid user ID
