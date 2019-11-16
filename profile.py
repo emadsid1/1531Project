@@ -182,7 +182,7 @@ def search(token, query_str):
         chan = find_channel(ch)
         for msg in chan.messages:
             if query_str in msg.message:
-                #get_reacts(msg)
+                reaction = get_reacts(user, msg)
                 messages.append({
                     "message_id": msg.message_id,
                     "u_id": msg.sender,
