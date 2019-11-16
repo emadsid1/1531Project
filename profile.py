@@ -98,7 +98,6 @@ def user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end, hos
     cropped = prof_image.crop(box)
     cropped.save(img_loc)
     user.prof_pic = f'{host}static/{user.handle}.jpg'
-    print(user.prof_pic)
     return {}
 
 def users_all(token):
