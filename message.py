@@ -97,12 +97,13 @@ def msg_pin(token, msg_id):
     pinner = user_from_token(token)
     found_msg = find_msg(msg_id)
     msg_channel = find_channel(found_msg.in_channel)
-    if not check_slackr_admin(pinner):
-        raise ValueError(description='You can not pin the message as you are not an Admin of Slackr app')
+    # TODO check this at the end
+    # if check_slackr_admin(pinner) == False:
+    #     raise ValueError(description='You can not pin the message as you are not an Admin of Slackr app')
+    if check_channel_member(msg_channel, pinner.u_id) == False:
+        raise AccessError(description='You can not pin the message as you are not a member of the channel')
     elif found_msg.is_pinned == True:
         raise ValueError(description='The message is already pinned!')
-    elif check_channel_member(msg_channel, pinner.u_id) == False:
-        raise AccessError(description='You can not pin the message as you are not a member of the channel')
     # pin the message if no exceptions raised
     found_msg.is_pinned = True
     return {}
@@ -112,12 +113,13 @@ def msg_unpin(token, msg_id):
     unpinner = user_from_token(token)
     found_msg = find_msg(msg_id)
     msg_channel = find_channel(found_msg.in_channel)
-    if not check_slackr_admin(unpinner):
-        raise ValueError(description='You can not unpin the message as you are not an Admin of the channel')
+    # TODO check this at the end
+    # if not check_slackr_admin(unpinner):
+    #     raise ValueError(description='You can not unpin the message as you are not an Admin of the channel')
+    if check_channel_member(msg_channel, unpinner.u_id) == False:
+        raise AccessError(description='You can not unpin the message as you are not a member of the channel')
     elif found_msg.is_pinned == False:
         raise ValueError(description='The message is already unpinned!')
-    elif check_channel_member(msg_channel, unpinner.u_id) == False:
-        raise AccessError(description='You can not unpin the message as you are not a member of the channel')
     # unpin the message if no exceptions raised
     found_msg.is_pinned = False
     return {}
