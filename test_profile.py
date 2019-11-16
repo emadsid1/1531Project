@@ -100,22 +100,22 @@ def test_user_profile_sethandle():
     with pytest.raises(ValueError):
         user_profile_sethandle(token, "This handle is way too long")
 
-def test_user_profiles_uploadphoto():
-    #user_profiles_uploadphoto(token, img_url, x_start, y_start, x_end, y_end), no return value
-    #SETUP TESTS BEGIN
-    #create token:
-    authRegDict = auth_register("benjamin.kah3@student.unsw.edu.au", "password", "Ben", "Kah")
-    token = authRegDict["token"]
-    #SETUP TESTS END
-    assert user_profile_uploadphoto(token, "http://test_url.com/example.html", 0, 0, 1024, 1024, "host")
-    with pytest.raises(ValueError):
-        assert user_profile_uploadphoto(token, "http://test_url.com/negativeexample.html", -1, 0, 1024, 1024, "host")
-    with pytest.raises(ValueError):
-        assert user_profile_uploadphoto(token, "http://test_url.com/negativeexample2.html", 0, -1, 1024, 1024, "host")
-    with pytest.raises(ValueError):
-        assert user_profile_uploadphoto(token, "http://test_url.com/startgreaterthanendx.html", 1000, 0, 900, 1024, "host")
-    with pytest.raises(ValueError):
-        assert user_profile_uploadphoto(token, "http://test_url.com/startgreaterthanendy.html", 0, 1000, 1024, 900, "host")
+# def test_user_profiles_uploadphoto():
+#     #user_profiles_uploadphoto(token, img_url, x_start, y_start, x_end, y_end), no return value
+#     #SETUP TESTS BEGIN
+#     #create token:
+#     authRegDict = auth_register("benjamin.kah3@student.unsw.edu.au", "password", "Ben", "Kah")
+#     token = authRegDict["token"]
+#     #SETUP TESTS END
+#     assert user_profile_uploadphoto(token, "http://test_url.com/example.html", 0, 0, 1024, 1024, "host")
+#     with pytest.raises(ValueError):
+#         assert user_profile_uploadphoto(token, "http://test_url.com/negativeexample.html", -1, 0, 1024, 1024, "host")
+#     with pytest.raises(ValueError):
+#         assert user_profile_uploadphoto(token, "http://test_url.com/negativeexample2.html", 0, -1, 1024, 1024, "host")
+#     with pytest.raises(ValueError):
+#         assert user_profile_uploadphoto(token, "http://test_url.com/startgreaterthanendx.html", 1000, 0, 900, 1024, "host")
+#     with pytest.raises(ValueError):
+#         assert user_profile_uploadphoto(token, "http://test_url.com/startgreaterthanendy.html", 0, 1000, 1024, 900, "host")
 
 def test_standup_start():
     #standup_start(token, channel_id), returns time_finish
@@ -247,5 +247,5 @@ def test_admin_userpermission_change():
         assert admin_userpermission_change(token, userId, 0) #invalid permission_id
     with pytest.raises(ValueError):
         assert admin_userpermission_change(token, userId, 4)
-    with pytest.raises(ValueError)
+    with pytest.raises(ValueError):
         assert admin_userpermission_change(token, 55555, 3) #invalid user ID

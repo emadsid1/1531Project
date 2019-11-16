@@ -94,7 +94,7 @@ def user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end, hos
        raise ValueError(description = 'the file is not of type jpg')
     prof_image = Image.open(img_loc)
     (width, height) = prof_image.size
-    if not(0 <= x_start and x_start <= width and 0 <= y_start and y_start <= height) or not(x_start < x_end or y_start < y_end):
+    if not(0 <= x_start and x_start <= width and 0 <= y_start and y_start <= height) or not(x_start < x_end and y_start < y_end):
             raise ValueError(description = 'the dimensions are not within the size of the image')
     box = (x_start, y_start, x_end, y_end)
     cropped = prof_image.crop(box)
