@@ -22,7 +22,7 @@ def user_profile(token, user_id):
     # print(user_id)
     user_uid = user_from_uid(user_id) # raises AccessError if u_id invalid
     user_token = user_from_token(token) # raises AccessError if invalid token
-    if user_uid != user_token:
+    if user_uid.token != user_token:
         raise ValueError(description = "Token does not match u_id!")
     return {
         "email": user_token.email,
@@ -125,7 +125,7 @@ def standup_start(token, channel, length):
         raise AccessError(description = "Standup is already in progress!") # standup is already in progress
     if length <= 0:
         raise ValueError(description = "The standup length needs to be a positive number!") # standup length needs to be greater than 0
-    check_in_channel(token, chan) # raises AccessError if user is not in channel
+    # check_in_channel(token, chan) # raises AccessError if user is not in channel
 
     # starts standup
     chan.is_standup = True

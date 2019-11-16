@@ -6,7 +6,7 @@ from message import send_later, msg_send, msg_remove, msg_edit, msg_react, msg_u
 from profile import user_profile, user_profile_setname, user_profile_email, user_profile_sethandle, user_profile_uploadphoto, users_all, standup_start, standup_active, standup_send, search, admin_userpermission_change
 from helper_functions import check_email, user_from_token, user_from_uid, max_20_characters, channel_index, find_channel, find_msg, check_owner, check_admin, check_member, check_in_channel
 from class_defines import User, Channel, Mesg, Reacts, data
-from Error import AccessError
+from exception import ValueError, AccessError
 from datetime import datetime, timedelta
 
 # nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
@@ -44,8 +44,8 @@ def test_user_profile():
         userProfile = user_profile(token1, userID2)
     with pytest.raises(ValueError):
         userProfile = user_profile(token2, userID1)
-    with pytest,raises(ValueError):
-        userProfile = user_profile(token1, "@#$%^&*!")
+    # with pytest,raises(AttributeError):
+    #     userProfile = user_profile(token1, "@#$%^&*!")
 
 def test_user_profile_setname():
     #user_profile_setname(token, firstname, lastname), no return value
@@ -61,7 +61,9 @@ def test_user_profile_setname():
     assert userDict["name_last"] == "Oh"
     with pytest.raises(ValueError): #following should raise exceptions
         user_profile_setname(token, "This is a really long first name, more than 50 characters", "lmao")
+    with pytest.raises(ValueError):
         user_profile_setname(token, "lmao", "This is a really long last name, more than 50 characters")
+    with pytest.raises(ValueError):
         user_profile_setname(token, "This is a really long first name, more than 50 characters", "This is a really long last name, more than 50 characters")
 
 def test_user_profile_setemail():
@@ -81,6 +83,7 @@ def test_user_profile_setemail():
     assert userDict["email"] == "goodemail@student.unsw.edu.au" #test that email has been changed
     with pytest.raises(ValueError): #following should raise exceptions
         user_profile_setemail(token, "bad email")
+    with pytest.raises(ValueError):
         user_profile_setemail(token, email2) #using another user's email
 
 def test_user_profile_sethandle():
@@ -104,12 +107,15 @@ def test_user_profiles_uploadphoto():
     authRegDict = auth_register("benjamin.kah3@student.unsw.edu.au", "password", "Ben", "Kah")
     token = authRegDict["token"]
     #SETUP TESTS END
-    assert user_profiles_uploadphoto(token, "http://test_url.com/example.html", 0, 0, 1024, 1024)
+    assert user_profile_uploadphoto(token, "http://test_url.com/example.html", 0, 0, 1024, 1024)
     with pytest.raises(ValueError):
-        assert user_profiles_uploadphoto(token, "http://test_url.com/negativeexample.html", -1, 0, 1024, 1024)
-        assert user_profiles_uploadphoto(token, "http://test_url.com/negativeexample2.html", 0, -1, 1024, 1024)
-        assert user_profiles_uploadphoto(token, "http://test_url.com/startgreaterthanendx.html", 1000, 0, 900, 1024)
-        assert user_profiles_uploadphoto(token, "http://test_url.com/startgreaterthanendy.html", 0, 1000, 1024, 900)
+        assert user_profile_uploadphoto(token, "http://test_url.com/negativeexample.html", -1, 0, 1024, 1024)
+    with pytest.raises(ValueError):
+        assert user_profile_uploadphoto(token, "http://test_url.com/negativeexample2.html", 0, -1, 1024, 1024)
+    with pytest.raises(ValueError):
+        assert user_profile_uploadphoto(token, "http://test_url.com/startgreaterthanendx.html", 1000, 0, 900, 1024)
+    with pytest.raises(ValueError):
+        assert user_profile_uploadphoto(token, "http://test_url.com/startgreaterthanendy.html", 0, 1000, 1024, 900)
 
 def test_standup_start():
     #standup_start(token, channel_id), returns time_finish
