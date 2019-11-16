@@ -305,8 +305,8 @@ def channel_details(token, channel_id):
     channel_name = data['channels'][index].name
 
     # TODO CHeck output based on specs
-    owners_uid = []
-    members_uid = []
+    owners_dict = []
+    members_dict = []
 
     for i in data['channels'][index].owners:
         owner_member = user_from_uid(i)
