@@ -22,7 +22,6 @@ import urllib.request
 # TODO: fix user_profile to work with u_id
 def user_profile(token, user_id):
     global data
-    # print(user_id)
     user_uid = user_from_uid(user_id) # raises AccessError if u_id invalid
     user_token = user_from_token(token) # raises AccessError if invalid token
     if user_uid != user_token:
@@ -201,7 +200,6 @@ def admin_userpermission_change(token, u_id, p_id):
     if not(perm_owner <= p_id and p_id <= perm_member):
         raise ValueError(description = 'permission_id does not refer to a value permission') # invalid perm_id
     c_user = user_from_token(token)
-    print(f'c_user = {c_user.perm_id} and p_user = {p_id}')
     if c_user.perm_id > p_id:
         raise AccessError(description = 'The authorised user is not an admin or owner')
     p_user = user_from_uid(u_id)
