@@ -1,5 +1,6 @@
 """Flask server"""
 import sys
+import requests
 from json import dumps
 from flask_mail import Mail, Message
 from flask_cors import CORS
@@ -12,6 +13,7 @@ from message import send_later, msg_send, msg_remove, msg_edit, msg_pin, msg_unp
 from profile import user_profile, user_profile_setname, user_profile_email, user_profile_sethandle, user_profile_uploadphoto, users_all, standup_start, standup_active, standup_send, search, admin_userpermission_change
 from channel import channels_create, channel_invite, channel_join, channel_leave, channel_add_owner, channel_remove_owner, channel_details, channels_list, channels_listall, channel_messages
 from helper_functions import * # TODO CHANGE LATER, KEEP FOR NOW
+from flask import Flask, request, send_from_directory
 
 def defaultHandler(err):
     response = err.get_response()
@@ -235,10 +237,13 @@ def route_user_profile_sethandle():
     return dumps(user_profile_sethandle(token, handle))
 
 @app.route('/user/profiles/uploadphoto', methods=['POST'])
-# DOES NOT NEED TO BE COMPLETED UNTIL ITERATION 3
 def route_user_profile_uploadphoto():
     token = request.form.get("token")
     img_url = request.form.get("img_url")
+    response = requests.get(img_url)
+    # Check if valid url
+    if response.status_code != 200:
+            raise ValueError(description = 'HTTP status other than 200 returned from img_url')
     x_start = int(request.form.get("x_start"))
     y_start = int(request.form.get("y_start"))
     x_end = int(request.form.get("x_end"))
