@@ -8,7 +8,7 @@ from time import time
 from threading import Timer
 from class_defines import data, User, Channel, Mesg, Reacts
 from helper_functions import find_channel, find_msg, check_channel_member, check_channel_owner, check_slackr_admin, check_slackr_owner, user_from_token, user_from_uid, reaction_exist
-    
+
 def send_later(token, msg, chan_id, sent_stamp):
     # get the number of second of the waiting interval for sending the msg later
     later_period = sent_stamp - datetime.now().replace(tzinfo=timezone.utc).timestamp()
@@ -67,7 +67,7 @@ def msg_edit(token, msg_id, new_msg):
     # edit the message if no exceptions raiseds
     found_msg.message = new_msg
     return {}
-    
+
 def msg_react(token, msg_id, react_id):
     global data
     reacter = user_from_token(token)
@@ -106,7 +106,7 @@ def msg_pin(token, msg_id):
     # pin the message if no exceptions raised
     found_msg.is_pinned = True
     return {}
-    
+
 def msg_unpin(token, msg_id):
     global data
     unpinner = user_from_token(token)

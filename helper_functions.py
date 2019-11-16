@@ -107,19 +107,27 @@ def check_slackr_admin(user):
     return False
 
 # Helper from Ben's profile and standup
-def check_in_channel(token, channel):
-    in_channel = False
-    for acc in channel.owners: # search owners list
-        if token == acc.token:
-            in_channel = True
+def check_in_channel(u_id, channel):
+    # in_channel = False
+    # for user_id in channel.owners: # search owners list
+    #     if user_id == u_id:
+    #         in_channel = True
+    # # if in_channel == False:
+    # #     for acc in data["channels"][channel_index].admins: # search admins list
+    # #         if token == acc.token:
+    # #             in_channel = True
     # if in_channel == False:
-    #     for acc in data["channels"][channel_index].admins: # search admins list
+    #     for acc in channel.members: # search members list
     #         if token == acc.token:
     #             in_channel = True
+    in_channel = check_channel_owner(channel, u_id)
     if in_channel == False:
-        for acc in channel.members: # search members list
-            if token == acc.token:
-                in_channel = True
+        in_channel = check_channel_member(channel, u_id)
     if in_channel == False: # if the user is not in the channel, raise an error
-        raise AccessError(description="You are currently not in this channel.") # TODO: need to write this function
+        raise AccessError(description="You are currently not in this channel.")
+
+# def get_reacts(message):
+#     react_list = []
+#     r_id = message.react_id
+
 # End of helper functions
