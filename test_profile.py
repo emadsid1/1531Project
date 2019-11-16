@@ -1,13 +1,13 @@
 import pytest
 import jwt
 from auth import auth_login, auth_logout, auth_register, reset_request, reset_reset
-from channel_functions import channels_create, channel_invite, channel_join, channel_leave, channel_add_owner, channel_remove_owner, channel_details, channels_list, channels_listall, channel_messages
+from channel import channels_create, channel_invite, channel_join, channel_leave, channel_add_owner, channel_remove_owner, channel_details, channels_list, channels_listall, channel_messages
 from message import send_later, msg_send, msg_remove, msg_edit, msg_react, msg_unreact, msg_pin, msg_unpin
 from profile import user_profile, user_profile_setname, user_profile_email, user_profile_sethandle, user_profile_uploadphoto, users_all, standup_start, standup_active, standup_send, search, admin_userpermission_change
 from helper_functions import check_email, user_from_token, user_from_uid, max_20_characters, channel_index, find_channel, find_msg, check_owner, check_admin, check_member, check_in_channel
 from class_defines import User, Channel, Mesg, Reacts, data
 from exception import ValueError, AccessError
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
 # ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
@@ -66,7 +66,7 @@ def test_user_profile_setname():
     with pytest.raises(ValueError):
         user_profile_setname(token, "This is a really long first name, more than 50 characters", "This is a really long last name, more than 50 characters")
 
-def test_user_profile_setemail():
+def test_user_profile_email():
     #user_profile_setemail(token, email), no return value
     #SETUP TESTS BEGIN
     #create token:
@@ -78,13 +78,13 @@ def test_user_profile_setemail():
     userDict2 = user_profile(authRegDict2["token"], authRegDict2["u_id"])
     email2 = userDict2["email"]
     #SETUP TESTS END
-    user_profile_setemail(token, "goodemail@student.unsw.edu.au") #this function should pass
+    user_profile_email(token, "goodemail@student.unsw.edu.au") #this function should pass
     userDict = user_profile(token, userId)
     assert userDict["email"] == "goodemail@student.unsw.edu.au" #test that email has been changed
     with pytest.raises(ValueError): #following should raise exceptions
-        user_profile_setemail(token, "bad email")
+        user_profile_email(token, "bad email")
     with pytest.raises(ValueError):
-        user_profile_setemail(token, email2) #using another user's email
+        user_profile_email(token, email2) #using another user's email
 
 def test_user_profile_sethandle():
     #user_profile_sethandle(token, handle_str), no return value
@@ -129,9 +129,10 @@ def test_standup_start():
     chanCreateDict = channels_create(token, "test channel", True)
     chanId = chanCreateDict["channel_id"]
     #SETUP TESTS END
-    assert standup_start(token, chanId) == '''some time'''
-    with pytest.raises(Exception):
+    assert standup_start(token, chanId, 5) == finish
+    with pytest.raises(ValueError):
         assert standup_start(token, 55555555)
+    with pytest.raises(ValueError):
         assert standup_start(token2, chanId)
     #TODO: figure out how to test the time
 
