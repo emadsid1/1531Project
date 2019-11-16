@@ -20,10 +20,10 @@ import urllib.request
 def user_profile(token, user_id):
     global data
     # print(user_id)
-    # user_uid = user_from_uid(user_id) # raises AccessError if u_id invalid
+    user_uid = user_from_uid(user_id) # raises AccessError if u_id invalid
     user_token = user_from_token(token) # raises AccessError if invalid token
-    # if user_uid.token != user_token:
-    #     raise ValueError(description = "Token does not match u_id!")
+    if user_uid.token != user_token:
+        raise ValueError(description = "Token does not match u_id!")
     return {
         "email": user_token.email,
         "name_first": user_token.name_first,
