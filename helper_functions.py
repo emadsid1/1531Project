@@ -72,11 +72,11 @@ def find_msg(msg_id):
     if message_found == False:
         raise ValueError(description='Message does not exists!')
 
-# check whether the message already contain a react with the react_id
+# check whether the message already contain a react with the react_id, also find the correct reaction base on the react id
 def reaction_exist(reactions, r_id):
     for react in reactions:
         if react.react_id == r_id:
-            return True
+            return react
     return False
 
 # check if a user is an owner of a given channel
