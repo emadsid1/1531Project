@@ -1,6 +1,6 @@
 import re
 from exception import ValueError, AccessError
-from class_defines import data, User, Channel
+from class_defines import data, User, Channel, perm_admin, perm_owner, perm_member
 
 # Helper functions
 # Helper from jeff's auth
@@ -72,26 +72,38 @@ def find_msg(msg_id):
     if message_found == False:
         raise ValueError(description='Message does not exists!')
 
+# check whether the message already contain a react with the react_id
+def reaction_exist(reactions, r_id):
+    for react in reactions:
+        if react.react_id == r_id:
+            return True
+    return False
+
 # check if a user is an owner of a given channel
-def check_owner(channel, u_id):
+def check_channel_owner(channel, u_id):
     global data
     for user_id in channel.owners:
         if user_id == u_id:
             return True
     return False
 
-# check if a user is an admin of a given channel
-def check_admin(channel, u_id):
-    for user_id in channel.admins:
+# check if a user is an member of a given channel
+def check_channel_member(channel, u_id):
+    for user_id in channel.members:
         if user_id == u_id:
             return True
     return False
 
-# check if a user is an member of a given channel
-def check_member(channel, u_id):
-    for user_id in channel.members:
-        if user_id == u_id:
-            return True
+# check if a user is an owner of the slackr app
+def check_slackr_owner(user):
+    if user.perm_id == perm_owner:
+        return True
+    return False
+
+# check if a user is an admin of the slackr app
+def check_slackr_admin(user):
+    if user.perm_id == perm_admin:
+        return True
     return False
 
 # Helper from Ben's profile and standup

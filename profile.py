@@ -2,7 +2,7 @@ from flask import send_from_directory
 from class_defines import User, Mesg, Channel, data, perm_member, perm_admin, perm_owner
 from datetime import datetime, timedelta, timezone
 from exception import ValueError, AccessError
-from helper_functions import find_channel, find_msg, check_admin, check_owner, check_member, user_from_token, user_from_uid
+from helper_functions import find_channel, find_msg, user_from_token, user_from_uid
 from PIL import Image
 import urllib.request
 
