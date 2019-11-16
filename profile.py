@@ -3,7 +3,7 @@ from threading import Timer
 from class_defines import User, Mesg, Channel, data, perm_member, perm_admin, perm_owner
 from datetime import datetime, timedelta, timezone
 from exception import ValueError, AccessError
-from helper_functions import find_channel, find_msg, user_from_token, user_from_uid, check_in_channel, get_reacts
+from helper_functions import find_channel, find_msg, user_from_token, user_from_uid, check_in_channel   # , get_reacts
 from message import msg_send
 from PIL import Image
 import urllib.request
