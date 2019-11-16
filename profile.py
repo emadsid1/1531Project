@@ -198,31 +198,17 @@ def search(token, query_str):
 
 def admin_userpermission_change(token, u_id, p_id):
     global data
-    if not(perm_owner < p_id or p_id < perm_member):
+    if not(perm_owner <= p_id and p_id <= perm_member):
         raise ValueError(description = 'permission_id does not refer to a value permission') # invalid perm_id
-    for acc in data['accounts']:
-        if acc.token == token:
-            if acc.perm_id > p_id:    # does not have permission to change p_id
-                raise AccessError(description = 'The authorised user is not an admin or owner')
-    for acc in data['accounts']:
-        if acc.u_id == u_id:
-            acc.perm_id = p_id
-            # if p_id == perm_member:
-            #     for chan in data['channels']:
-            #         if u_id in chan.owners:
-            #             if len(channel.owners) != 1:
-            #                 chan.owners.remove(u_id)
-            #         if not(u_id in chan.members):
-            #             chan.members.append(u_id)
-            # else:
-            #     for chan in data['channels']:
-            #         if u_id in chan.members:
-            #             chan.members.remove(u_id)
-            #         if not(u_id in chan.owners):
-            #             chan.owners.append(u_id)
-            return {}
-    raise ValueError(description = 'u_id does not refer to a valid user')
-
+    c_user = user_from_token(token)
+    print(f'c_user = {c_user.perm_id} and p_user = {p_id}')
+    if c_user.perm_id > p_id:
+        raise AccessError(description = 'The authorised user is not an admin or owner')
+    p_user = user_from_uid(u_id)
+    if p_user.perm_id < c_user.perm_id:
+        raise AccessError(description = 'The authorised user is not an admin or owner')
+    p_user.perm_id = p_id
+    return {}
 
 # not included in the function list, but useful to have
 # sends the summary of the standup messages
