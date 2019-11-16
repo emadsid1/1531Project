@@ -1,8 +1,8 @@
 from flask import send_from_directory
-from class_defines import User, Mesg, Channel, data
+from class_defines import User, Mesg, Channel, data, perm_member, perm_admin, perm_owner
 from datetime import datetime, timedelta, timezone
 from exception import ValueError, AccessError
-from helper_functions import find_channel, find_msg, check_admin, check_owner, check_member, user_from_token, user_from_uid
+from helper_functions import find_channel, find_msg, user_from_token, user_from_uid
 from PIL import Image
 import urllib.request
 
@@ -41,7 +41,7 @@ def user_profile_setname(token, name_first, name_last):
     user = user_from_token(token) # raises AccessError if invalid token
     user.name_first = name_first
     user.name_last = name_last
-    # no return statement
+    return {}
 
 def user_profile_email(token, email):
     global data
@@ -59,7 +59,7 @@ def user_profile_email(token, email):
         data["accounts"][counter].email = email
     else:
         raise AccessError(description = "token does not exist for any user") # token is invalid
-    # no return statement
+    return {}
 
 def user_profile_sethandle(token, handle):
     global data
@@ -78,7 +78,7 @@ def user_profile_sethandle(token, handle):
         data["accounts"][counter].handle = handle
     else:
         raise AccessError(description = "token does not exist for any user") #token is invalid
-    # no return statement
+    return {}
 
 # DOES NOT NEED TO BE COMPLETED UNTIL ITERATION 3
 def user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end, host):
@@ -87,17 +87,15 @@ def user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end, hos
     # TODO: use week 8 slides from lecture
     # imgDown.py
     # crop.py
-    # convert the url into something unique (perhaps u_id)
-    # static.py
-    # [request.host]/static/filename.png
+    # check if jpg, check dimensions andcheck http status
     user = user_from_token(token)
-    img_loc = "static/" + str(user.u_id) + ".jpg" #location should be "localhost:port/images/user_id"
+    img_loc = f'{host}imgurl/{user.u_id}.jpg' #location should be "localhost:port/images/user_id"
     urllib.request.urlretrieve(img_url, img_loc)
     imageObject = Image.open(img_loc)
     cropped = imageObject.crop((x_start, y_start, x_end, y_end))
     cropped.save(img_loc)
-    user.prof_pic = host + img_loc
-    # no return statement
+    user.prof_pic = img_loc
+    return {}
 
 def users_all(token):
     global data
@@ -171,7 +169,7 @@ def standup_send(token, channel, message):
     msg_send(token, message, channel)
     user = user_from_token(token)
     chan.standup_messages.append([user.handle, message])
-    # no return statement
+    return {}
 
 def search(token, query_str):
     global data
@@ -200,61 +198,27 @@ def admin_userpermission_change(token, u_id, p_id):
         raise ValueError(description = 'permission_id does not refer to a value permission') # invalid perm_id
     for acc in data['accounts']:
         if acc.token == token:
-            if not(acc.perm_id >= p_id):    # does not have permission to change p_id
+            if acc.perm_id > p_id:    # does not have permission to change p_id
                 raise AccessError(description = 'The authorised user is not an admin or owner')
     for acc in data['accounts']:
-        if acc.user_id == u_id:
+        if acc.u_id == u_id:
             acc.perm_id = p_id
-            if p_id == perm_member:
-                for chan in data['channels']:
-                    if u_id in chan.owners:
-                        if len(channel.owners) != 1:
-                            chan.owners.remove(u_id)
-                    if not(u_id in chan.members):
-                        chan.members.append(u_id)
-            else:
-                for chan in data['channels']:
-                    if u_id in chan.members:
-                        chan.members.remove(u_id)
-                    if not(u_id in chan.owners):
-                        chan.owners.append(u_id)
-            return 0 # TODO: fix this
+            # if p_id == perm_member:
+            #     for chan in data['channels']:
+            #         if u_id in chan.owners:
+            #             if len(channel.owners) != 1:
+            #                 chan.owners.remove(u_id)
+            #         if not(u_id in chan.members):
+            #             chan.members.append(u_id)
+            # else:
+            #     for chan in data['channels']:
+            #         if u_id in chan.members:
+            #             chan.members.remove(u_id)
+            #         if not(u_id in chan.owners):
+            #             chan.owners.append(u_id)
+            return {}
     raise ValueError(description = 'u_id does not refer to a valid user')
-    # for ch in data["channels"]:
-    #     for own in ch.owners:
-    #         if token == own.token:
-    #             has_permission = True
-    #         if user_id == acc.user_id:
-    #             valid = True
-    #             if perm_id != 1:
-    #                 remove(own)
-    #                 user = own
-    #     for ad in ch.admins:
-    #         if token == ad.token:
-    #             has_permission = True
-    #         if user_id == acc.user_id:
-    #             valid = True
-    #             if perm_id != 2:
-    #                 remove(acc)
-    #                 user = acc
-    #     for mem in ch.members:
-    #         if user_id == acc.user_id:
-    #             valid = True
-    #             if perm_id != 3:
-    #                 remove(mem)
-    #                 user = mem
-    # if has_permission == False:
-    #     raise Exception("AccessError") # members cannot use this function
-    # if valid == False:
-    #     raise Exception("ValueError") # user does not exist
-    # for add in data["channels"]:
-    #     if perm_id == 1:
-    #         add.owners.append(user)
-    #     if perm_id == 2:
-    #         add.admins.append(user)
-    #     if perm_id == 3:
-    #         add.members.append(user)
-    # return dumps({})
+
 
 # not included in the function list, but useful to have
 # sends the summary of the standup messages

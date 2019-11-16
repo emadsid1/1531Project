@@ -55,9 +55,9 @@ class Reacts():
 #         self.time = time                # either standup_end time or message_send time
 
 data = {
-    'accounts': [User('chiefjief5@gmail.com', 'password', 'Jeffrey', 'Oh', 'JeffreyOh', '', 0), User('kennyhan@gmail.com', 'password', 'Kenny', 'Han', 'KennyHan','',1)],
+    'accounts': [User('chiefjief5@gmail.com', 'password', 'Jeffrey', 'Oh', 'JeffreyOh', '', 0)],
     'channels': [],
-    'account_count': 0,
+    'account_count': 1,
     'channel_count': 0,
     'message_count': 0,
 }

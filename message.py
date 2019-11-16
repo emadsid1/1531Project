@@ -7,12 +7,12 @@ from datetime import datetime, timezone
 from time import time
 from threading import Timer
 from class_defines import data, User, Channel, Mesg, Reacts
-from helper_functions import find_channel, find_msg, check_admin, check_owner, check_member, user_from_token, user_from_uid
+from helper_functions import find_channel, find_msg, check_channel_member, check_channel_owner, check_slackr_admin, check_slackr_owner, user_from_token, user_from_uid, reaction_exist
     
 def send_later(token, msg, chan_id, sent_stamp):
     # get the number of second of the waiting interval for sending the msg later
     later_period = sent_stamp - datetime.now().replace(tzinfo=timezone.utc).timestamp()
-    if later_period < 0:
+    if later_period > 0:
         raise ValueError(description='Time sent is a value in the past!')
     # create a new thread apart from the main thread, while other function calls are still allowed
     send = Timer(later_period, msg_send, (token, msg, chan_id))
@@ -26,7 +26,7 @@ def msg_send(token, msg, chan_id):
     current_channel = find_channel(chan_id)
     if len(msg) > 1000:
         raise ValueError(description='Message is more than 1000 words!')
-    elif check_member(current_channel, sender.u_id) == False:
+    elif check_channel_member(current_channel, sender.u_id) == False:
         raise AccessError(description='You have not joined this channel yet, please join first!')
     else:
         # generate an unique id
@@ -44,7 +44,7 @@ def msg_remove(token, msg_id):
     msg_channel = find_channel(found_msg.in_channel)
     if found_msg.sender != remover.u_id:
         raise AccessError(description='You do not have the permission to delete this message as you are not the sender!')
-    elif (check_owner(msg_channel, remover.u_id) == False):     # TODO  or (check_admin(msg_channel, remover.u_id) == False)
+    elif not(check_channel_owner(msg_channel, remover.u_id)) or not(check_slackr_admin(remover)) or not(check_slackr_owner(remover)):
         raise AccessError(description='You do not have the permission as you are not the owner or admin of this channel!')
     # no exception raised, then remove the message
     msg_channel.messages.remove(found_msg)
@@ -62,8 +62,8 @@ def msg_edit(token, msg_id, new_msg):
         raise ValueError(description='Message is more than 1000 words!')
     elif found_msg.sender != editor.u_id:
         raise AccessError(description='You do not have the permission to edit this message as you are not the sender!')
-    elif (check_owner(msg_channel, editor.u_id) == False):      # TODO  or (check_admin(msg_channel, editor.u_id) == False)
-        raise AccessError(description='You do not have the permission as you are not the owner or admin of this channel!')
+    elif not(check_channel_owner(msg_channel, remover.u_id)) or not(check_slackr_admin(remover)) or not(check_slackr_owner(remover)):
+        raise AccessError(description='You do not have the permission as you are not the owner or admin of this channel or Slackr!')
     # edit the message if no exceptions raiseds
     found_msg.message = new_msg
     return {}
@@ -74,10 +74,10 @@ def msg_react(token, msg_id, react_id):
     found_msg = find_msg(msg_id)
     if react_id != 1:
         raise ValueError(description='Invalid React ID!')
-    elif found_msg.reaction != None:
-        raise ValueError(description='This message already contains an active React!')
+    elif reaction_exist(found_msg.reaction, react_id) == True:
+        raise ValueError(description=f'This message already contains an active React with react ID: {react_id}!')
     # give the message a reaction if no exceptions raised
-    found_msg.reaction = Reacts(reacter.u_id, react_id)
+    found_msg.reaction.append(Reacts(reacter.u_id, react_id))
     found_msg.reacted_user.append(reacter.u_id)
     return {}
 
@@ -86,10 +86,11 @@ def msg_unreact(token, msg_id, react_id):
     found_msg = find_msg(msg_id)
     if react_id != 1:
         raise ValueError(description='Invalid React ID!')
-    elif found_msg.reaction == None:
-        raise ValueError(description='This message does not contain an active React!')
+    elif reaction_exist(found_msg.reaction, react_id) == False:
+        raise ValueError(description=f'This message does not contain an active React with the react ID: {react_id}!')
     # unreact the message if no exceptions raised
-    found_msg.reaction = None
+    reacter = user_from_token(token)
+    found_msg.reaction.remove(Reacts(reacter.u_id, react_id))
     return {}
 
 def msg_pin(token, msg_id):
@@ -97,7 +98,7 @@ def msg_pin(token, msg_id):
     pinner = user_from_token(token)
     found_msg = find_msg(msg_id)
     msg_channel = find_channel(found_msg.in_channel)
-    if check_admin(msg_channel, pinner.u_id) == False:      # TODO check this admin 
+    if not check_slackr_admin(pinner):
         raise ValueError(description='You can not pin the message as you are not an Admin of the channel')
     elif found_msg.is_pinned == True:
         raise ValueError(description='The message is already pinned!')
@@ -112,7 +113,7 @@ def msg_unpin(token, msg_id):
     unpinner = user_from_token(token)
     found_msg = find_msg(msg_id)
     msg_channel = find_channel(found_msg.in_channel)
-    if check_admin(msg_channel, unpinner.u_id) == False:        # TODO check this admin
+    if not check_slackr_admin(unpinner):
         raise ValueError(description='You can not unpin the message as you are not an Admin of the channel')
     elif found_msg.is_pinned == False:
         raise ValueError(description='The message is already unpinned!')
