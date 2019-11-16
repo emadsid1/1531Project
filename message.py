@@ -12,7 +12,7 @@ from helper_functions import find_channel, find_msg, check_channel_member, check
 def send_later(token, msg, chan_id, sent_stamp):
     # get the number of second of the waiting interval for sending the msg later
     later_period = sent_stamp - datetime.now().replace(tzinfo=timezone.utc).timestamp()
-    if later_period > 0:
+    if later_period <= 0:
         raise ValueError(description='Time sent is a value in the past!')
     # create a new thread apart from the main thread, while other function calls are still allowed
     send = Timer(later_period, msg_send, (token, msg, chan_id))
@@ -44,7 +44,7 @@ def msg_remove(token, msg_id):
     msg_channel = find_channel(found_msg.in_channel)
     if found_msg.sender != remover.u_id:
         raise AccessError(description='You do not have the permission to delete this message as you are not the sender!')
-    elif not(check_channel_owner(msg_channel, remover.u_id)) or not(check_slackr_admin(remover)) or not(check_slackr_owner(remover)):
+    elif not check_channel_owner(msg_channel, remover.u_id):
         raise AccessError(description='You do not have the permission as you are not the owner or admin of this channel!')
     # no exception raised, then remove the message
     msg_channel.messages.remove(found_msg)
@@ -62,7 +62,7 @@ def msg_edit(token, msg_id, new_msg):
         raise ValueError(description='Message is more than 1000 words!')
     elif found_msg.sender != editor.u_id:
         raise AccessError(description='You do not have the permission to edit this message as you are not the sender!')
-    elif not(check_channel_owner(msg_channel, remover.u_id)) or not(check_slackr_admin(remover)) or not(check_slackr_owner(remover)):
+    elif not check_channel_owner(msg_channel, editor.u_id):
         raise AccessError(description='You do not have the permission as you are not the owner or admin of this channel or Slackr!')
     # edit the message if no exceptions raiseds
     found_msg.message = new_msg
@@ -74,10 +74,10 @@ def msg_react(token, msg_id, react_id):
     found_msg = find_msg(msg_id)
     if react_id != 1:
         raise ValueError(description='Invalid React ID!')
-    elif reaction_exist(found_msg.reaction, react_id) == True:
+    elif reaction_exist(found_msg.reactions, react_id) is not False:
         raise ValueError(description=f'This message already contains an active React with react ID: {react_id}!')
     # give the message a reaction if no exceptions raised
-    found_msg.reaction.append(Reacts(reacter.u_id, react_id))
+    found_msg.reactions.append(Reacts(reacter.u_id, react_id))
     found_msg.reacted_user.append(reacter.u_id)
     return {}
 
@@ -86,11 +86,10 @@ def msg_unreact(token, msg_id, react_id):
     found_msg = find_msg(msg_id)
     if react_id != 1:
         raise ValueError(description='Invalid React ID!')
-    elif reaction_exist(found_msg.reaction, react_id) == False:
+    elif reaction_exist(found_msg.reactions, react_id) == False:
         raise ValueError(description=f'This message does not contain an active React with the react ID: {react_id}!')
     # unreact the message if no exceptions raised
-    reacter = user_from_token(token)
-    found_msg.reaction.remove(Reacts(reacter.u_id, react_id))
+    found_msg.reactions.remove(reaction_exist(found_msg.reactions, react_id))
     return {}
 
 def msg_pin(token, msg_id):
@@ -98,12 +97,13 @@ def msg_pin(token, msg_id):
     pinner = user_from_token(token)
     found_msg = find_msg(msg_id)
     msg_channel = find_channel(found_msg.in_channel)
-    if not check_slackr_admin(pinner):
-        raise ValueError(description='You can not pin the message as you are not an Admin of the channel')
+    # TODO check this at the end
+    # if check_slackr_admin(pinner) == False:
+    #     raise ValueError(description='You can not pin the message as you are not an Admin of Slackr app')
+    if check_channel_member(msg_channel, pinner.u_id) == False:
+        raise AccessError(description='You can not pin the message as you are not a member of the channel')
     elif found_msg.is_pinned == True:
         raise ValueError(description='The message is already pinned!')
-    elif check_member(msg_channel, pinner.u_id) == False:
-        raise AccessError(description='You can not pin the message as you are not a member of the channel')
     # pin the message if no exceptions raised
     found_msg.is_pinned = True
     return {}
@@ -113,12 +113,13 @@ def msg_unpin(token, msg_id):
     unpinner = user_from_token(token)
     found_msg = find_msg(msg_id)
     msg_channel = find_channel(found_msg.in_channel)
-    if not check_slackr_admin(unpinner):
-        raise ValueError(description='You can not unpin the message as you are not an Admin of the channel')
+    # TODO check this at the end
+    # if not check_slackr_admin(unpinner):
+    #     raise ValueError(description='You can not unpin the message as you are not an Admin of the channel')
+    if check_channel_member(msg_channel, unpinner.u_id) == False:
+        raise AccessError(description='You can not unpin the message as you are not a member of the channel')
     elif found_msg.is_pinned == False:
         raise ValueError(description='The message is already unpinned!')
-    elif check_member(msg_channel, unpinner.u_id) == False:
-        raise AccessError(description='You can not unpin the message as you are not a member of the channel')
     # unpin the message if no exceptions raised
     found_msg.is_pinned = False
     return {}

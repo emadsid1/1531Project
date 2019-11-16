@@ -58,7 +58,7 @@ def find_channel(chan_id):
             channel_found = True
             return chan
     if channel_found == False:
-        raise Value(description='Channel does not exit, please join or create a channel first!')
+        raise ValueError(description='Channel does not exit, please join or create a channel first!')
 
 # find the correct message base on the message_id
 def find_msg(msg_id):

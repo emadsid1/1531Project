@@ -28,7 +28,6 @@ def channels_create(token, name, is_public):
 
     # add channel to user's list of channels
     acct.in_channel.append(channel_id)
-
     return {
         'channel_id': channel_id
     }
@@ -137,7 +136,6 @@ def channel_leave(token, channel_id):
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
     acct = user_from_token(token)
-
     # raise AccessError if authorised user not in channel
     if (channel_id in acct.in_channel) == False:
         raise AccessError('authorised user is not in channel')
@@ -145,7 +143,6 @@ def channel_leave(token, channel_id):
     for j in data['channels'][index].members:
         if j == acct.u_id:
             data['channels'][index].members.remove(j) #DONT use .pop as it takes in the index, .remove takes in element
-
     for j in data['channels'][index].owners:
         if j == acct.u_id:
             data['channels'][index].owners.remove(j)
@@ -196,13 +193,13 @@ def channel_add_owner(token, channel_id, u_id):
     index = channel_index(channel_id)
 
     # check if user with u_id is already owner
+
     if user_from_uid(u_id).u_id in data['channels'][index].owners:
         raise ValueError(description = 'User with u_id is already an owner')
 
     # check if authorised user is an owner of this channel
     if user_from_token(token).u_id not in data['channels'][index].owners:
         raise AccessError(description = 'Authorised user not an owner of this channel')
-
     data['channels'][index].owners.append(u_id)
 
     return {
@@ -252,7 +249,6 @@ def channel_remove_owner(token, channel_id, u_id):
     # raise AccessError if token is not an owner of this channel
     if user_from_token(token).u_id not in data['channels'][index].owners:
         raise AccessError(description = 'authorised user is not an owner of this channel')
-
     data['channels'][index].owners.remove(u_id)
 
     return {
