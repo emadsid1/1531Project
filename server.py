@@ -25,7 +25,7 @@ def defaultHandler(err):
     response.content_type = 'application/json'
     return response
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static/')
 app.config['TRAP_HTTP_EXCEPTIONS'] = True
 app.register_error_handler(Exception, defaultHandler)
 CORS(app)
@@ -250,6 +250,10 @@ def route_user_profile_uploadphoto():
     y_end = int(request.form.get("y_end"))
     host = request.host_url
     return dumps(user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end, host))
+
+@app.route('/static/<path:path>')
+def send_js(path):
+    return send_from_directory('', path)
 
 @app.route('/users/all', methods=['GET'])
 def route_users_all():
