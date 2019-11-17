@@ -135,7 +135,7 @@ def channel_details(token, channel_id):
     # raise AccessError('authorised user is not in channel')
     acct = user_from_token(token)
     if not(channel_id in acct.in_channel):
-        raise AccessError(description = 'joemamaauthorised user is not in channel')
+        raise AccessError(description = 'authorised user is not in channel')
 
     channel_name = data['channels'][index].name
 
@@ -144,11 +144,11 @@ def channel_details(token, channel_id):
 
     for i in data['channels'][index].owners:
         owner_member = user_from_uid(i)
-        owners_dict.append({'u_id': i, 'name_first': owner_member.name_first, 'name_last': owner_member.name_last, 'profile_img_url': ''})
+        owners_dict.append({'u_id': i, 'name_first': owner_member.name_first, 'name_last': owner_member.name_last, 'profile_img_url': owner_member.prof_pic})
     
     for i in data['channels'][index].members:
         member = user_from_uid(i)
-        members_dict.append({'u_id': i, 'name_first': member.name_first, 'name_last': member.name_last, 'profile_img_url': ''})
+        members_dict.append({'u_id': i, 'name_first': member.name_first, 'name_last': member.name_last, 'profile_img_url': member.prof_pic})
 
     return {
         'name': channel_name,
