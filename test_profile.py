@@ -8,6 +8,7 @@ from helper_functions import check_email, user_from_token, user_from_uid, max_20
 from class_defines import User, Channel, Mesg, Reacts, data
 from exception import ValueError, AccessError
 from datetime import datetime, timedelta, timezone
+from time import time
 
 # nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
 # ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
@@ -128,13 +129,16 @@ def test_standup_start():
     #create channel
     chanCreateDict = channels_create(token, "test channel", True)
     chanId = chanCreateDict["channel_id"]
+    channel_join(token, chanId)
     #SETUP TESTS END
-    low = datetime.now() + timedelta(seconds=4)
-    up = datetime.now() + timedelta(seconds=6)
+    # low = datetime.now() + timedelta(seconds=4)
+    # up = datetime.now() + timedelta(seconds=6)
+    low_bound = time() + float(4.8)
+    up_bound = time() + float(5.2)
     finish = standup_start(token, chanId, 5)
     standup_finish = finish["time_finish"]
-    low_bound = low.replace(tzinfo=timezone.utc).timestamp()
-    up_bound = up.replace(tzinfo=timezone.utc).timestamp()
+    # low_bound = low.replace(tzinfo=timezone.utc).timestamp()
+    # up_bound = up.replace(tzinfo=timezone.utc).timestamp()
     assert low_bound < standup_finish
     assert up_bound > standup_finish
 
@@ -142,7 +146,6 @@ def test_standup_start():
         assert standup_start(token, 5555, 5)    # channel_id is not a valid channel
     with pytest.raises(ValueError):
         assert standup_start(token2, chanId, 5) # token is invalid
-    #TODO: figure out how to test the time
 
 def test_standup_send():
     #standup_send(token, channel_id, message), no return value
@@ -155,8 +158,10 @@ def test_standup_send():
     #create channels:
     chanCreateDict = channels_create(token, "test channel", True)
     chanId = chanCreateDict["channel_id"]
+    channel_join(token, chanId)
     chanCreateDict2 = channels_create(token, "test channel 2", True)
     chanId2 = chanCreateDict2["channel_id"]
+    channel_join(token, chanId2)
     #SETUP TESTS END
 
     with pytest.raises(ValueError):
@@ -168,14 +173,7 @@ def test_standup_send():
     # after = standup_finish + timedelta(seconds=6)
     # after_standup = after.replace(tzinfo=timezone.utc).timestamp()
 
-    # this message should be sent, as it will be sent after the standup
-    # assert message_sendlater(token, chanId, "this is sent after standup", after_standup)
-
-    # with pytest.raises(AccessError):
-    #     assert message_send(token, chanId, "this message can't be sent in a standup!")
-    #     assert message_sendlater(token, chanId, "wait until after standup", minBefStandupEnd)
-    # channel_join(token, chanId)
-    assert standup_send(token, chanId, "Standup message")
+    standup_send(token, chanId, "Standup message")
     with pytest.raises(AccessError):
         assert standup_send(token2, chanId, "Standup message with user not a member of the channel")
     strOver1000 = "yeah bo" + "i"*1000
@@ -183,7 +181,6 @@ def test_standup_send():
         assert standup_send(token, chanId, strOver1000)
     with pytest.raises(ValueError):
         assert standup_send(token, chanId2, "Standup message with wrong chanId")
-    #TODO: how to represent standup time
 
 def test_search():
     #search(token, query_str), returns messages
@@ -194,23 +191,24 @@ def test_search():
     #create channel
     chanCreateDict = channels_create(token, "test channel", True)
     chanId = chanCreateDict["channel_id"]
+    channel_join(token, chanId)
     #create messages
-    msg_send(token, chanId, "New message sent")
-    msg_send(token, chanId, "Another message")
-    msg_send(token, chanId, "A completely different string")
+    msg_send(token, "New message sent", chanId)
+    msg_send(token, "Another message", chanId)
+    msg_send(token, "A completely different string", chanId)
     #SETUP TESTS END
     searchResultsList = search(token, "message") #first search query
     searchResultsList2 = search(token, "nothing to find") #second search query
-    assert searchResultsList[0]["message"] == "New message sent" #search results should contain these strings
-    assert searchResultsList[1]["message"] == "Another message"
-    assert len(searchResultsList) == 2
-    assert searchResultsList2 == False #list should be empty
+    assert searchResultsList["messages"][0]["message"] == "New message sent" #search results should contain these strings
+    assert searchResultsList["messages"][1]["message"] == "Another message"
+    assert len(searchResultsList["messages"]) == 2
+    assert len(searchResultsList2["messages"]) == 0 #list should be empty
 
 def test_admin_userpermission_change():
     #admin_userpermission_change(token, u_id, permission_id), no return value
     #SETUP TESTS BEGIN
     #create new admin:
-    authRegDict = auth_register("benjamin.kah7@student.unsw.edu.au", "password", "Ben", "Kah")
+    authRegDict = auth_login("kenny@gmail.com", "password")
     token = authRegDict["token"]
     userId = authRegDict["u_id"]
     #create regular user:
@@ -220,32 +218,39 @@ def test_admin_userpermission_change():
     #create channel from admin:
     chanCreateDict = channels_create(token, "test channel", True)
     chanId = chanCreateDict["channel_id"]
+    channel_join(token, chanId)
     #add regular user to first channel:
     channel_invite(token, chanId, userId2)
     #SETUP TESTS END
-    admin_userpermission_change(token, userId2, 3) #confirm regular user is a member
-    with pytest.raises(AccessError):
-        assert channel_removeowner(token2, chanId, userId) #regular user should not have permission to do this
-
-    admin_userpermission_change(token, userId2, 1) #make regular user an owner
-    channel_removeowner(token2, chanId, userId) #revoke original admin's permissions - should pass
-
-    admin_userpermission_change(token2, userId, 2) #make original admin an admin again
-    channel_removeowner(token, chanId, userId2) #original admin removes new owner's privileges - should pass
-
-    admin_userpermission_change(token, userId2, 1) #add regular user as an owner again to set up next test
-    #create second channel:
-    chanCreateDict2 = channels_create(token, "test channel 2", True)
-    chanId2 = chanCreateDict2["channel_id"]
-    #add regular user to second channel:
-    channel_invite(token, chanId, userId2)
-    #owner of channel 1 should not be owner of this channel
-    with pytest.raises(AccessError):
-        assert channel_removeowner(token2, chanId2, userId) #regular user should not have permission to do this
-
     with pytest.raises(ValueError):
         assert admin_userpermission_change(token, userId, 0) #invalid permission_id
     with pytest.raises(ValueError):
         assert admin_userpermission_change(token, userId, 4)
-    with pytest.raises(ValueError):
+    with pytest.raises(AccessError):
         assert admin_userpermission_change(token, 55555, 3) #invalid user ID
+
+    user2 = user_from_token(token2)
+    # check user2 is a member (not an owner or admin)
+    assert check_slackr_owner(user2) == False
+    assert check_slackr_admin(user2) == False
+
+    # check user2 is an owner
+    admin_userpermission_change(token, userId2, 1)
+    assert check_slackr_owner(user2) == True
+    assert check_slackr_admin(user2) == False
+
+    # check user2 is an admin
+    admin_userpermission_change(token, userId2, 2)
+    assert check_slackr_owner(user2) == False
+    assert check_slackr_admin(user2) == True
+
+    # change user2 back to member
+    admin_userpermission_change(token, userId2, 3)
+    # check user2 cannot change permission of user1
+    with pytest.raises(AccessError):
+        admin_userpermission_change(token2, userId, 3)
+
+    user = user_from_token(token)
+    # check slackr owner can be made admin
+    admin_userpermission_change(token, userId, 2)
+    assert check_slackr_admin(user)
