@@ -10,23 +10,6 @@ from exception import ValueError, AccessError
 from datetime import datetime, timedelta, timezone
 from time import time
 
-# nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
-# ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
-# chan1 = Channel("chatime", True, 1, 5)
-#
-# data = {
-#     "accounts": [nom, ben],
-#     "channels": [chan1]
-# }
-
-# user = auth_register("ben@gmail.com", "password", "ben", "kah")
-# user_2 = auth_login('chiefjief5@gmail.com', '123456')
-# print(user)
-# print(user_2)
-# user_3 = user_from_uid("267925653265221847378815592933319945304")
-# print(user_3)
-
-
 def test_user_profile():
     # set up
     # user1(admin)
@@ -101,23 +84,6 @@ def test_user_profile_sethandle():
     with pytest.raises(ValueError):
         user_profile_sethandle(token, "This handle is way too long")
 
-# def test_user_profiles_uploadphoto():
-#     #user_profiles_uploadphoto(token, img_url, x_start, y_start, x_end, y_end), no return value
-#     #SETUP TESTS BEGIN
-#     #create token:
-#     authRegDict = auth_register("benjamin.kah3@student.unsw.edu.au", "password", "Ben", "Kah")
-#     token = authRegDict["token"]
-#     #SETUP TESTS END
-#     assert user_profile_uploadphoto(token, "http://test_url.com/example.html", 0, 0, 1024, 1024, "host")
-#     with pytest.raises(ValueError):
-#         assert user_profile_uploadphoto(token, "http://test_url.com/negativeexample.html", -1, 0, 1024, 1024, "host")
-#     with pytest.raises(ValueError):
-#         assert user_profile_uploadphoto(token, "http://test_url.com/negativeexample2.html", 0, -1, 1024, 1024, "host")
-#     with pytest.raises(ValueError):
-#         assert user_profile_uploadphoto(token, "http://test_url.com/startgreaterthanendx.html", 1000, 0, 900, 1024, "host")
-#     with pytest.raises(ValueError):
-#         assert user_profile_uploadphoto(token, "http://test_url.com/startgreaterthanendy.html", 0, 1000, 1024, 900, "host")
-
 def test_standup_start():
     #standup_start(token, channel_id), returns time_finish
     #SETUP TESTS BEGIN
@@ -170,8 +136,6 @@ def test_standup_send():
     #create time_finish
     finish = standup_start(token, chanId, 5)
     standup_finish = finish["time_finish"]
-    # after = standup_finish + timedelta(seconds=6)
-    # after_standup = after.replace(tzinfo=timezone.utc).timestamp()
 
     standup_send(token, chanId, "Standup message")
     with pytest.raises(AccessError):
@@ -199,8 +163,8 @@ def test_search():
     #SETUP TESTS END
     searchResultsList = search(token, "message") #first search query
     searchResultsList2 = search(token, "nothing to find") #second search query
-    assert searchResultsList["messages"][0]["message"] == "New message sent" #search results should contain these strings
-    assert searchResultsList["messages"][1]["message"] == "Another message"
+    assert searchResultsList["messages"][1]["message"] == "New message sent" #search results should contain these strings
+    assert searchResultsList["messages"][0]["message"] == "Another message"
     assert len(searchResultsList["messages"]) == 2
     assert len(searchResultsList2["messages"]) == 0 #list should be empty
 
