@@ -154,17 +154,12 @@ def test_unreacted():
     with pytest.raises(ValueError):
         msg_unreact(token1, msg_id4, 1)
 
-def test_successful_pin():                  # TODO check this at the end
-    # user1 = user_from_token(token1)
-    # user3 = user_from_token(token3)
-    # print(user1.u_id)
-    print(data['accounts'][0].perm_id)
-    # print(user3.u_id)
-    # print(user3.perm_id)
+def test_successful_pin():
+    user1 = user_from_token(token1)
+    user3 = user_from_token(token3)
     msg_id1 = data['channels'][0].messages[0].message_id
-    # admin_userpermission_change(token1, user3.u_id, perm_admin)
-    # data['accounts'][0].perm_id == 2
-    assert msg_pin(token1, msg_id1) == {}
+    admin_userpermission_change(token1, user3.u_id, perm_admin)
+    assert msg_pin(token3, msg_id1) == {}
 
 def test_already_pinned():
     # if the message is already pinned
@@ -183,11 +178,12 @@ def test_pin_msgid_notvalid():
     with pytest.raises(ValueError):
         msg_pin(token1, 6666)
 
-def test_successful_unpin():                  # TODO check this at the end
+def test_successful_unpin():
+    user1 = user_from_token(token1)
+    user3 = user_from_token(token3)
     msg_id1 = data['channels'][0].messages[0].message_id
-    # admin_userpermission_change(token1, user3.u_id, perm_admin)
-    # data['accounts'][0].perm_id == 2
-    assert msg_unpin(token1, msg_id1) == {}
+    admin_userpermission_change(token1, user3.u_id, perm_admin)
+    assert msg_unpin(token3, msg_id1) == {}
 
 def test_already_unpinned():
     # if the message is already unpinned

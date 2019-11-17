@@ -9,7 +9,7 @@ from helper_functions import find_channel, find_msg, check_channel_member, check
 
 def send_later(token, msg, chan_id, sent_stamp):
     # get the number of second of the waiting interval for sending the msg later
-    later_period = sent_stamp - datetime.now().replace(tzinfo=timezone.utc).timestamp()
+    later_period = sent_stamp - time()
     if later_period <= 0:
         raise ValueError(description='Time sent is a value in the past!')
     # create a new thread apart from the main thread, while other function calls are still allowed
