@@ -21,7 +21,6 @@ import urllib.request
 #     "channels": [chan1]
 # }
 
-# TODO: fix user_profile to work with u_id
 def user_profile(token, user_id):
     global data
     user_uid = user_from_uid(user_id) # raises AccessError if u_id invalid
@@ -158,7 +157,7 @@ def standup_active(token, channel):
         # if chan.standup_time < datetime.now().replace(tzinfo=timezone.utc).timestamp():
         if chan.standup_time < time():
             chan.is_standup = False
-            standup_end(token, chan.channel_id) # TODO: write this function
+            standup_end(token, chan.channel_id)
         else:
             finish = chan.standup_time
     return {
@@ -176,7 +175,6 @@ def standup_send(token, channel, message):
     user = user_from_token(token)
     check_in_channel(user.u_id, chan) # raises AccessError if user is not in channel
 
-    # TODO: check_in_channel is disabled to test other errors
     msg_send(token, message, channel)
     user = user_from_token(token)
     chan.standup_messages.append([user.handle, message])
