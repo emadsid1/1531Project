@@ -146,7 +146,6 @@ def test_standup_start():
         assert standup_start(token, 5555, 5)    # channel_id is not a valid channel
     with pytest.raises(ValueError):
         assert standup_start(token2, chanId, 5) # token is invalid
-    #TODO: figure out how to test the time
 
 def test_standup_send():
     #standup_send(token, channel_id, message), no return value
@@ -182,7 +181,6 @@ def test_standup_send():
         assert standup_send(token, chanId, strOver1000)
     with pytest.raises(ValueError):
         assert standup_send(token, chanId2, "Standup message with wrong chanId")
-    #TODO: how to represent standup time
 
 def test_search():
     #search(token, query_str), returns messages
