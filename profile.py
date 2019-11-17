@@ -190,8 +190,8 @@ def search(token, query_str):
                     "u_id": msg.sender,
                     "message": msg.message,
                     "time_created": msg.create_time,
-                    "reacts": msg.reaction, # TODO: figure out what type this is
-                    "is_pinned": msg.pin
+                    "reacts": reaction, # TODO: figure out what type this is
+                    "is_pinned": msg.is_pinned
                 })
     return {
         "messages": messages

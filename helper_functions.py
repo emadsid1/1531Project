@@ -146,7 +146,7 @@ def get_reacts(user, message):
         reacc = True
     return [{
         "react_id": 1,          # assume only one type of react_id
-        "u_ids": reacted_user,
+        "u_ids": message.reacted_user,
         "is_this_user_reacted": reacc
     }]
 
