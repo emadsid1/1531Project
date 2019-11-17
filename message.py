@@ -1,6 +1,4 @@
-'''
-Message functions by Kenny Han z5206270 (just to make pylint happy XD) <- TODO LMAO
-'''
+'''Message functions'''
 from json import dumps
 from exception import ValueError, AccessError
 from datetime import datetime, timezone
@@ -11,7 +9,7 @@ from helper_functions import find_channel, find_msg, check_channel_member, check
 
 def send_later(token, msg, chan_id, sent_stamp):
     # get the number of second of the waiting interval for sending the msg later
-    later_period = sent_stamp - datetime.now().replace(tzinfo=timezone.utc).timestamp()
+    later_period = sent_stamp - time()
     if later_period <= 0:
         raise ValueError(description='Time sent is a value in the past!')
     # create a new thread apart from the main thread, while other function calls are still allowed
@@ -100,13 +98,12 @@ def msg_pin(token, msg_id):
     pinner = user_from_token(token)
     found_msg = find_msg(msg_id)
     msg_channel = find_channel(found_msg.in_channel)
-    # TODO check this at the end
-    # if check_slackr_admin(pinner) == False:
-    #     raise ValueError(description='You can not pin the message as you are not an Admin of Slackr app')
     if check_channel_member(msg_channel, pinner.u_id) == False:
         raise AccessError(description='You can not pin the message as you are not a member of the channel')
     elif found_msg.is_pinned == True:
         raise ValueError(description='The message is already pinned!')
+    elif not check_slackr_admin(pinner):
+        raise ValueError(description='You can not pin the message as you are not an Admin of Slackr app')
     # pin the message if no exceptions raised
     found_msg.is_pinned = True
     return {}
@@ -116,13 +113,12 @@ def msg_unpin(token, msg_id):
     unpinner = user_from_token(token)
     found_msg = find_msg(msg_id)
     msg_channel = find_channel(found_msg.in_channel)
-    # TODO check this at the end
-    # if not check_slackr_admin(unpinner):
-    #     raise ValueError(description='You can not unpin the message as you are not an Admin of the channel')
     if check_channel_member(msg_channel, unpinner.u_id) == False:
         raise AccessError(description='You can not unpin the message as you are not a member of the channel')
     elif found_msg.is_pinned == False:
         raise ValueError(description='The message is already unpinned!')
+    elif not check_slackr_admin(unpinner):
+        raise ValueError(description='You can not unpin the message as you are not an Admin of the channel')
     # unpin the message if no exceptions raised
     found_msg.is_pinned = False
     return {}

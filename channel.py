@@ -1,3 +1,4 @@
+'''channel functions'''
 from flask import Flask, request, flash
 from class_defines import data, Channel, User, Mesg, perm_admin, perm_member, perm_owner
 from exception import ValueError, AccessError
@@ -35,9 +36,6 @@ def channel_invite(token, channel_id, u_id):
     # raise AccessError if authorised user not in channel
     # check if channel_id is part of User's in_channel list
     acct = user_from_token(token)
-    #print(acct.in_channel)
-    #print(channel_id)
-    print(acct.in_channel)
     if (channel_id in acct.in_channel) == False:
         raise AccessError(description = 'authorised user is not in channel')
 
@@ -49,9 +47,7 @@ def channel_invite(token, channel_id, u_id):
     acct = user_from_uid(u_id)
     acct.in_channel.append(channel_id)
 
-    #print(data['channels'][index].members)
-    return {
-    }
+    return {}
 
 def channel_join(token, channel_id):
     global data
@@ -138,13 +134,11 @@ def channel_details(token, channel_id):
 
     # raise AccessError('authorised user is not in channel')
     acct = user_from_token(token)
-    # TODO CHECK IF THIS EVER HAPPENS acct.in_channel.append(channel_id)
-    if not(channel_id in acct.in_channel): # TODO RETURNING WRONG LOGIC
+    if not(channel_id in acct.in_channel):
         raise AccessError(description = 'joemamaauthorised user is not in channel')
 
     channel_name = data['channels'][index].name
 
-    # TODO CHeck output based on specs
     owners_dict = []
     members_dict = []
 
@@ -155,7 +149,7 @@ def channel_details(token, channel_id):
     for i in data['channels'][index].members:
         member = user_from_uid(i)
         members_dict.append({'u_id': i, 'name_first': member.name_first, 'name_last': member.name_last, 'profile_img_url': ''})
-    # TODO CHeck output based on specs
+
     return {
         'name': channel_name,
         'owner_members': owners_dict,
@@ -164,10 +158,6 @@ def channel_details(token, channel_id):
 
 def channels_list(token):
     global data
-
-    # testing set up
-    # data['channels'][0].members.append(user_from_token(token))
-    # testing set up
 
     channel_list = []
     for channel in data['channels']:
@@ -208,16 +198,11 @@ def channel_messages(token, channel_id, start):
     if start > no_total_messages:
         raise ValueError(description = 'start is greater than no. of total messages')
     
-    # { message_id, u_id, message, time_created, reacts, is_pinned,  }
     end = -1
     list_messages = []
     i = start
-    # index50 = start + 50
-    # index50 <= no_total_messages, end = index50
-    #print(data['channels'][index].messages)
 
     for item in data['channels'][index].messages[i:]:
-        #print(item)
         message = {}
         message['message_id'] = item.message_id
         message['u_id'] = item.sender

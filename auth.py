@@ -1,3 +1,4 @@
+'''auth functions'''
 import jwt
 from uuid import uuid4
 from exception import ValueError, AccessError
@@ -30,13 +31,13 @@ def auth_logout(token):
             return {'is_success': True}
     return {'is_success': False}
 
-def auth_register(email, password, first, last): # TODO FIRST USER IS OWNER?
+def auth_register(email, password, first, last):
     global data
 
     check_email(email)
 
     if (len(password) <= 6): # if password is too short
-        raise ValueError(description = 'Password too short') # TODO KENNY YA CUNT LOOK AT THIS
+        raise ValueError(description = 'Password too short')
 
     if (not(1 <= len(first) and len(first) <= 50)): # if name is not between 1 and 50 characters long
         raise ValueError(description = 'first name must be between 1 and 50 characters long')

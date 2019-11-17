@@ -1,3 +1,4 @@
+'''profile functions'''
 from flask import send_from_directory
 from threading import Timer
 from class_defines import User, Mesg, Channel, data, perm_member, perm_admin, perm_owner
