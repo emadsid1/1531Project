@@ -21,13 +21,6 @@ def user_from_token(token):
             return acc
     raise AccessError(description = 'token does not exist for any user')
 
-#given u_id, returns acc with that u_id
-# def user_from_uid(u_id):
-#     global data
-#     for counter, acc in enumerate(data['accounts']):
-#         if str(acc.u_id) == str(u_id):
-#             return acc
-#     raise AccessError('u_id does not exist for any user')
 def user_from_uid(u_id):
     global data
     for acc in data['accounts']:

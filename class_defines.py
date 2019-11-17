@@ -13,11 +13,12 @@ class User():
         self.name_last = last
         self.handle = handle
         self.u_id = user_id
-        self.token = token      # login token, MAKE SURE it is a string type
-        self.prof_pic = ''      # URL to pic
-        self.in_channel = []    # list of channels the user is in, stored as channel_id
+        self.token = token          # login token, MAKE SURE it is a string type
+        self.prof_pic = ''          # URL to pic
+        self.in_channel = []        # list of channels the user is in, stored as channel_id
         self.reset_code = ''
-        self.perm_id = perm_member # For slackr permissions
+        self.perm_id = perm_member  # for slackr permissions
+        self.reacted_msgs = []      # lsit of messages that the user has reacted to
 
 class Channel():
     def __init__(self, name, is_public, channel_id):

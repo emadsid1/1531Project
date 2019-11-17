@@ -194,7 +194,7 @@ def route_msg_unreact():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     react_id = int(request.form.get('react_id'))
-    return dumps(msg_unreact(toekn, msg_id, react_id))
+    return dumps(msg_unreact(token, msg_id, react_id))
 
 @app.route('/message/pin', methods=['POST'])
 def route_msg_pin():
@@ -288,7 +288,7 @@ def route_search():
 
 @app.route('/admin/userpermission/change', methods=['POST'])
 def route_admin_userpermission_change():
-    token = request.args.get("token")
+    token = request.form.get("token")
     user_id = int(request.form.get("u_id"))
     perm_id = int(request.form.get("permission_id"))
     return dumps(admin_userpermission_change(token, user_id, perm_id))

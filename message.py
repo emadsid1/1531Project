@@ -79,6 +79,7 @@ def msg_react(token, msg_id, react_id):
     # give the message a reaction if no exceptions raised
     found_msg.reactions.append(Reacts(reacter.u_id, react_id))
     found_msg.reacted_user.append(reacter.u_id)
+    reacter.reacted_msgs.append(msg_id)
     return {}
 
 def msg_unreact(token, msg_id, react_id):
@@ -90,6 +91,8 @@ def msg_unreact(token, msg_id, react_id):
         raise ValueError(description=f'This message does not contain an active React with the react ID: {react_id}!')
     # unreact the message if no exceptions raised
     found_msg.reactions.remove(reaction_exist(found_msg.reactions, react_id))
+    unreacter = user_from_token(token)
+    unreacter.reacted_msgs.remove(msg_id)
     return {}
 
 def msg_pin(token, msg_id):

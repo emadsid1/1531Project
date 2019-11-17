@@ -70,8 +70,8 @@ def auth_register(email, password, first, last): # TODO FIRST USER IS OWNER?
     token = jwt.encode({'email': email}, password, algorithm = 'HS256')
     token = token.decode('utf-8')
     data['accounts'].append(User(email, password, first, last, handle, token, user_id))
-    if data['account_count'] == 1:
-        data['accounts'][0].perm_id == perm_owner
+    if user_id == 0:
+        data['accounts'][user_id].perm_id = perm_owner
     return {'u_id': user_id,'token': token}
 
 def reset_request(email):
