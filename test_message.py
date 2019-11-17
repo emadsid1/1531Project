@@ -38,7 +38,7 @@ def test_successful_msg_send():
     assert data['channels'][0].messages[0].message_id == 1
     # a msg with 1000 characters
     assert msg_send(token3, long_msg, chan_id1) == {'message_id': 2}
-    assert data['channels'][0].messages[1].message_id == 2
+    assert data['channels'][0].messages[0].message_id == 2
     assert len(data['channels'][0].messages) == 2
 
 def test_msg_too_long():
@@ -83,7 +83,7 @@ def test_msgid_notexist():
     
 def test_successful_edit():
     msg_send(token1, '4th msg', chan_id1)
-    msg_id4 = data['channels'][0].messages[3].message_id
+    msg_id4 = data['channels'][0].messages[0].message_id
     assert msg_edit(token1, msg_id4, 'new 4th msg(edited)') == {}
     assert len(data['channels'][0].messages) == 4
 
@@ -95,7 +95,7 @@ def test_notowner_editor():
 def test_editor_notsender():
     # when editor is not the actual sender of the message
     with pytest.raises(AccessError):
-        msg_edit(token1, data['channels'][0].messages[0].message_id, 'new msg')
+        msg_edit(token1, data['channels'][0].messages[3].message_id, 'new msg')
 
 def test_sendlater_timeinpast():
     # when the time trying to send is in the past

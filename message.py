@@ -19,7 +19,6 @@ def send_later(token, msg, chan_id, sent_stamp):
 def msg_send(token, msg, chan_id):
     global data
     sending_time = datetime.now().replace(tzinfo=timezone.utc).timestamp()
-    print(sending_time)
     sender = user_from_token(token)
     current_channel = find_channel(chan_id)
     if len(msg) > 1000:
@@ -31,7 +30,7 @@ def msg_send(token, msg, chan_id):
         data['message_count'] += 1
         msg_id = data['message_count']
         # no exceptions raised, then add(send) the message to the current channel
-        current_channel.messages.append(Mesg(sender.u_id, sending_time, msg, msg_id, chan_id, False))
+        current_channel.messages.insert(0, Mesg(sender.u_id, sending_time, msg, msg_id, chan_id, False))
     return {'message_id': msg_id}
 
 def msg_remove(token, msg_id):
