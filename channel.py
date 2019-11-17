@@ -71,8 +71,7 @@ def channel_join(token, channel_id):
     
     acct.in_channel.append(channel_id)
     data['channels'][index].members.append(acct.u_id)
-    return {
-    }
+    return {}
     
 def channel_leave(token, channel_id):
     global data
@@ -86,19 +85,14 @@ def channel_leave(token, channel_id):
 
     for j in data['channels'][index].members:
         if j == acct.u_id:
-            data['channels'][index].members.remove(j) #DONT use .pop as it takes in the index, .remove takes in element
+            # use .remove() instead of .pop() as .remove() takes in the actual element
+            data['channels'][index].members.remove(j) 
     
     for j in data['channels'][index].owners:
         if j == acct.u_id:
             data['channels'][index].owners.remove(j)
 
-    #TODO: Add admin attribute to class in class_defines.py
-    #for j in data['channels'][index].admins:
-    #    if j == acct.u_id:
-    #        data['channels'][index].admins.remove(j)
-
-    return {
-    }
+    return {}
 
 def channel_add_owner(token, channel_id, u_id):
     global data
@@ -116,8 +110,7 @@ def channel_add_owner(token, channel_id, u_id):
     
     data['channels'][index].owners.append(u_id)
 
-    return {
-    }
+    return {}
 
 def channel_remove_owner(token, channel_id, u_id):
     global data
@@ -135,8 +128,7 @@ def channel_remove_owner(token, channel_id, u_id):
     
     data['channels'][index].owners.remove(u_id)
 
-    return {
-    }
+    return {}
 
 def channel_details(token, channel_id):
     global data
@@ -158,16 +150,16 @@ def channel_details(token, channel_id):
 
     for i in data['channels'][index].owners:
         owner_member = user_from_uid(i)
-        owners_dict.append({'u_id': i, 'name_first': owner_member.name_first, 'name_last': owner_member.name_last, 'profile_img_url': 'https://www.google.com/search?q=google&rlz=1C1CHBF_enAU866AU866&sxsrf=ACYBGNQd0ogpVTR2M1cRzxpOGtcGko6oBg:1573777720661&source=lnms&tbm=isch&sa=X&ved=0ahUKEwiz_vrv-urlAhWQ73MBHZ88DkUQ_AUIEygC&biw=1536&bih=722&dpr=1.25#imgrc=5wK_L1umstSwXM:'})
+        owners_dict.append({'u_id': i, 'name_first': owner_member.name_first, 'name_last': owner_member.name_last, 'profile_img_url': ''})
     
     for i in data['channels'][index].members:
         member = user_from_uid(i)
-        members_dict.append({'u_id': i, 'name_first': member.name_first, 'name_last': member.name_last, 'profile_img_url': 'https://www.google.com/search?q=google&rlz=1C1CHBF_enAU866AU866&sxsrf=ACYBGNQd0ogpVTR2M1cRzxpOGtcGko6oBg:1573777720661&source=lnms&tbm=isch&sa=X&ved=0ahUKEwiz_vrv-urlAhWQ73MBHZ88DkUQ_AUIEygC&biw=1536&bih=722&dpr=1.25#imgrc=5wK_L1umstSwXM:'})
+        members_dict.append({'u_id': i, 'name_first': member.name_first, 'name_last': member.name_last, 'profile_img_url': ''})
     # TODO CHeck output based on specs
     return {
         'name': channel_name,
-        'owners': owners_dict,
-        'members': members_dict
+        'owner_members': owners_dict,
+        'all_members': members_dict
     }
 
 def channels_list(token):
@@ -201,11 +193,14 @@ def channels_listall(token):
 def channel_messages(token, channel_id, start):
     global data
 
+    # get the current user
+    curr_user = user_from_token(token)
+
     # raise ValueError if channel_id doesn't exist (channel_index)
     index = channel_index(channel_id)
 
     # raise AccessError if authorised user isn't in channel
-    if user_from_token(token).u_id not in data['channels'][index].members:
+    if curr_user.u_id not in data['channels'][index].members:
         raise AccessError(description = 'authorised user is not in channel')
 
     # raise ValueError if start is greater than no. of total messages
@@ -231,7 +226,9 @@ def channel_messages(token, channel_id, start):
         message['is_pinned'] = item.is_pinned
         message['reacts'] = []
         for react in item.reactions:
-            message['reacts'].append({'react_id': react.react_id, 'u_id': react.reacter, 'is_this_user_reacted': True})
+            reacter_list = []
+            reacter_list.append(react.reacter)
+            message['reacts'].append({'react_id': react.react_id, 'u_ids': reacter_list, 'is_this_user_reacted': (curr_user.u_id in item.reacted_user)})
 
         i = i + 1
         list_messages.append(message)

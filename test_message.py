@@ -105,10 +105,12 @@ def test_sendlater_timeinpast():
 
 def test_successful_react():
     # successful thumb up
+    user1 = user_from_token(token1)
     msg_id4 = data['channels'][0].messages[3].message_id
     assert msg_react(token1, msg_id4, 1) == {}
     assert data['channels'][0].messages[3].reactions[0].react_id == 1
     assert data['channels'][0].messages[3].reactions[0].reacter == user_from_token(token1).u_id
+    assert user1.reacted_msgs[0] == msg_id4
 
 def test_reacted():
     # when the message is already reacted
@@ -140,9 +142,11 @@ def test_unreact_msgid_notvalid():
 
 def test_successful_unreact():
     # successful unreact a message that is reacted before
+    user1 = user_from_token(token1)
     msg_id4 = data['channels'][0].messages[3].message_id
     assert msg_unreact(token1, msg_id4, 1) == {}
     assert len(data['channels'][0].messages[3].reactions) == 0
+    assert len(user1.reacted_msgs) == 0
 
 def test_unreacted():
     # when the message is already unreacted

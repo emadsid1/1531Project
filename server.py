@@ -194,7 +194,7 @@ def route_msg_unreact():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     react_id = int(request.form.get('react_id'))
-    return dumps(msg_unreact(toekn, msg_id, react_id))
+    return dumps(msg_unreact(token, msg_id, react_id))
 
 @app.route('/message/pin', methods=['POST'])
 def route_msg_pin():
