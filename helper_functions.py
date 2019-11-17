@@ -1,3 +1,4 @@
+'''all helper functions'''
 import re
 from exception import ValueError, AccessError
 from class_defines import data, User, Channel, perm_admin, perm_owner, perm_member
@@ -13,7 +14,6 @@ def check_email(email):
 # Helpers from Emad's channel
 # channel invite vs join, invite needed to join a private channel. passive v active.
 # given a token, returns acc with that token
-#TODO: Incorporate JWT decrypt to get it working with auth
 def user_from_token(token):
     global data
     for acc in data['accounts']:

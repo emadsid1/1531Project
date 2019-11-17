@@ -1,4 +1,4 @@
-"""Flask server"""
+'''Flask server for Slackr app'''
 import sys
 import requests
 from json import dumps
@@ -12,7 +12,6 @@ from auth import auth_login, auth_logout, auth_register, reset_request, reset_re
 from message import send_later, msg_send, msg_remove, msg_edit, msg_pin, msg_unpin, msg_react, msg_unreact
 from profile import user_profile, user_profile_setname, user_profile_email, user_profile_sethandle, user_profile_uploadphoto, users_all, standup_start, standup_active, standup_send, search, admin_userpermission_change
 from channel import channels_create, channel_invite, channel_join, channel_leave, channel_add_owner, channel_remove_owner, channel_details, channels_list, channels_listall, channel_messages
-from helper_functions import * # TODO CHANGE LATER, KEEP FOR NOW
 from flask import Flask, request, send_from_directory
 
 def defaultHandler(err):
