@@ -6,6 +6,7 @@ from exception import ValueError, AccessError
 from helper_functions import check_email, find_channel, find_msg, user_from_token, user_from_uid, check_in_channel, get_reacts
 from message import msg_send
 from PIL import Image
+from time import time
 import imghdr
 import urllib.request
 
@@ -133,8 +134,9 @@ def standup_start(token, channel, length):
 
     # starts standup
     chan.is_standup = True
-    finish = datetime.now() + timedelta(seconds=length)
-    standup_finish = finish.replace(tzinfo=timezone.utc).timestamp()
+    # finish = datetime.now() + timedelta(seconds=length)
+    # standup_finish = finish.replace(tzinfo=timezone.utc).timestamp()
+    standup_finish = time() + float(length)
     chan.standup_time = standup_finish
     # chan.standup_time = finish.replace(tzinfo=timezone.utc).timestamp()
     t = Timer(length, standup_active, (token, channel))
@@ -150,7 +152,8 @@ def standup_active(token, channel):
     #check_in_channel(token, ch_num) # raises AccessError if user is not in channel
     finish = None
     if chan.is_standup == True:
-        if chan.standup_time < datetime.now().replace(tzinfo=timezone.utc).timestamp():
+        # if chan.standup_time < datetime.now().replace(tzinfo=timezone.utc).timestamp():
+        if chan.standup_time < time():
             chan.is_standup = False
             standup_end(token, chan.channel_id) # TODO: write this function
         else:
@@ -190,7 +193,7 @@ def search(token, query_str):
                     "u_id": msg.sender,
                     "message": msg.message,
                     "time_created": msg.create_time,
-                    "reacts": reaction, # TODO: figure out what type this is
+                    "reacts": reaction,
                     "is_pinned": msg.is_pinned
                 })
     return {
@@ -214,14 +217,10 @@ def admin_userpermission_change(token, u_id, p_id):
 # sends the summary of the standup messages
 def standup_end(token, channel):
     global data
-    send_time = datetime.now()
-    sender = user_from_token(token)
     current_channel = find_channel(channel)
-    data["message_count"] += 1
-    msg_id = data["message_count"]
     message_list = []
     for msg in current_channel.standup_messages:
-        msg_user = " ".join(msg)
+        msg_user = ": ".join(msg)
         message_list.append(msg_user)
     stdup_summary = "\n".join(message_list)
-    current_channel.messages.append(Mesg(sender, send_time, stdup_summary, msg_id, channel, False))
+    msg_send(token, stdup_summary, current_channel.channel_id)
