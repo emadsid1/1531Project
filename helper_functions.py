@@ -95,7 +95,7 @@ def check_slackr_owner(user):
 
 # check if a user is an admin of the slackr app
 def check_slackr_admin(user):
-    if user.perm_id == perm_admin:
+    if user.perm_id == perm_admin or user.perm_id == perm_owner:
         return True
     return False
 

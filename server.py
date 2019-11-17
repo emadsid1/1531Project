@@ -250,7 +250,7 @@ def route_user_profile_uploadphoto():
     host = request.host_url
     return dumps(user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end, host))
 
-@app.route('/static/<path:path>')
+@app.route('/static/<path:filename>')
 def send_js(path):
     return send_from_directory('', path)
 
