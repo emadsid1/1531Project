@@ -29,7 +29,7 @@ chan_id1 = data['channels'][0].channel_id
 channel_join(token3, chan_id1)
 # a long message
 long_msg = 'a' * 1000
-invalid_msg = 'a' * 1001
+invalid_msg = 'a' * 1001    # more than 1000 characters
 # setup end
 
 def test_successful_msg_send():
@@ -201,3 +201,15 @@ def test_unpin_msgid_notvalid():
     # if the message id is not valid
     with pytest.raises(ValueError):
         msg_unpin(token1, 6666)
+
+def test_editmsg_toolong():
+    # when the new message is too long
+    msg_id4 = data['channels'][0].messages[0].message_id
+    with pytest.raises(ValueError):
+        msg_edit(token1, msg_id4, invalid_msg)
+
+# extra function for iter3: when editing msg, if new message is empty, then delete old message
+def test_edit_remove():
+    msg_id4 = data['channels'][0].messages[0].message_id
+    assert msg_edit(token1, msg_id4, '') == {}
+    assert len(data['channels'][0].messages) == 3

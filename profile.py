@@ -11,16 +11,6 @@ from time import time
 import imghdr
 import urllib.request
 
-
-# nom = User("naomizhen@gmail.com", "password", "naomi", "zhen", "nomHandle", "12345", 1)
-# ben = User("benkah@gmail.com", "password", "ben", "kah", "benHandle", "1234", 2)
-# chan1 = Channel("chatime", True, 1, 5)
-#
-# data = {
-#     "accounts": [nom, ben],
-#     "channels": [chan1]
-# }
-
 def user_profile(token, user_id):
     global data
     user_uid = user_from_uid(user_id) # raises AccessError if u_id invalid
@@ -33,8 +23,6 @@ def user_profile(token, user_id):
         "name_last": user_token.name_last,
         "handle_str": user_token.handle,
         "profile_img_url": user_token.prof_pic,
-        # "token": token,
-        # "u_id": user_id
     }
 
 def user_profile_setname(token, name_first, name_last):
@@ -135,11 +123,8 @@ def standup_start(token, channel, length):
 
     # starts standup
     chan.is_standup = True
-    # finish = datetime.now() + timedelta(seconds=length)
-    # standup_finish = finish.replace(tzinfo=timezone.utc).timestamp()
     standup_finish = time() + float(length)
     chan.standup_time = standup_finish
-    # chan.standup_time = finish.replace(tzinfo=timezone.utc).timestamp()
     t = Timer(length, standup_active, (token, channel))
     t.start()
 
@@ -154,7 +139,6 @@ def standup_active(token, channel):
     check_in_channel(user.u_id, chan) # raises AccessError if user is not in channel
     finish = None
     if chan.is_standup == True:
-        # if chan.standup_time < datetime.now().replace(tzinfo=timezone.utc).timestamp():
         if chan.standup_time < time():
             chan.is_standup = False
             standup_end(token, chan.channel_id)
