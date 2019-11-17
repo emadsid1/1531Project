@@ -51,7 +51,7 @@ def find_channel(chan_id):
             channel_found = True
             return chan
     if channel_found == False:
-        raise AccessError(description='Channel does not exit, please join or create a channel first!')
+        raise ValueError(description='Channel does not exit, please join or create a channel first!')
 
 # find the correct message base on the message_id
 def find_msg(msg_id):
@@ -119,8 +119,35 @@ def check_in_channel(u_id, channel):
     if in_channel == False: # if the user is not in the channel, raise an error
         raise AccessError(description="You are currently not in this channel.")
 
-# def get_reacts(message):
-#     react_list = []
-#     r_id = message.react_id
+def get_reacts(user, message):
+    # This is only used if we can't assume that there is only one react_id
+    # react_dict = {}
+    # react_id_list = []
+    # user_id_list = []
+    # #is_this_user_reacted = []
+    # for r in message.reactions: # get a list of all different react_ids
+    #     if not react_id_list:
+    #         react_id_list.append(r.react_id)
+    #     elif r.react_id not in react_id_list:
+    #         react_id_list.append(r.react_id)
+    #
+    # for i in range(sizeof(react_id_list)):  # create list of lists
+    #     user_id_list.append([])
+    #
+    # j = 0
+    # for reacc in react_id_list: # create a list of a list of u_ids
+    #     for type in message.reactions:
+    #         if reacc == type.react_id:
+    #             user_id_list[j].append(type.reacter.u_id)
+    #     j += 1
+
+    reacc = False
+    if user.u_id in message.reacted_user:
+        reacc = True
+    return [{
+        "react_id": 1,          # assume only one type of react_id
+        "u_ids": message.reacted_user,
+        "is_this_user_reacted": reacc
+    }]
 
 # End of helper functions

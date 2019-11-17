@@ -51,10 +51,6 @@ class Reacts():
         self.reacter = reacter          # type user
         self.react_id = react_id        # react id of the reaction (for iteration 2 this is 1)
 
-# class Threads(threading.Thread):
-#     def __init__(self, time):
-#         self.time = time                # either standup_end time or message_send time
-
 data = {
     'accounts': [],
     'channels': [],

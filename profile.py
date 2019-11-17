@@ -3,9 +3,10 @@ from threading import Timer
 from class_defines import User, Mesg, Channel, data, perm_member, perm_admin, perm_owner
 from datetime import datetime, timedelta, timezone
 from exception import ValueError, AccessError
-from helper_functions import find_channel, find_msg, user_from_token, user_from_uid, check_in_channel
+from helper_functions import check_email, find_channel, find_msg, user_from_token, user_from_uid, check_in_channel, get_reacts
 from message import msg_send
 from PIL import Image
+from time import time
 import imghdr
 import urllib.request
 
@@ -39,6 +40,8 @@ def user_profile(token, user_id):
 def user_profile_setname(token, name_first, name_last):
     global data
     if not(len(name_first) >= 1 and len(name_first) <= 50):
+        raise ValueError(description = "Name needs to be between 1 and 50 characters long.")
+    if not(len(name_last) >= 1 and len(name_last) <= 50):
         raise ValueError(description = "Name needs to be between 1 and 50 characters long.")
     user = user_from_token(token) # raises AccessError if invalid token
     user.name_first = name_first
@@ -124,15 +127,16 @@ def standup_start(token, channel, length):
     global data
     chan = find_channel(channel) # raises ValueError if channel does not exist
     if chan.is_standup == True:
-        raise AccessError(description = "Standup is already in progress!") # standup is already in progress
+        raise ValueError(description = "Standup is already in progress!") # standup is already in progress
     if length <= 0:
         raise ValueError(description = "The standup length needs to be a positive number!") # standup length needs to be greater than 0
     # check_in_channel(token, chan) # raises AccessError if user is not in channel
 
     # starts standup
     chan.is_standup = True
-    finish = datetime.now() + timedelta(seconds=length)
-    standup_finish = finish.replace(tzinfo=timezone.utc).timestamp()
+    # finish = datetime.now() + timedelta(seconds=length)
+    # standup_finish = finish.replace(tzinfo=timezone.utc).timestamp()
+    standup_finish = time() + float(length)
     chan.standup_time = standup_finish
     # chan.standup_time = finish.replace(tzinfo=timezone.utc).timestamp()
     t = Timer(length, standup_active, (token, channel))
@@ -148,7 +152,8 @@ def standup_active(token, channel):
     #check_in_channel(token, ch_num) # raises AccessError if user is not in channel
     finish = None
     if chan.is_standup == True:
-        if chan.standup_time < datetime.now().replace(tzinfo=timezone.utc).timestamp():
+        # if chan.standup_time < datetime.now().replace(tzinfo=timezone.utc).timestamp():
+        if chan.standup_time < time():
             chan.is_standup = False
             standup_end(token, chan.channel_id) # TODO: write this function
         else:
@@ -182,14 +187,14 @@ def search(token, query_str):
         chan = find_channel(ch)
         for msg in chan.messages:
             if query_str in msg.message:
-                #get_reacts(msg)
+                reaction = get_reacts(user, msg)
                 messages.append({
                     "message_id": msg.message_id,
                     "u_id": msg.sender,
                     "message": msg.message,
                     "time_created": msg.create_time,
-                    "reacts": msg.reaction, # TODO: figure out what type this is
-                    "is_pinned": msg.pin
+                    "reacts": reaction,
+                    "is_pinned": msg.is_pinned
                 })
     return {
         "messages": messages
@@ -212,14 +217,10 @@ def admin_userpermission_change(token, u_id, p_id):
 # sends the summary of the standup messages
 def standup_end(token, channel):
     global data
-    send_time = datetime.now()
-    sender = user_from_token(token)
     current_channel = find_channel(channel)
-    data["message_count"] += 1
-    msg_id = data["message_count"]
     message_list = []
     for msg in current_channel.standup_messages:
-        msg_user = " ".join(msg)
+        msg_user = ": ".join(msg)
         message_list.append(msg_user)
     stdup_summary = "\n".join(message_list)
-    current_channel.messages.append(Mesg(sender, send_time, stdup_summary, msg_id, channel, False))
+    msg_send(token, stdup_summary, current_channel.channel_id)
