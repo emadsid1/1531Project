@@ -130,7 +130,8 @@ def standup_start(token, channel, length):
         raise ValueError(description = "Standup is already in progress!") # standup is already in progress
     if length <= 0:
         raise ValueError(description = "The standup length needs to be a positive number!") # standup length needs to be greater than 0
-    # check_in_channel(token, chan) # raises AccessError if user is not in channel
+    user = user_from_token(token)
+    check_in_channel(user.u_id, chan) # raises AccessError if user is not in channel
 
     # starts standup
     chan.is_standup = True
@@ -149,7 +150,8 @@ def standup_start(token, channel, length):
 def standup_active(token, channel):
     global data
     chan = find_channel(channel) # raises AccessError if channel does not exist
-    #check_in_channel(token, ch_num) # raises AccessError if user is not in channel
+    user = user_from_token(token)
+    check_in_channel(user.u_id, chan) # raises AccessError if user is not in channel
     finish = None
     if chan.is_standup == True:
         # if chan.standup_time < datetime.now().replace(tzinfo=timezone.utc).timestamp():
@@ -171,7 +173,7 @@ def standup_send(token, channel, message):
     if len(message) > 1000:
         raise ValueError(description = "Your message is too long.") # message too long
     user = user_from_token(token)
-    # check_in_channel(user.u_id, chan) # raises AccessError if user is not in channel
+    check_in_channel(user.u_id, chan) # raises AccessError if user is not in channel
 
     # TODO: check_in_channel is disabled to test other errors
     msg_send(token, message, channel)
