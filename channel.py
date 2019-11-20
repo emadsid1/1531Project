@@ -33,9 +33,9 @@ def channels_create(token, name, is_public):
         'channel_id': channel_id
     }
 
-# def test_channels_create():
-#     with pytest.raises(Exception): # Following should raise exceptions
-#         channels_create('valid token', 'This is a string that is much longer than the max length', True)
+def test_channels_create():
+    with pytest.raises(Exception): # Following should raise exceptions
+        channels_create('valid token', 'This is a string that is much longer than the max length', True)
 
 def channel_invite(token, channel_id, u_id):
     global data
@@ -49,7 +49,7 @@ def channel_invite(token, channel_id, u_id):
     #print(acct.in_channel)
     #print(channel_id)
     print(acct.in_channel)
-    if (channel_id in acct.in_channel) == False:
+    if channel_id not in acct.in_channel:
         raise AccessError(description = 'authorised user is not in channel')
 
     # raise ValueError if channel_id doesn't exist (channel_index)
@@ -64,31 +64,31 @@ def channel_invite(token, channel_id, u_id):
     return {
     }
 
-# def test_channel_invite():
-#     #SETUP START
-#     auth_register_dict = json.loads(auth_register("goodemail@gmail.com", "password123456", "John", "Smith"))
-#     token = auth_register_dict['token']
+def test_channel_invite():
+    #SETUP START
+    auth_register_dict = auth_register("goodemail@gmail.com", "password123456", "John", "Smith")
+    token = auth_register_dict['token']
 
-#     auth_register_dict2 = json.loads(auth_register("emad@gmail.com", "password142256", "Emad", "Siddiqui"))
-#     token2 = auth_register_dict2['token']
+    auth_register_dict2 = auth_register("emad@gmail.com", "password142256", "Emad", "Siddiqui")
+    token2 = auth_register_dict2['token']
 
-#     auth_register_dict3 = json.loads(auth_register("email@gmail.com", "password13456", "Firstname", "Lastname"))
-#     uid3 = auth_register_dict3['u_id']
+    auth_register_dict3 = auth_register("email@gmail.com", "password13456", "Firstname", "Lastname")
+    uid3 = auth_register_dict3['u_id']
 
-#     channel_dict = channels_create(token, "tokenchannel", True) # create token's channel
-#     channel_id = channel_dict['channel_id']
-#     #SETUP END
+    channel_dict = channels_create(token, "tokenchannel", True) # create token's channel
+    channel_id = channel_dict['channel_id']
+    #SETUP END
 
-#     channel_invite(token, channel_id, uid3)
+    channel_invite(token, channel_id, uid3)
     
-#     with pytest.raises(Exception): # Following should raise exceptions
-#         channel_invite(token2, channel_id, uid3) #AccessError since token2 is not authorised
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_invite(token2, channel_id, uid3) #AccessError since token2 is not authorised
     
-#     with pytest.raises(Exception): # Following should raise exceptions
-#         channel_invite(token, 00000000000, uid3) #ValueError since channel_id does not exist
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_invite(token, 00000000000, uid3) #ValueError since channel_id does not exist
     
-#     with pytest.raises(Exception): # Following should raise exceptions
-#         channel_invite(token, channel_id, (uid3+8)) #ValueError since u_id does not exist
+    with pytest.raises(Exception): # Following should raise exceptions
+        channel_invite(token, channel_id, (uid3+8)) #ValueError since u_id does not exist
 
 def channel_join(token, channel_id):
     global data
@@ -472,11 +472,11 @@ def channel_messages(token, channel_id, start):
 
 def test_channel_messages():
     #SETUP START
-    auth_register_dict = json.loads(auth_register("goodemail7@gmail.com", "password123456", "John7", "Smith7"))
+    auth_register_dict = auth_register("goodemail7@gmail.com", "password123456", "John7", "Smith7")
     token = auth_register_dict['token']
     uid = auth_register_dict['u_id']
 
-    auth_register_dict2 = json.loads(auth_register("emad7@gmail.com", "password142256", "Emad7", "Siddiqui7"))
+    auth_register_dict2 = auth_register("emad7@gmail.com", "password142256", "Emad7", "Siddiqui7")
     token2 = auth_register_dict2['token']
     uid2 = auth_register_dict2['u_id']
     #SETUP END
@@ -492,8 +492,8 @@ def test_channel_messages():
         msg_send(token, "Hi, this is a message.", channel_id)
         i = i + 1
 
-    print(channel_messages(token, channel_id, 0))
-    assert False==True
+    #print(channel_messages(token, channel_id, 0))
+    #assert False==True
 
 
 if __name__ == '__main__':
