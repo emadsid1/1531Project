@@ -4,11 +4,12 @@ Tests for message functions
 import pytest
 from auth import auth_login, auth_logout, auth_register, reset_request, reset_reset
 from channel import channels_create, channel_invite, channel_join, channel_leave, channel_add_owner, channel_remove_owner, channel_details, channels_list, channels_listall, channel_messages
+from profile import admin_userpermission_change
 from message import send_later, msg_send, msg_remove, msg_edit, msg_react, msg_unreact, msg_pin, msg_unpin
-from helper_functions import check_email, user_from_token, user_from_uid, max_20_characters, channel_index, find_channel, find_msg, check_owner, check_admin, check_member, check_in_channel
+from helper_functions import check_email, user_from_token, user_from_uid, max_20_characters, channel_index, find_channel, find_msg, check_channel_member, check_channel_owner, check_slackr_admin, check_slackr_owner, check_in_channel
 from exception import ValueError, AccessError
 from datetime import datetime, timedelta, timezone
-from class_defines import User, Channel, Mesg, Reacts, data
+from class_defines import User, Channel, Mesg, Reacts, data, perm_admin, perm_owner, perm_member
     
 # setup
 auth_register('kenny@gmail.com', 'password', 'kenny', 'han')
@@ -28,7 +29,7 @@ chan_id1 = data['channels'][0].channel_id
 channel_join(token3, chan_id1)
 # a long message
 long_msg = 'a' * 1000
-invalid_msg = 'a' * 1001
+invalid_msg = 'a' * 1001    # more than 1000 characters
 # setup end
 
 def test_successful_msg_send():
@@ -37,7 +38,7 @@ def test_successful_msg_send():
     assert data['channels'][0].messages[0].message_id == 1
     # a msg with 1000 characters
     assert msg_send(token3, long_msg, chan_id1) == {'message_id': 2}
-    assert data['channels'][0].messages[1].message_id == 2
+    assert data['channels'][0].messages[0].message_id == 2
     assert len(data['channels'][0].messages) == 2
 
 def test_msg_too_long():
@@ -62,7 +63,7 @@ def test_successful_remove():
     assert len(data['channels'][0].messages) == 1
 
 def test_notowner_remove():
-    # when remover is not an owner TODO or an admin
+    # when remover is not an owner
     msg_send(token3, '2nd msg', chan_id1)
     msg_id2 = data['channels'][0].messages[1].message_id
     with pytest.raises(AccessError):
@@ -82,19 +83,19 @@ def test_msgid_notexist():
     
 def test_successful_edit():
     msg_send(token1, '4th msg', chan_id1)
-    msg_id4 = data['channels'][0].messages[3].message_id
+    msg_id4 = data['channels'][0].messages[0].message_id
     assert msg_edit(token1, msg_id4, 'new 4th msg(edited)') == {}
     assert len(data['channels'][0].messages) == 4
 
 def test_notowner_editor():
-    # when editor is not an owner TODO or an admin
+    # when editor is not an owner
     with pytest.raises(AccessError):
         msg_edit(token3, data['channels'][0].messages[0].message_id, 'new msg')
 
 def test_editor_notsender():
     # when editor is not the actual sender of the message
     with pytest.raises(AccessError):
-        msg_edit(token1, data['channels'][0].messages[0].message_id, 'new msg')
+        msg_edit(token1, data['channels'][0].messages[3].message_id, 'new msg')
 
 def test_sendlater_timeinpast():
     # when the time trying to send is in the past
@@ -104,10 +105,12 @@ def test_sendlater_timeinpast():
 
 def test_successful_react():
     # successful thumb up
+    user1 = user_from_token(token1)
     msg_id4 = data['channels'][0].messages[3].message_id
     assert msg_react(token1, msg_id4, 1) == {}
-    assert data['channels'][0].messages[3].reaction.react_id == 1
-    assert data['channels'][0].messages[3].reaction.reacter == user_from_token(token1).u_id
+    assert data['channels'][0].messages[3].reactions[0].react_id == 1
+    assert data['channels'][0].messages[3].reactions[0].reacter == user_from_token(token1).u_id
+    assert user1.reacted_msgs[0] == msg_id4
 
 def test_reacted():
     # when the message is already reacted
@@ -139,9 +142,11 @@ def test_unreact_msgid_notvalid():
 
 def test_successful_unreact():
     # successful unreact a message that is reacted before
+    user1 = user_from_token(token1)
     msg_id4 = data['channels'][0].messages[3].message_id
     assert msg_unreact(token1, msg_id4, 1) == {}
-    assert data['channels'][0].messages[3].reaction == None
+    assert len(data['channels'][0].messages[3].reactions) == 0
+    assert len(user1.reacted_msgs) == 0
 
 def test_unreacted():
     # when the message is already unreacted
@@ -149,9 +154,62 @@ def test_unreacted():
     with pytest.raises(ValueError):
         msg_unreact(token1, msg_id4, 1)
 
-def message_pin_test():
-    pass
+def test_successful_pin():
+    user1 = user_from_token(token1)
+    user3 = user_from_token(token3)
+    msg_id1 = data['channels'][0].messages[0].message_id
+    admin_userpermission_change(token1, user3.u_id, perm_admin)
+    assert msg_pin(token3, msg_id1) == {}
 
-def message_unpin_test():
-    pass
+def test_already_pinned():
+    # if the message is already pinned
+    msg_id1 = data['channels'][0].messages[0].message_id
+    with pytest.raises(ValueError):
+        msg_pin(token1, msg_id1)
 
+def test_notmember_pin():
+    # if the pinner is a member of the channel
+    msg_id1 = data['channels'][0].messages[0].message_id
+    with pytest.raises(AccessError):
+        msg_pin(token2, msg_id1)
+
+def test_pin_msgid_notvalid():
+    # if the message id is not valid
+    with pytest.raises(ValueError):
+        msg_pin(token1, 6666)
+
+def test_successful_unpin():
+    user1 = user_from_token(token1)
+    user3 = user_from_token(token3)
+    msg_id1 = data['channels'][0].messages[0].message_id
+    admin_userpermission_change(token1, user3.u_id, perm_admin)
+    assert msg_unpin(token3, msg_id1) == {}
+
+def test_already_unpinned():
+    # if the message is already unpinned
+    msg_id1 = data['channels'][0].messages[0].message_id
+    with pytest.raises(ValueError):
+        msg_unpin(token1, msg_id1)
+
+def test_notmember_unpin():
+    # if the unpinner is a member of the channel
+    msg_id1 = data['channels'][0].messages[0].message_id
+    with pytest.raises(AccessError):
+        msg_unpin(token2, msg_id1)
+
+def test_unpin_msgid_notvalid():
+    # if the message id is not valid
+    with pytest.raises(ValueError):
+        msg_unpin(token1, 6666)
+
+def test_editmsg_toolong():
+    # when the new message is too long
+    msg_id4 = data['channels'][0].messages[0].message_id
+    with pytest.raises(ValueError):
+        msg_edit(token1, msg_id4, invalid_msg)
+
+# extra function for iter3: when editing msg, if new message is empty, then delete old message
+def test_edit_remove():
+    msg_id4 = data['channels'][0].messages[0].message_id
+    assert msg_edit(token1, msg_id4, '') == {}
+    assert len(data['channels'][0].messages) == 3

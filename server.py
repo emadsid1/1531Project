@@ -1,5 +1,6 @@
-"""Flask server"""
+'''Flask server for Slackr app'''
 import sys
+import requests
 from json import dumps
 from flask_mail import Mail, Message
 from flask_cors import CORS
@@ -11,7 +12,7 @@ from auth import auth_login, auth_logout, auth_register, reset_request, reset_re
 from message import send_later, msg_send, msg_remove, msg_edit, msg_pin, msg_unpin, msg_react, msg_unreact
 from profile import user_profile, user_profile_setname, user_profile_email, user_profile_sethandle, user_profile_uploadphoto, users_all, standup_start, standup_active, standup_send, search, admin_userpermission_change
 from channel import channels_create, channel_invite, channel_join, channel_leave, channel_add_owner, channel_remove_owner, channel_details, channels_list, channels_listall, channel_messages
-from helper_functions import * # TODO CHANGE LATER, KEEP FOR NOW
+from flask import Flask, request, send_from_directory
 
 def defaultHandler(err):
     response = err.get_response()
@@ -23,7 +24,7 @@ def defaultHandler(err):
     response.content_type = 'application/json'
     return response
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static/')
 app.config['TRAP_HTTP_EXCEPTIONS'] = True
 app.register_error_handler(Exception, defaultHandler)
 CORS(app)
@@ -132,7 +133,7 @@ def route_channel_remove_owner():
 @app.route('/channel/details', methods = ['GET'])
 def route_channel_details():
     token = request.args.get('token')
-    channel_id = request.args.get('channel_id') # supposed to be an int
+    channel_id = int(request.args.get('channel_id'))
     return dumps(channel_details(token, channel_id))
 
 @app.route('/channels/list', methods = ['GET'])
@@ -192,7 +193,7 @@ def route_msg_unreact():
     token = request.form.get('token')
     msg_id = int(request.form.get('message_id'))
     react_id = int(request.form.get('react_id'))
-    return dumps(msg_unreact(toekn, msg_id, react_id))
+    return dumps(msg_unreact(token, msg_id, react_id))
 
 @app.route('/message/pin', methods=['POST'])
 def route_msg_pin():
@@ -220,82 +221,76 @@ def route_user_profile_setname():
     token = request.form.get("token")
     name_first = request.form.get("name_first")
     name_last = request.form.get("name_last")
-    user_profile_setname(token, name_first, name_last)
-    return dumps({})
+    return dumps(user_profile_setname(token, name_first, name_last))
 
 @app.route('/user/profile/setemail', methods=['PUT'])
 def route_user_profile_email():
     token = request.form.get("token")
     email = request.form.get("email")
-    user_profile_email(token, email)
-    return dumps({})
+    return dumps(user_profile_email(token, email))
 
 @app.route('/user/profile/sethandle', methods=['PUT'])
 def route_user_profile_sethandle():
     token = request.form.get("token")
     handle = request.form.get("handle_str")
-    user_profile_sethandle(token, handle)
-    return dumps({})
+    return dumps(user_profile_sethandle(token, handle))
 
 @app.route('/user/profiles/uploadphoto', methods=['POST'])
-# DOES NOT NEED TO BE COMPLETED UNTIL ITERATION 3
 def route_user_profile_uploadphoto():
     token = request.form.get("token")
     img_url = request.form.get("img_url")
+    response = requests.get(img_url)
+    # Check if valid url
+    if response.status_code != 200:
+            raise ValueError(description = 'HTTP status other than 200 returned from img_url')
     x_start = int(request.form.get("x_start"))
     y_start = int(request.form.get("y_start"))
     x_end = int(request.form.get("x_end"))
     y_end = int(request.form.get("y_end"))
     host = request.host_url
-    user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end, host)
-    return dumps({})
+    return dumps(user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end, host))
+
+@app.route('/static/<path:path>')
+def send_js(path):
+    return send_from_directory('', path)
 
 @app.route('/users/all', methods=['GET'])
 def route_users_all():
     token = request.args.get("token")
-    users = users_all(token)
-    return dumps(users)
+    return dumps(users_all(token))
 
 @app.route('/standup/start', methods=['POST'])
 def route_standup_start():
     token = request.form.get("token")
     channel_id = int(request.form.get("channel_id"))
     length = int(request.form.get("length"))
-    stdp_fin = standup_start(token, channel_id, length)
-    return dumps(stdp_fin)
+    return dumps(standup_start(token, channel_id, length))
 
 @app.route('/standup/active', methods=['GET'])
 def route_standup_active():
     token = request.args.get("token")
     channel_id = int(request.args.get("channel_id"))
-    stdp = standup_active(token, channel_id)
-    return dumps(stdp)
+    return dumps(standup_active(token, channel_id))
 
 @app.route('/standup/send', methods=['POST'])
 def route_standup_send():
     token = request.form.get("token")
     channel_id = int(request.form.get("channel_id"))
     message = request.form.get("message")
-    standup_send(token, channel_id, message)
-    return dumps({})
+    return dumps(standup_send(token, channel_id, message))
 
 @app.route('/search', methods=['GET'])
 def route_search():
     token = request.args.get("token")
     query_str = request.args.get("query_str")
-    msg_list = search(token, query_str)
-    return dumps(msg_list)
+    return dumps(search(token, query_str))
 
 @app.route('/admin/userpermission/change', methods=['POST'])
 def route_admin_userpermission_change():
-    token = request.args.get("token")
+    token = request.form.get("token")
     user_id = int(request.form.get("u_id"))
     perm_id = int(request.form.get("permission_id"))
-    admin_userpermission_change(token, user_id, perm_id)
-    return dumps({})
+    return dumps(admin_userpermission_change(token, user_id, perm_id))
 
 if __name__ == '__main__':
     app.run(port=(sys.argv[1] if len(sys.argv) > 1 else 5000))
-
-# def get_host_url():
-#     return request.host_url

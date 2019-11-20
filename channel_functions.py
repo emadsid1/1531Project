@@ -71,7 +71,7 @@ def channels_create(token, name, is_public):
         raise ValueError('name is more than 20 characters')
     else:
         channel_id = data['channel_count'] + 1
-        data['channels'].append(Channel(name, is_public, channel_id, False))
+        data['channels'].append(Channel(name, is_public, channel_id)) # TODO: is there supposed to be one extra variable here?
         index = channel_index(channel_id)
         data['channels'][index].owners.append(user_from_token(token).u_id)
         data['channels'][index].members.append(user_from_token(token).u_id)

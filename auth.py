@@ -1,3 +1,4 @@
+'''auth functions'''
 import jwt
 from uuid import uuid4
 from exception import ValueError, AccessError
@@ -8,7 +9,6 @@ def auth_login(email, password):
     global data
     valid = False
     i = 0
-    user_id = 0
     check_email(email)
     for counter, acc in enumerate(data['accounts']):
         if acc.email == email and acc.password == password:
@@ -31,13 +31,13 @@ def auth_logout(token):
             return {'is_success': True}
     return {'is_success': False}
 
-def auth_register(email, password, first, last): # TODO FIRST USER IS OWNER?
+def auth_register(email, password, first, last):
     global data
 
     check_email(email)
 
     if (len(password) <= 6): # if password is too short
-        raise ValueError(description = 'Password too short') # TODO KENNY YA CUNT LOOK AT THIS
+        raise ValueError(description = 'Password too short')
 
     if (not(1 <= len(first) and len(first) <= 50)): # if name is not between 1 and 50 characters long
         raise ValueError(description = 'first name must be between 1 and 50 characters long')
@@ -61,7 +61,7 @@ def auth_register(email, password, first, last): # TODO FIRST USER IS OWNER?
                 if curr <= new: # If new number is larger replace
                     handle = first + last + str(new)
                     curr = new
-        elif handle == (first + last)[:20]: # If name is truncate case and is already 20 characters
+        elif acc.handle == (first + last)[:20]: # If name is truncate case and is already 20 characters
             handle += '0'
     if len(handle) > 20:    # If handle is too long make handle the hexadecimal number of account_count
         handle = hex(data['account_count'])
@@ -69,10 +69,11 @@ def auth_register(email, password, first, last): # TODO FIRST USER IS OWNER?
     data['account_count'] += 1
     handle.lower()
     token = jwt.encode({'email': email}, password, algorithm = 'HS256')
-    data['accounts'].append(User(email, password, first, last, handle, token.decode('utf-8'), user_id))
-    if data['account_count'] == 1:
-        data['accounts'][0].perm_id == perm_owner
-    return {'u_id': user_id,'token': token.decode('utf-8')}
+    token = token.decode('utf-8')
+    data['accounts'].append(User(email, password, first, last, handle, token, user_id))
+    if user_id == 0:
+        data['accounts'][user_id].perm_id = perm_owner
+    return {'u_id': user_id,'token': token}
 
 def reset_request(email):
     global data
@@ -82,7 +83,7 @@ def reset_request(email):
             acc.reset_code = resetcode
     return {}
 
-def reset_reset(code, password):    # TODO TOKEN IS INVALID AFTER RESETTING
+def reset_reset(code, password):
     global data
     for acc in data['accounts']:
         if code == acc.reset_code:

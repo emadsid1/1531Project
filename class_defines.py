@@ -13,11 +13,12 @@ class User():
         self.name_last = last
         self.handle = handle
         self.u_id = user_id
-        self.token = token      # login token, MAKE SURE it is a string type
-        self.prof_pic = ''      # URL to pic
-        self.in_channel = []    # list of channels the user is in, stored as channel_id
+        self.token = token          # login token, MAKE SURE it is a string type
+        self.prof_pic = ''          # URL to pic
+        self.in_channel = []        # list of channels the user is in, stored as channel_id
         self.reset_code = ''
-        self.perm_id = perm_member # For slackr permissions
+        self.perm_id = perm_member  # for slackr permissions
+        self.reacted_msgs = []      # lsit of messages that the user has reacted to
 
 class Channel():
     def __init__(self, name, is_public, channel_id):
@@ -50,12 +51,8 @@ class Reacts():
         self.reacter = reacter          # type user
         self.react_id = react_id        # react id of the reaction (for iteration 2 this is 1)
 
-# class Threads(threading.Thread):
-#     def __init__(self, time):
-#         self.time = time                # either standup_end time or message_send time
-
 data = {
-    'accounts': [User('chiefjief5@gmail.com', 'password', 'Jeffrey', 'Oh', 'JeffreyOh', '', 0), User('kennyhan@gmail.com', 'password', 'Kenny', 'Han', 'KennyHan','',1)],
+    'accounts': [],
     'channels': [],
     'account_count': 0,
     'channel_count': 0,
